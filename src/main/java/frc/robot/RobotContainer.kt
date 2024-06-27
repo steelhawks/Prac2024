@@ -29,6 +29,7 @@ object RobotContainer
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
     private val driverController = CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT)
+    private val operatorController = CommandXboxController(OperatorConstants.OPERATOR_CONTROLLER_PORT)
 
     /**
      * Use this method to define your `trigger->command` mappings. Triggers can be created via the

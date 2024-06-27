@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.util.WPILibVersion
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.robot.commands.Autos
+import frc.robot.subsystems.LEDSubsystem
 
 /**
  * The VM is configured to automatically run this object (which basically functions as a singleton class),
@@ -66,7 +67,7 @@ object Robot : TimedRobot()
 
     override fun disabledPeriodic()
     {
-
+        LEDSubsystem.rainbow()
     }
 
     /** This autonomous runs the autonomous command selected by your [RobotContainer] class.  */
@@ -76,12 +77,12 @@ object Robot : TimedRobot()
         // is modified while the command is running since we need to access it again in teleopInit()
         autonomousCommand = Autos.selectedAutonomousCommand
         autonomousCommand.schedule()
+
+        LEDSubsystem.fade(LEDSubsystem.LEDColor.RED)
     }
 
     /** This method is called periodically during autonomous.  */
-    override fun autonomousPeriodic()
-    {
-    }
+    override fun autonomousPeriodic() {}
 
     override fun teleopInit()
     {
