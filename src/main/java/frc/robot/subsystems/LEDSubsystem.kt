@@ -11,8 +11,8 @@ object LEDSubsystem : SubsystemBase() {
     private var LEDStrip = AddressableLED(Constants.LED.PORT)
     private var LEDBuffer = AddressableLEDBuffer(Constants.LED.LENGTH)
 
-    private var lastChange: Double? = null
-    private var isOn: Boolean? = null
+    private var lastChange = 0.0
+    private var isOn = false
     private var waveIndex = 0
     private var rainbowStart = 0
     private var bounceWaveIndex = 0

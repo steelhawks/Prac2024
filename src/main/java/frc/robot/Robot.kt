@@ -77,12 +77,12 @@ object Robot : TimedRobot()
         // is modified while the command is running since we need to access it again in teleopInit()
         autonomousCommand = Autos.selectedAutonomousCommand
         autonomousCommand.schedule()
-
-        LEDSubsystem.fade(LEDSubsystem.LEDColor.RED)
     }
 
     /** This method is called periodically during autonomous.  */
-    override fun autonomousPeriodic() {}
+    override fun autonomousPeriodic() {
+        LEDSubsystem.fade(LEDSubsystem.LEDColor.RED)
+    }
 
     override fun teleopInit()
     {
@@ -94,7 +94,7 @@ object Robot : TimedRobot()
     /** This method is called periodically during operator control.  */
     override fun teleopPeriodic()
     {
-
+        LEDSubsystem.bounceWave(LEDSubsystem.LEDColor.GREEN)
     }
 
     override fun testInit()
