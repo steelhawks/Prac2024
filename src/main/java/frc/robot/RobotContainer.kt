@@ -1,11 +1,15 @@
 package frc.robot
 
+import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
 import frc.robot.commands.Autos
 import frc.robot.commands.ExampleCommand
+import frc.robot.commands.IntakeCommand
 import frc.robot.subsystems.ExampleSubsystem
+import frc.robot.subsystems.IntakeSubsystem
+import java.time.Instant
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -31,6 +35,10 @@ object RobotContainer
     private val driverController = CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT)
     private val operatorController = CommandXboxController(OperatorConstants.OPERATOR_CONTROLLER_PORT)
 
+    private val reverseIntakeButton = driverController.leftBumper()
+    private val intakeButton = driverController.rightBumper()
+
+
     /**
      * Use this method to define your `trigger->command` mappings. Triggers can be created via the
      * [Trigger] constructor that takes a [BooleanSupplier][java.util.function.BooleanSupplier]
@@ -46,5 +54,9 @@ object RobotContainer
         // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
         // cancelling on release.
 //        driverController.b().whileTrue(ExampleSubsystem.exampleMethodCommand())
+        intakeButton.whileTrue(IntakeCommand())
+        reverseIntakeButton.whileTrue(InstantCommand({
+            IntakeSubsystem.intakeReverse()
+        }))
     }
 }
