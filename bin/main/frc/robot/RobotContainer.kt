@@ -8,7 +8,6 @@ import frc.robot.subsystems.IntakeSubsystem
 import frc.robot.commands.IntakeCommand
 import frc.robot.commands.Autos
 import SwerveSubsystem
-import frc.robot.commands.TeleopDriveCommand
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -34,10 +33,7 @@ object RobotContainer
         configureBindings()
         // Reference the Autos object so that it is initialized, placing the chooser on the dashboard
         Autos
-
-        SwerveSubsystem.defaultCommand = TeleopDriveCommand(
-            { driverController.leftX },
-            { driverController.leftY }, { driverController.rightX })
+        SwerveSubsystem
     }
 
     /**
@@ -49,8 +45,6 @@ object RobotContainer
      */
     private fun configureBindings()
     {
-
-
         intakeButton.whileTrue(IntakeCommand())
         reverseIntakeButton.whileTrue(InstantCommand({
             IntakeSubsystem.intakeReverse()

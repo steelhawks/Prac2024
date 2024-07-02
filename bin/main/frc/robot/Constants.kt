@@ -1,11 +1,7 @@
 package frc.robot
 
 import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.math.geometry.Translation2d
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics
-import edu.wpi.first.math.util.Units
 import frc.robot.utils.SwerveModuleConstants
-import frc.lib.util.COTSTalonFXSwerveConstants;
 
 
 /*
@@ -45,22 +41,7 @@ object Constants {
         const val INTAKE_FEED_SPEED: Double = 1.0 // for arm and shooter
     }
 
-    object Swerve {
-        val chosenModule: COTSTalonFXSwerveConstants =
-            COTSTalonFXSwerveConstants.SDS.MK4i.Falcon500(COTSTalonFXSwerveConstants.SDS.MK4i.driveRatios.L2)
-        /* Drivetrain Constants */
-        val TRACK_WIDTH: Double = Units.inchesToMeters(26.75) // width
-        val WHEEL_BASE: Double = Units.inchesToMeters(26.75) // length
-        val WHEEL_CIRCUMFERENCE: Double = chosenModule.wheelCircumference
-
-        /* Swerve Kinematics */
-        val SWERVE_KINEMATICS: SwerveDriveKinematics = SwerveDriveKinematics(
-            Translation2d(WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0),
-            Translation2d(WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0),
-            Translation2d(-WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0),
-            Translation2d(-WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0)
-        )
-    }
+    // Swerve Modules
     object Modules {
         object FrontLeft {
             const val driveMotorID: Int = 1
