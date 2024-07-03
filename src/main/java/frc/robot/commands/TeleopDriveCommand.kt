@@ -18,13 +18,13 @@ class TeleopDriveCommand(
     override fun initialize() {}
 
     override fun execute() {
-        val newDesiredSpeeds = ChassisSpeeds(
-            getLeftY(),
-            getLeftX(),
-            getRightX()
+        swerveSubsystem.drive(ChassisSpeeds(
+            getLeftY() * swerveSubsystem.speedMultiplier,
+            getLeftX() * swerveSubsystem.speedMultiplier,
+            getRightX() * swerveSubsystem.speedMultiplier
+        ),
+            true
         )
-
-        swerveSubsystem.setChassisSpeed(newDesiredSpeeds)
 //        println("Executing TeleopDriveCommand with ChassisSpeeds: vx=${newDesiredSpeeds.vxMetersPerSecond}, vy=${newDesiredSpeeds.vyMetersPerSecond}, omega=${newDesiredSpeeds.omegaRadiansPerSecond}")
     }
 
