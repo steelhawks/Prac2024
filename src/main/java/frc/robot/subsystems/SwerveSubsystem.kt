@@ -1,8 +1,7 @@
+package frc.robot.subsystems
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.utils.SwerveModuleConstants
-import com.ctre.phoenix6.controls.DutyCycleOut
-import com.ctre.phoenix6.controls.PositionVoltage
-import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Rotation2d
@@ -10,7 +9,10 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.robot.Constants
-import frc.lib.util.math.Conversions;
+import frc.lib.util.math.Conversions
+import com.ctre.phoenix6.controls.DutyCycleOut
+import com.ctre.phoenix6.controls.PositionVoltage
+import com.ctre.phoenix6.controls.VelocityVoltage
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 
 class SwerveModule(private val constants: SwerveModuleConstants) {
@@ -42,27 +44,30 @@ class SwerveModule(private val constants: SwerveModuleConstants) {
     private fun setAngle(angle: Rotation2d) {
         anglePosition.withPosition(angle.rotations)
         steeringMotor.setControl(anglePosition)
+        println("Setting angle to ${angle.degrees} degrees")
     }
 
     private fun setSpeed(speed: Double, isOpenLoop: Boolean) {
         if (isOpenLoop) {
             driveDutyCycle.Output = speed / Constants.Swerve.MAX_SPEED
             driveMotor.setControl(driveDutyCycle)
+            println("Setting speed (open loop) to $speed m/s")
         } else {
             driveVelocity.Velocity = Conversions.MPSToRPS(speed, Constants.Swerve.WHEEL_CIRCUMFERENCE)
             driveVelocity.FeedForward = driveFeedForward.calculate(speed)
             driveMotor.setControl(driveVelocity)
+            println("Setting speed (closed loop) to $speed m/s")
         }
     }
 
     fun periodic() {
-        // Update current state
         currentState = SwerveModuleState(
             Conversions.RPSToMPS(driveMotor.velocity.value, Constants.Swerve.WHEEL_CIRCUMFERENCE),
             Rotation2d.fromRotations(steeringMotor.position.value)
         )
     }
 }
+
 
 object SwerveSubsystem : SubsystemBase() {
     private val frontLeftModule = SwerveModule(Constants.Modules.FrontLeft.constants)
@@ -79,16 +84,16 @@ object SwerveSubsystem : SubsystemBase() {
         frontRightModule.setDesiredState(newStates[1], false)
         backLeftModule.setDesiredState(newStates[2], false)
         backRightModule.setDesiredState(newStates[3], false)
+
+        println("Setting chassis speeds: vx=${desiredSpeed.vxMetersPerSecond}, vy=${desiredSpeed.vyMetersPerSecond}, omega=${desiredSpeed.omegaRadiansPerSecond}")
     }
 
     override fun periodic() {
-        // Call periodic on each module to update motor outputs
         frontLeftModule.periodic()
         frontRightModule.periodic()
         backLeftModule.periodic()
         backRightModule.periodic()
 
-        // Log states
         val loggingState = doubleArrayOf(
             frontLeftModule.currentState.angle.degrees,
             frontLeftModule.currentState.speedMetersPerSecond,

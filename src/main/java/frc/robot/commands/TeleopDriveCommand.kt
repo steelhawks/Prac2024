@@ -1,15 +1,17 @@
 package frc.robot.commands
 
-import edu.wpi.first.wpilibj2.command.Command
-import SwerveSubsystem
+import frc.robot.subsystems.SwerveSubsystem
 import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.wpilibj2.command.Command
 
-class TeleopDriveCommand(private val getLeftX: () -> Double, private val getLeftY: () -> Double, private val getRightX: () -> Double) : Command() {
+class TeleopDriveCommand(
+    private val getLeftX: () -> Double,
+    private val getLeftY: () -> Double,
+    private val getRightX: () -> Double
+) : Command() {
     private val swerveSubsystem = SwerveSubsystem
 
-
     init {
-        // each subsystem used by the command must be passed into the addRequirements() method
         addRequirements(swerveSubsystem)
     }
 
@@ -19,16 +21,17 @@ class TeleopDriveCommand(private val getLeftX: () -> Double, private val getLeft
         val newDesiredSpeeds = ChassisSpeeds(
             getLeftY(),
             getLeftX(),
-            getRightX(),
+            getRightX()
         )
 
         swerveSubsystem.setChassisSpeed(newDesiredSpeeds)
+        println("Executing TeleopDriveCommand with ChassisSpeeds: vx=${newDesiredSpeeds.vxMetersPerSecond}, vy=${newDesiredSpeeds.vyMetersPerSecond}, omega=${newDesiredSpeeds.omegaRadiansPerSecond}")
     }
 
-    override fun isFinished(): Boolean {
-        // TODO: Make this return true when this Command no longer needs to run execute()
-        return false
-    }
+    override fun isFinished(): Boolean = false
 
-    override fun end(interrupted: Boolean) {}
+    override fun end(interrupted: Boolean) {
+        swerveSubsystem.stop()
+        println("TeleopDriveCommand ended.")
+    }
 }
