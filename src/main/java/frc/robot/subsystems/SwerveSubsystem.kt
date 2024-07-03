@@ -44,16 +44,19 @@ class SwerveModule(private val constants: SwerveModuleConstants) {
     private fun setAngle(angle: Rotation2d) {
         anglePosition.withPosition(angle.rotations)
         steeringMotor.setControl(anglePosition)
+        println("Setting angle to ${angle.degrees} degrees")
     }
 
     private fun setSpeed(speed: Double, isOpenLoop: Boolean) {
         if (isOpenLoop) {
             driveDutyCycle.Output = speed / Constants.Swerve.MAX_SPEED
             driveMotor.setControl(driveDutyCycle)
+            println("Setting speed (open loop) to $speed m/s")
         } else {
             driveVelocity.Velocity = Conversions.MPSToRPS(speed, Constants.Swerve.WHEEL_CIRCUMFERENCE)
             driveVelocity.FeedForward = driveFeedForward.calculate(speed)
             driveMotor.setControl(driveVelocity)
+            println("Setting speed (closed loop) to $speed m/s")
         }
     }
 
@@ -64,6 +67,7 @@ class SwerveModule(private val constants: SwerveModuleConstants) {
         )
     }
 }
+
 
 object SwerveSubsystem : SubsystemBase() {
     private val frontLeftModule = SwerveModule(Constants.Modules.FrontLeft.constants)
@@ -80,6 +84,8 @@ object SwerveSubsystem : SubsystemBase() {
         frontRightModule.setDesiredState(newStates[1], false)
         backLeftModule.setDesiredState(newStates[2], false)
         backRightModule.setDesiredState(newStates[3], false)
+
+        println("Setting chassis speeds: vx=${desiredSpeed.vxMetersPerSecond}, vy=${desiredSpeed.vyMetersPerSecond}, omega=${desiredSpeed.omegaRadiansPerSecond}")
     }
 
     override fun periodic() {
@@ -87,7 +93,6 @@ object SwerveSubsystem : SubsystemBase() {
         frontRightModule.periodic()
         backLeftModule.periodic()
         backRightModule.periodic()
-
 
         val loggingState = doubleArrayOf(
             frontLeftModule.currentState.angle.degrees,
