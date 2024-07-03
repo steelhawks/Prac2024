@@ -1,58 +1,66 @@
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.utils.SwerveModuleConstants
+import com.ctre.phoenix6.controls.DutyCycleOut
+import com.ctre.phoenix6.controls.PositionVoltage
+import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.math.util.Units
-import edu.wpi.first.wpilibj.simulation.FlywheelSim
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.robot.Constants
+import frc.lib.util.math.Conversions;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward
 
-class SwerveModule(constants: SwerveModuleConstants) {
+class SwerveModule(private val constants: SwerveModuleConstants) {
     private val driveMotor: TalonFX = TalonFX(constants.driveMotorID)
     private val steeringMotor: TalonFX = TalonFX(constants.angleMotorID)
-    var currentState: SwerveModuleState
+    var currentState: SwerveModuleState = SwerveModuleState()
         private set
-    lateinit var desiredState: SwerveModuleState
+    var desiredState: SwerveModuleState = SwerveModuleState()
         private set
 
-    private val drivePIDController: PIDController
-    private val steeringPIDController: PIDController
+    private val drivePIDController: PIDController = PIDController(0.1, 0.0, 0.0)
+    private val steeringPIDController: PIDController = PIDController(0.1, 0.0, 0.0)
+    private val driveFeedForward = SimpleMotorFeedforward(Constants.Swerve.DRIVE_KS, Constants.Swerve.DRIVE_KV, Constants.Swerve.DRIVE_KA)
 
-    // simulator
-//    private val steeringSimulation = FlywheelSim(
-//        DCMotor.getFalcon500(1),
-//        150.0 / 7.0,
-//        0.004
-//    )
-
-    fun setDesiredState(state: SwerveModuleState) {
-        currentState = state
-    }
+    private val driveDutyCycle = DutyCycleOut(0.0)
+    private val driveVelocity = VelocityVoltage(0.0)
+    private val anglePosition = PositionVoltage(0.0)
 
     init {
-        println("SwerveModule")
-        currentState = SwerveModuleState()
+        println("SwerveModule initialized")
+    }
 
-        drivePIDController = PIDController(0.1, 0.0, 0.0)
-        steeringPIDController = PIDController(0.1, 0.0, 0.0)
+    fun setDesiredState(state: SwerveModuleState, isOpenLoop: Boolean) {
+        desiredState = SwerveModuleState.optimize(state, currentState.angle)
+        setAngle(desiredState.angle)
+        setSpeed(desiredState.speedMetersPerSecond, isOpenLoop)
+    }
+
+    private fun setAngle(angle: Rotation2d) {
+        anglePosition.withPosition(angle.rotations)
+        steeringMotor.setControl(anglePosition)
+    }
+
+    private fun setSpeed(speed: Double, isOpenLoop: Boolean) {
+        if (isOpenLoop) {
+            driveDutyCycle.Output = speed / Constants.Swerve.MAX_SPEED
+            driveMotor.setControl(driveDutyCycle)
+        } else {
+            driveVelocity.Velocity = Conversions.MPSToRPS(speed, Constants.Swerve.WHEEL_CIRCUMFERENCE)
+            driveVelocity.FeedForward = driveFeedForward.calculate(speed)
+            driveMotor.setControl(driveVelocity)
+        }
     }
 
     fun periodic() {
-//        steeringSimulation.update(0.02)
-//
-//        // get new simulated angle change
-//        val simulatedAngleDiffRad = steeringSimulation.angularVelocityRadPerSec * 0.02
-//
-//        // update curr state
-//        currentState = SwerveModuleState(
-//            currentState.speedMetersPerSecond,
-//            Rotation2d.fromDegrees(currentState.angle.degrees + Units.radiansToDegrees(simulatedAngleDiffRad))
-//        )
-        // set new angle
+        // Update current state
+        currentState = SwerveModuleState(
+            Conversions.RPSToMPS(driveMotor.velocity.value, Constants.Swerve.WHEEL_CIRCUMFERENCE),
+            Rotation2d.fromRotations(steeringMotor.position.value)
+        )
     }
 }
 
@@ -67,17 +75,23 @@ object SwerveSubsystem : SubsystemBase() {
     fun setChassisSpeed(desiredSpeed: ChassisSpeeds) {
         val newStates: Array<SwerveModuleState> = kinematics.toSwerveModuleStates(desiredSpeed)
 
-        frontLeftModule.setDesiredState(newStates[0])
-        frontRightModule.setDesiredState(newStates[1])
-        backLeftModule.setDesiredState(newStates[2])
-        backRightModule.setDesiredState(newStates[3])
+        frontLeftModule.setDesiredState(newStates[0], false)
+        frontRightModule.setDesiredState(newStates[1], false)
+        backLeftModule.setDesiredState(newStates[2], false)
+        backRightModule.setDesiredState(newStates[3], false)
     }
 
     override fun periodic() {
-        // front left, front right, back left, back right
+        // Call periodic on each module to update motor outputs
+        frontLeftModule.periodic()
+        frontRightModule.periodic()
+        backLeftModule.periodic()
+        backRightModule.periodic()
+
+        // Log states
         val loggingState = doubleArrayOf(
-            frontLeftModule.currentState.angle.degrees, // mod 1 angle
-            frontLeftModule.currentState.speedMetersPerSecond, // mod 1 speed m/s
+            frontLeftModule.currentState.angle.degrees,
+            frontLeftModule.currentState.speedMetersPerSecond,
             frontRightModule.currentState.angle.degrees,
             frontRightModule.currentState.speedMetersPerSecond,
             backLeftModule.currentState.angle.degrees,

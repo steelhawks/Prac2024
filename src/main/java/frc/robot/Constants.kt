@@ -4,8 +4,8 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.util.Units
+import frc.lib.util.COTSTalonFXSwerveConstants
 import frc.robot.utils.SwerveModuleConstants
-import frc.lib.util.COTSTalonFXSwerveConstants;
 
 
 /*
@@ -60,6 +60,19 @@ object Constants {
             Translation2d(-WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0),
             Translation2d(-WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0)
         )
+
+        /* Drive Motor PID Values */
+        const val driveKP = 0.12
+        const val driveKI = 0.0
+        const val driveKD = 0.0
+        const val driveKF = 0.0
+
+        /* Drive Motor Characterization Values From SYSID */
+        const val DRIVE_KS = 0.078838
+        const val DRIVE_KV = 2.5819
+        const val DRIVE_KA = 0.23783
+
+        const val MAX_SPEED: Double = 4.5
     }
     object Modules {
         object FrontLeft {
