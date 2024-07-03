@@ -85,7 +85,7 @@ object SwerveSubsystem : SubsystemBase() {
         backLeftModule.setDesiredState(newStates[2], false)
         backRightModule.setDesiredState(newStates[3], false)
 
-        println("Setting chassis speeds: vx=${desiredSpeed.vxMetersPerSecond}, vy=${desiredSpeed.vyMetersPerSecond}, omega=${desiredSpeed.omegaRadiansPerSecond}")
+//        println("Setting chassis speeds: vx=${desiredSpeed.vxMetersPerSecond}, vy=${desiredSpeed.vyMetersPerSecond}, omega=${desiredSpeed.omegaRadiansPerSecond}")
     }
 
     override fun periodic() {

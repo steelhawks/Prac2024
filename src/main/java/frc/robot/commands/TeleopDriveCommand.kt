@@ -25,7 +25,7 @@ class TeleopDriveCommand(
         )
 
         swerveSubsystem.setChassisSpeed(newDesiredSpeeds)
-        println("Executing TeleopDriveCommand with ChassisSpeeds: vx=${newDesiredSpeeds.vxMetersPerSecond}, vy=${newDesiredSpeeds.vyMetersPerSecond}, omega=${newDesiredSpeeds.omegaRadiansPerSecond}")
+//        println("Executing TeleopDriveCommand with ChassisSpeeds: vx=${newDesiredSpeeds.vxMetersPerSecond}, vy=${newDesiredSpeeds.vyMetersPerSecond}, omega=${newDesiredSpeeds.omegaRadiansPerSecond}")
     }
 
     override fun isFinished(): Boolean = false
