@@ -67,7 +67,7 @@ object Robot : TimedRobot()
 
     override fun disabledPeriodic()
     {
-        LEDSubsystem.rainbow()
+        LEDSubsystem.bounceWave(LEDSubsystem.LEDColor.RED)
     }
 
     /** This autonomous runs the autonomous command selected by your [RobotContainer] class.  */
@@ -81,7 +81,7 @@ object Robot : TimedRobot()
 
     /** This method is called periodically during autonomous.  */
     override fun autonomousPeriodic() {
-        LEDSubsystem.fade(LEDSubsystem.LEDColor.RED)
+        LEDSubsystem.rainbow()
     }
 
     override fun teleopInit()
