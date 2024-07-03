@@ -1,8 +1,8 @@
 package frc.robot.commands
 
 import edu.wpi.first.wpilibj2.command.Command
-import SwerveSubsystem
 import edu.wpi.first.math.kinematics.ChassisSpeeds
+import frc.robot.subsystems.SwerveSubsystem
 
 class TeleopDriveCommand(private val getLeftX: () -> Double, private val getLeftY: () -> Double, private val getRightX: () -> Double) : Command() {
     private val swerveSubsystem = SwerveSubsystem

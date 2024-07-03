@@ -1,8 +1,7 @@
+package frc.robot.subsystems
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.utils.SwerveModuleConstants
-import com.ctre.phoenix6.controls.DutyCycleOut
-import com.ctre.phoenix6.controls.PositionVoltage
-import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Rotation2d
@@ -10,7 +9,10 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.robot.Constants
-import frc.lib.util.math.Conversions;
+import frc.lib.util.math.Conversions
+import com.ctre.phoenix6.controls.DutyCycleOut
+import com.ctre.phoenix6.controls.PositionVoltage
+import com.ctre.phoenix6.controls.VelocityVoltage
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 
 class SwerveModule(private val constants: SwerveModuleConstants) {
@@ -56,7 +58,6 @@ class SwerveModule(private val constants: SwerveModuleConstants) {
     }
 
     fun periodic() {
-        // Update current state
         currentState = SwerveModuleState(
             Conversions.RPSToMPS(driveMotor.velocity.value, Constants.Swerve.WHEEL_CIRCUMFERENCE),
             Rotation2d.fromRotations(steeringMotor.position.value)
@@ -82,13 +83,12 @@ object SwerveSubsystem : SubsystemBase() {
     }
 
     override fun periodic() {
-        // Call periodic on each module to update motor outputs
         frontLeftModule.periodic()
         frontRightModule.periodic()
         backLeftModule.periodic()
         backRightModule.periodic()
 
-        // Log states
+
         val loggingState = doubleArrayOf(
             frontLeftModule.currentState.angle.degrees,
             frontLeftModule.currentState.speedMetersPerSecond,
