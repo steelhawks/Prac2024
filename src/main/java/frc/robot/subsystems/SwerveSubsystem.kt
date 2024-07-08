@@ -15,6 +15,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import com.ctre.phoenix6.hardware.CANcoder
+import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.math.geometry.Translation2d
 import frc.lib.util.math.MathConstants
 import frc.robot.CTREConfigs
@@ -51,6 +52,9 @@ class SwerveModule(val swerveModuleNumber: Int, private val constants: SwerveMod
         driveMotor = TalonFX(constants.driveMotorID, Constants.CANIVORE_NAME)
         driveMotor.configurator.apply(CTREConfigs.swerveAngleFXConfig)
         driveMotor.configurator.setPosition(0.0)
+
+        driveMotor.setNeutralMode(NeutralModeValue.Brake)
+        angleMotor.setNeutralMode(NeutralModeValue.Brake)
     }
 
     fun setDesiredState(state: SwerveModuleState, isOpenLoop: Boolean) {
