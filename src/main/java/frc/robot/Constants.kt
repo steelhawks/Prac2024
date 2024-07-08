@@ -158,6 +158,13 @@ object Constants {
                 SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         }
     }
+
+    object Deadbands {
+        const val DRIVE_DEADBAND: Double = 0.1
+        const val ARM_DEADBAND: Double = 0.2
+        const val SHOOTER_DEADBAND: Double = 0.2
+        const val CLIMB_DEADBAND: Double = 0.4
+    }
 }
 
 

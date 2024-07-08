@@ -29,7 +29,7 @@ object RobotContainer
     private val reverseIntakeButton = driverController.leftBumper()
     private val intakeButton = driverController.rightBumper()
 
-    private val slowModeToggler = driverController.rightTrigger()
+    private val slowModeToggle = driverController.rightTrigger()
     init
     {
         configureBindings()
@@ -37,8 +37,9 @@ object RobotContainer
         Autos
 
         SwerveSubsystem.defaultCommand = TeleopDriveCommand(
+            { driverController.leftY },
             { driverController.leftX },
-            { driverController.leftY }, { driverController.rightX })
+            { driverController.rightX })
     }
 
     /**
@@ -50,7 +51,7 @@ object RobotContainer
      */
     private fun configureBindings()
     {
-        slowModeToggler.whileTrue(InstantCommand({ SwerveSubsystem.toggleSpeedChange() }))
+        slowModeToggle.whileTrue(InstantCommand({ SwerveSubsystem.toggleSpeedChange() }))
         reverseIntakeButton.whileTrue(InstantCommand({ IntakeSubsystem.intakeReverse() }))
         intakeButton.whileTrue(IntakeCommand())
     }

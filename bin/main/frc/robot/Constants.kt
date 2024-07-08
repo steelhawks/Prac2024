@@ -1,6 +1,12 @@
 package frc.robot
 
+import com.ctre.phoenix6.signals.NeutralModeValue
+import com.ctre.phoenix6.signals.SensorDirectionValue
 import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics
+import edu.wpi.first.math.util.Units
+import frc.lib.util.COTSTalonFXSwerveConstants
 import frc.robot.utils.SwerveModuleConstants
 
 
@@ -13,6 +19,7 @@ import frc.robot.utils.SwerveModuleConstants
 
 object Constants {
     const val CANIVORE_NAME = "canivore"
+    const val PIGEON_CAN_NAME = "canivore"
 
     object OperatorConstants {
         const val DRIVER_CONTROLLER_PORT = 0
@@ -41,7 +48,79 @@ object Constants {
         const val INTAKE_FEED_SPEED: Double = 1.0 // for arm and shooter
     }
 
-    // Swerve Modules
+    object Swerve {
+        const val PIGEON_ID = 0
+
+        val CHOSEN_MODULE: COTSTalonFXSwerveConstants =
+            COTSTalonFXSwerveConstants.SDS.MK4i.Falcon500(COTSTalonFXSwerveConstants.SDS.MK4i.driveRatios.L2)
+
+        /* Drivetrain Constants */
+        val TRACK_WIDTH: Double = Units.inchesToMeters(26.75) // width
+        val WHEEL_BASE: Double = Units.inchesToMeters(26.75) // length
+        val WHEEL_CIRCUMFERENCE: Double = CHOSEN_MODULE.wheelCircumference
+
+        /* Swerve Kinematics */
+        val SWERVE_KINEMATICS: SwerveDriveKinematics = SwerveDriveKinematics(
+            Translation2d(WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0),
+            Translation2d(WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0),
+            Translation2d(-WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0),
+            Translation2d(-WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0)
+        )
+
+        /* Module Gear Ratios */
+        val DRIVE_GEAR_RATIO = CHOSEN_MODULE.driveGearRatio
+        val ANGLE_GEAR_RATIO = CHOSEN_MODULE.angleGearRatio
+
+        /* Motor Inverts */
+        val ANGLE_MOTOR_INVERT = CHOSEN_MODULE.angleMotorInvert
+        val DRIVE_MOTOR_INVERT = CHOSEN_MODULE.driveMotorInvert
+
+        val CANCODER_INVERT: SensorDirectionValue = CHOSEN_MODULE.cancoderInvert
+
+        /* Swerve Current Limiting */
+        const val ANGLE_CURRENT_LIMIT = 25
+        const val ANGLE_CURRENT_THRESHOLD = 40
+        const val ANGLE_CURRENT_THRESHOLD_TIME = 0.1
+        const val ANGLE_ENABLE_CURRENT_LIMIT = true
+
+        const val DRIVE_CURRENT_LIMIT = 35
+        const val DRIVE_CURRENT_THRESHOLD = 60
+        const val DRIVE_CURRENT_THRESHOLD_TIME = 0.1
+        const val DRIVE_ENABLE_CURRENT_LIMIT = true
+
+        /* These values are used by the drive falcon to ramp in open loop and closed loop driving.
+         * We found a small open loop ramp (0.25) helps with tread wear, tipping, etc */
+        const val OPEN_LOOP_RAMP: Double = 0.25
+        const val CLOSED_LOOP_RAMP: Double = 0.0
+
+        val ANGLE_KP = CHOSEN_MODULE.angleKP
+        val ANGLE_KI = CHOSEN_MODULE.angleKI
+        val ANGLE_KD = CHOSEN_MODULE.angleKD
+
+        /* Drive Motor PID Values */
+        const val DRIVE_KP = 0.12
+        const val DRIVE_KI = 0.0
+        const val DRIVE_KD = 0.0
+        const val DRIVE_KF = 0.0
+
+        /* Drive Motor Characterization Values From SYSID */
+        const val DRIVE_KS = 0.078838
+        const val DRIVE_KV = 2.5819
+        const val DRIVE_KA = 0.23783
+
+        /* Swerve Profiling Values */
+        /** Meters per Second  */
+        const val MAX_SPEED: Double = 4.5
+        /** Radians per Second  */
+        const val MAX_ANGULAR_VELOCITY: Double = 10.0
+
+        val ANGLE_NEUTRAL_MODE = NeutralModeValue.Coast
+        val DRIVE_NEUTRAL_MODE = NeutralModeValue.Brake
+
+        const val AUTO_ALIGN_KP = 0.07
+        const val AUTO_ALIGN_KI = 0
+        const val AUTO_ALIGN_KD = 0
+    }
     object Modules {
         object FrontLeft {
             const val driveMotorID: Int = 1
