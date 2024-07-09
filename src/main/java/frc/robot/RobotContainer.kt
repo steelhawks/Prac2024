@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
 import frc.robot.subsystems.IntakeSubsystem
-import frc.robot.commands.IntakeCommand
+import frc.robot.commands.intake.IntakeCommand
 import frc.robot.commands.Autos
 import frc.robot.commands.TeleopDriveCommand
 import frc.robot.subsystems.SwerveSubsystem

@@ -101,7 +101,8 @@ class SwerveModule(val swerveModuleNumber: Int, private val constants: SwerveMod
 
 
 object SwerveSubsystem : SubsystemBase() {
-    private var speedMultiplier = 1.0
+//    private var speedMultiplier = 1.0
+    private var speedMultiplier = .1
     private val m_swerveModules: Array<SwerveModule> = arrayOf(
         SwerveModule(0, Constants.Modules.FrontLeft.constants),
         SwerveModule(1, Constants.Modules.FrontRight.constants),
@@ -125,7 +126,8 @@ object SwerveSubsystem : SubsystemBase() {
 //    private val backRightModule = SwerveModule(Constants.Modules.BackRight.constants)
 
     fun toggleSpeedChange() {
-        speedMultiplier = if (speedMultiplier == 1.0) 0.2 else 1.0
+//        speedMultiplier = if (speedMultiplier == 1.0) 0.2 else 1.0
+        speedMultiplier = .1
     }
 
 

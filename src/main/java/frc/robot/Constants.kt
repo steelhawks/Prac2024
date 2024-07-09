@@ -55,8 +55,11 @@ object Constants {
             COTSTalonFXSwerveConstants.SDS.MK4i.Falcon500(COTSTalonFXSwerveConstants.SDS.MK4i.driveRatios.L2)
 
         /* Drivetrain Constants */
-        val TRACK_WIDTH: Double = Units.inchesToMeters(26.75) // width
-        val WHEEL_BASE: Double = Units.inchesToMeters(26.75) // length
+//        val TRACK_WIDTH: Double = Units.inchesToMeters(26.75) // width old
+//        val WHEEL_BASE: Double = Units.inchesToMeters(26.75) // length old
+
+        val TRACK_WIDTH: Double = Units.inchesToMeters(29.5) // width new
+        val WHEEL_BASE: Double = Units.inchesToMeters(30.5) // length new
         val WHEEL_CIRCUMFERENCE: Double = CHOSEN_MODULE.wheelCircumference
 
         /* Swerve Kinematics */
@@ -164,6 +167,14 @@ object Constants {
         const val ARM_DEADBAND: Double = 0.2
         const val SHOOTER_DEADBAND: Double = 0.2
         const val CLIMB_DEADBAND: Double = 0.4
+    }
+
+    object Shooter {
+        const val BOTTOM_SHOOTER_MOTOR_ID: Int = 15
+        const val TOP_SHOOTER_MOTOR_ID: Int = 16
+        const val FEEDER_MOTOR_ID: Int = 17
+        const val PIVOT_MOTOR_ID: Int = 18
+        const val CANCODER_ID: Int = 19
     }
 }
 
