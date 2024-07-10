@@ -1,11 +1,9 @@
-package frc.robot.commands
+package frc.robot.commands.led
 
-import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.Command
-import frc.robot.RobotContainer
 import frc.robot.subsystems.LEDSubsystem
 
-class LEDIdleCommand : Command() {
+class LEDIdleCommand(private val color: LEDSubsystem.LEDColor) : Command() {
     private val lEDSubsystem = LEDSubsystem
 
 
@@ -17,10 +15,7 @@ class LEDIdleCommand : Command() {
     override fun initialize() {}
 
     override fun execute() {
-        LEDSubsystem.bounceWave(
-            if (RobotContainer.alliance == DriverStation.Alliance.Red) LEDSubsystem.LEDColor.RED else LEDSubsystem.LEDColor.BLUE
-        ) // original was green which i think looks better
-
+        LEDSubsystem.bounceWave(color) // original was green which i think looks better
     }
 
     override fun isFinished(): Boolean {

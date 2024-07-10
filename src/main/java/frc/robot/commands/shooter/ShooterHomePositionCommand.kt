@@ -3,7 +3,7 @@ package frc.robot.commands.shooter
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.ShooterSubsystem
 
-class ShooterHomePositionCommand : Command() {
+class ShooterHomePositionCommand() : Command() {
     private val shooterSubsystem = ShooterSubsystem
 
 
@@ -14,12 +14,16 @@ class ShooterHomePositionCommand : Command() {
 
     override fun initialize() {}
 
-    override fun execute() {}
+    override fun execute() {
+        shooterSubsystem.goHome()
+    }
 
     override fun isFinished(): Boolean {
         // TODO: Make this return true when this Command no longer needs to run execute()
         return false
     }
 
-    override fun end(interrupted: Boolean) {}
+    override fun end(interrupted: Boolean) {
+        shooterSubsystem.stopPivot()
+    }
 }

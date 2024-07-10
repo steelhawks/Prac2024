@@ -189,9 +189,7 @@ object LEDSubsystem : SubsystemBase() {
             WaitCommand(time),
             Commands.run({
                 this.pulse(color, interval)
-            }, this).andThen(Commands.run({
-                this.setColor(LEDColor.GREEN)
-            }))
+            }, this)
         )
     }
 

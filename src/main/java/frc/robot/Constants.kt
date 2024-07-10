@@ -200,6 +200,13 @@ object Constants {
         const val BOTTOM_SHOOTER_KP: Double = 0.01
         const val BOTTOM_SHOOTER_KI: Double = 0.0
         const val BOTTOM_SHOOTER_KD: Double = 0.0
+
+        const val K_MAX_VELOCITY_RAD_PER_SECOND: Double = 6.0
+        const val K_MAX_ACCELERATION_RAD_PER_SEC_SQUARED: Double = 8.0
+
+        const val HOME_POSITION: Double = 1.05
+
+        const val SHOOTER_TOLERANCE: Double = 50.0
     }
 }
 

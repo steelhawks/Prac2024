@@ -85,9 +85,7 @@ object Robot : TimedRobot()
     }
 
     /** This method is called periodically during autonomous.  */
-    override fun autonomousPeriodic() {
-        LEDSubsystem.rainbow()
-    }
+    override fun autonomousPeriodic() {}
 
     override fun teleopInit()
     {

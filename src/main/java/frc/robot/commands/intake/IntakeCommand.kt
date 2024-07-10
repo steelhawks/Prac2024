@@ -1,6 +1,7 @@
 package frc.robot.commands.intake
 
 import edu.wpi.first.wpilibj2.command.Command
+import frc.robot.NoteStatus
 import frc.robot.subsystems.IntakeSubsystem
 import frc.robot.subsystems.LEDSubsystem
 
@@ -30,6 +31,7 @@ class IntakeCommand : Command() {
     }
 
     override fun end(interrupted: Boolean) {
+        intakeSubsystem.noteStatus = NoteStatus.INTAKEN
         intakeSubsystem.stop()
     }
 }
