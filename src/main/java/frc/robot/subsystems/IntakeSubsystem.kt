@@ -4,6 +4,7 @@ import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.Constants
 
@@ -16,7 +17,7 @@ object IntakeSubsystem : SubsystemBase() {
     private val intakeBeam = DigitalInput(Constants.Intake.BEAM_BREAKER_INTAKE)
     private val armBeam = DigitalInput(Constants.Intake.BEAM_BREAKER_ARM)
 
-    private val prevBeamBroken = false
+//    private val prevBeamBroken = false
 
     init {
         configureMotors()
@@ -34,7 +35,7 @@ object IntakeSubsystem : SubsystemBase() {
         m_intakeMotor2.set(Constants.Intake.INTAKE_SPEED)
     }
 
-    fun configureMotors() {
+    private fun configureMotors() {
         m_intakeMotor1.inverted = false
         m_intakeMotor2.inverted = true
         m_forkMotor.inverted = true
@@ -42,6 +43,10 @@ object IntakeSubsystem : SubsystemBase() {
         m_intakeMotor1.setNeutralMode(NeutralModeValue.Coast)
         m_intakeMotor2.setNeutralMode(NeutralModeValue.Coast)
         m_forkMotor.setNeutralMode(NeutralModeValue.Coast)
+    }
+
+    fun intakeLEDCommand(): Command {
+        return LEDSubsystem.flashCommand(LEDSubsystem.LEDColor.GREEN, 0.1, 1.0)
     }
 
     fun stop() {

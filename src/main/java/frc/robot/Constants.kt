@@ -175,6 +175,31 @@ object Constants {
         const val FEEDER_MOTOR_ID: Int = 17
         const val PIVOT_MOTOR_ID: Int = 18
         const val CANCODER_ID: Int = 19
+
+        const val PIVOT_KS: Double = 0.09256 // 0.09256
+        const val PIVOT_KG: Double = 0.15116 // 0.15116
+        const val PIVOT_KV: Double = 1.593 // 1.275
+        const val PIVOT_KA: Double = 0.0
+
+        const val PIVOT_KP: Double = 5.0
+        const val PIVOT_KI: Double = 0.0
+        const val PIVOT_KD: Double = 0.0
+
+        const val TOP_SHOOTER_KS: Double = 0.19655
+        const val TOP_SHOOTER_KV: Double = 0.00212586
+        const val TOP_SHOOTER_KA: Double = 0.00025997
+
+        const val TOP_SHOOTER_KP: Double = 0.01
+        const val TOP_SHOOTER_KI: Double = 0.0
+        const val TOP_SHOOTER_KD: Double = 0.0
+
+        const val BOTTOM_SHOOTER_KS: Double = 0.13122
+        const val BOTTOM_SHOOTER_KV: Double = 0.00198405
+        const val BOTTOM_SHOOTER_KA: Double = 0.00071765
+
+        const val BOTTOM_SHOOTER_KP: Double = 0.01
+        const val BOTTOM_SHOOTER_KI: Double = 0.0
+        const val BOTTOM_SHOOTER_KD: Double = 0.0
     }
 }
 

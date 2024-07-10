@@ -3,8 +3,9 @@ package frc.robot.subsystems
 import edu.wpi.first.wpilibj.AddressableLED
 import edu.wpi.first.wpilibj.AddressableLEDBuffer
 import edu.wpi.first.wpilibj.Timer
-import edu.wpi.first.wpilibj2.command.SubsystemBase
+import edu.wpi.first.wpilibj2.command.*
 import frc.robot.Constants
+import java.time.Instant
 
 
 object LEDSubsystem : SubsystemBase() {
@@ -85,10 +86,10 @@ object LEDSubsystem : SubsystemBase() {
             isOn = !isOn!!
         }
 
-        if (isOn == true) {
-            stop()
-        } else {
+        if (isOn) {
             setColor(color)
+        } else {
+            stop()
         }
     }
 
@@ -182,6 +183,18 @@ object LEDSubsystem : SubsystemBase() {
         _currentColor = color
         LEDStrip.setData(LEDBuffer)
     }
+
+    fun flashCommand(color: LEDColor, interval: Double, time: Double): Command {
+        return ParallelDeadlineGroup(
+            WaitCommand(time),
+            Commands.run({
+                this.pulse(color, interval)
+            }, this).andThen(Commands.run({
+                this.setColor(LEDColor.GREEN)
+            }))
+        )
+    }
+
 
     private val currentColor: LEDColor
         get() = _currentColor
