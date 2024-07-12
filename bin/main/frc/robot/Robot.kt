@@ -3,11 +3,14 @@ package frc.robot
 import edu.wpi.first.hal.FRCNetComm.tInstances
 import edu.wpi.first.hal.FRCNetComm.tResourceType
 import edu.wpi.first.hal.HAL
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.TimedRobot
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj.util.WPILibVersion
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.robot.commands.Autos
+import frc.robot.subsystems.IntakeSubsystem
 import frc.robot.subsystems.LEDSubsystem
 
 /**
@@ -40,7 +43,8 @@ object Robot : TimedRobot()
         HAL.report(tResourceType.kResourceType_Language, tInstances.kLanguage_Kotlin, 0, WPILibVersion.Version)
         // Access the RobotContainer object so that it is initialized. This will perform all our
         // button bindings, and put our autonomous chooser on the dashboard.
-        RobotContainer
+        DriverStation.silenceJoystickConnectionWarning(true)
+        RobotContainer.resetControllerRumble()
     }
 
     /**
@@ -62,12 +66,13 @@ object Robot : TimedRobot()
     /** This method is called once each time the robot enters Disabled mode.  */
     override fun disabledInit()
     {
-
+        RobotContainer.resetControllerRumble()
     }
 
     override fun disabledPeriodic()
     {
-        LEDSubsystem.bounceWave(LEDSubsystem.LEDColor.RED)
+//        LEDSubsystem.bounceWave(LEDSubsystem.LEDColor.RED)
+        LEDSubsystem.rainbow()
     }
 
     /** This autonomous runs the autonomous command selected by your [RobotContainer] class.  */
@@ -80,9 +85,7 @@ object Robot : TimedRobot()
     }
 
     /** This method is called periodically during autonomous.  */
-    override fun autonomousPeriodic() {
-        LEDSubsystem.rainbow()
-    }
+    override fun autonomousPeriodic() {}
 
     override fun teleopInit()
     {
@@ -92,10 +95,7 @@ object Robot : TimedRobot()
     }
 
     /** This method is called periodically during operator control.  */
-    override fun teleopPeriodic()
-    {
-        LEDSubsystem.bounceWave(LEDSubsystem.LEDColor.GREEN)
-    }
+    override fun teleopPeriodic() {}
 
     override fun testInit()
     {

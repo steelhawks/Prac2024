@@ -55,8 +55,11 @@ object Constants {
             COTSTalonFXSwerveConstants.SDS.MK4i.Falcon500(COTSTalonFXSwerveConstants.SDS.MK4i.driveRatios.L2)
 
         /* Drivetrain Constants */
-        val TRACK_WIDTH: Double = Units.inchesToMeters(26.75) // width
-        val WHEEL_BASE: Double = Units.inchesToMeters(26.75) // length
+//        val TRACK_WIDTH: Double = Units.inchesToMeters(26.75) // width old
+//        val WHEEL_BASE: Double = Units.inchesToMeters(26.75) // length old
+
+        val TRACK_WIDTH: Double = Units.inchesToMeters(29.5) // width new
+        val WHEEL_BASE: Double = Units.inchesToMeters(30.5) // length new
         val WHEEL_CIRCUMFERENCE: Double = CHOSEN_MODULE.wheelCircumference
 
         /* Swerve Kinematics */
@@ -157,6 +160,53 @@ object Constants {
             val constants: SwerveModuleConstants =
                 SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         }
+    }
+
+    object Deadbands {
+        const val DRIVE_DEADBAND: Double = 0.1
+        const val ARM_DEADBAND: Double = 0.2
+        const val SHOOTER_DEADBAND: Double = 0.2
+        const val CLIMB_DEADBAND: Double = 0.4
+    }
+
+    object Shooter {
+        const val BOTTOM_SHOOTER_MOTOR_ID: Int = 15
+        const val TOP_SHOOTER_MOTOR_ID: Int = 16
+        const val FEEDER_MOTOR_ID: Int = 17
+        const val PIVOT_MOTOR_ID: Int = 18
+        const val CANCODER_ID: Int = 19
+
+        const val PIVOT_KS: Double = 0.09256 // 0.09256
+        const val PIVOT_KG: Double = 0.15116 // 0.15116
+        const val PIVOT_KV: Double = 1.593 // 1.275
+        const val PIVOT_KA: Double = 0.0
+
+        const val PIVOT_KP: Double = 5.0
+        const val PIVOT_KI: Double = 0.0
+        const val PIVOT_KD: Double = 0.0
+
+        const val TOP_SHOOTER_KS: Double = 0.19655
+        const val TOP_SHOOTER_KV: Double = 0.00212586
+        const val TOP_SHOOTER_KA: Double = 0.00025997
+
+        const val TOP_SHOOTER_KP: Double = 0.01
+        const val TOP_SHOOTER_KI: Double = 0.0
+        const val TOP_SHOOTER_KD: Double = 0.0
+
+        const val BOTTOM_SHOOTER_KS: Double = 0.13122
+        const val BOTTOM_SHOOTER_KV: Double = 0.00198405
+        const val BOTTOM_SHOOTER_KA: Double = 0.00071765
+
+        const val BOTTOM_SHOOTER_KP: Double = 0.01
+        const val BOTTOM_SHOOTER_KI: Double = 0.0
+        const val BOTTOM_SHOOTER_KD: Double = 0.0
+
+        const val K_MAX_VELOCITY_RAD_PER_SECOND: Double = 6.0
+        const val K_MAX_ACCELERATION_RAD_PER_SEC_SQUARED: Double = 8.0
+
+        const val HOME_POSITION: Double = 1.05
+
+        const val SHOOTER_TOLERANCE: Double = 50.0
     }
 }
 

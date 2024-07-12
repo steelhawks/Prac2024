@@ -40,12 +40,13 @@ object Autos
         CUSTOM_AUTO_1("Custom Auto Mode 1", exampleAuto()),
         CUSTOM_AUTO_2("Custom Auto Mode 2", exampleAuto2()),
         CUSTOM_AUTO_3("Custom Auto Mode 3", ExampleCommand()),
+        PATH_PLANNER_AUTO_4("Path Planner 4", PathPlannerAuto()),
         ;
 
         companion object
         {
             /** The default auto mode. */
-            val default = CUSTOM_AUTO_1
+            val default = PATH_PLANNER_AUTO_4
         }
     }
 }

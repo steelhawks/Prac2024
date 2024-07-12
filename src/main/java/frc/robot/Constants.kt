@@ -2,6 +2,7 @@ package frc.robot
 
 import com.ctre.phoenix6.signals.NeutralModeValue
 import com.ctre.phoenix6.signals.SensorDirectionValue
+import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
@@ -58,8 +59,8 @@ object Constants {
 //        val TRACK_WIDTH: Double = Units.inchesToMeters(26.75) // width old
 //        val WHEEL_BASE: Double = Units.inchesToMeters(26.75) // length old
 
-        val TRACK_WIDTH: Double = Units.inchesToMeters(29.5) // width new
-        val WHEEL_BASE: Double = Units.inchesToMeters(30.5) // length new
+        private val TRACK_WIDTH: Double = Units.inchesToMeters(29.5) // width new
+        private val WHEEL_BASE: Double = Units.inchesToMeters(30.5) // length new
         val WHEEL_CIRCUMFERENCE: Double = CHOSEN_MODULE.wheelCircumference
 
         /* Swerve Kinematics */
@@ -126,37 +127,37 @@ object Constants {
     }
     object Modules {
         object FrontLeft {
-            const val driveMotorID: Int = 1
-            const val angleMotorID: Int = 2
-            const val canCoderID: Int = 3
-            val angleOffset: Rotation2d = Rotation2d.fromDegrees(-130.17)
+            private const val driveMotorID: Int = 1
+            private const val angleMotorID: Int = 2
+            private const val canCoderID: Int = 3
+            private val angleOffset: Rotation2d = Rotation2d.fromDegrees(-130.17)
             val constants: SwerveModuleConstants =
                 SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         }
 
         object FrontRight {
-            const val driveMotorID: Int = 4
-            const val angleMotorID: Int = 5
-            const val canCoderID: Int = 6
-            val angleOffset: Rotation2d = Rotation2d.fromDegrees(-51.34)
+            private const val driveMotorID: Int = 4
+            private const val angleMotorID: Int = 5
+            private const val canCoderID: Int = 6
+            private val angleOffset: Rotation2d = Rotation2d.fromDegrees(-51.34)
             val constants: SwerveModuleConstants =
                 SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         }
 
         object BackLeft {
-            const val driveMotorID: Int = 7
-            const val angleMotorID: Int = 8
-            const val canCoderID: Int = 9
-            val angleOffset: Rotation2d = Rotation2d.fromDegrees(-63.90)
+            private const val driveMotorID: Int = 7
+            private const val angleMotorID: Int = 8
+            private const val canCoderID: Int = 9
+            private val angleOffset: Rotation2d = Rotation2d.fromDegrees(-63.90)
             val constants: SwerveModuleConstants =
                 SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         }
 
         object BackRight {
-            const val driveMotorID: Int = 10
-            const val angleMotorID: Int = 11
-            const val canCoderID: Int = 12
-            val angleOffset: Rotation2d = Rotation2d.fromDegrees(-175.96)
+            private const val driveMotorID: Int = 10
+            private const val angleMotorID: Int = 11
+            private const val canCoderID: Int = 12
+            private val angleOffset: Rotation2d = Rotation2d.fromDegrees(-175.96)
             val constants: SwerveModuleConstants =
                 SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         }
@@ -207,6 +208,51 @@ object Constants {
         const val HOME_POSITION: Double = 1.05
 
         const val SHOOTER_TOLERANCE: Double = 50.0
+    }
+
+    object LimelightConstants {
+        const val LIMELIGHT_SHOOTER: String = "limelight-shooter"
+        const val LIMELIGHT_ARM: String = "limelight-arm"
+
+        // Tracking constants
+        const val MIN_AREA_OF_TAG: Double = .1
+        const val MAX_VISION_POSE_ERROR: Double = 0.5
+
+        // Pipeline IDS
+        const val LIMELIGHT_SHOOTER_TAG_PIPELINE: Int = 0
+        const val LIMELIGHT_ARM_TAG_PIPELINE: Int = 0
+    }
+
+    object PoseConfig {
+        // Increase these numbers to trust your model's state estimates less.
+        const val K_POSITION_STD_DEV_X: Double = 0.1
+        const val K_POSITION_STD_DEV_Y: Double = 0.1
+        const val K_POSITION_STD_DEV_THETA: Double = 50.0 // 10
+
+        // Increase these numbers to trust global measurements from vision less.
+        const val K_VISION_STD_DEV_X: Double = 5.0
+        const val K_VISION_STD_DEV_Y: Double = 5.0
+        const val K_VISION_STD_DEV_THETA: Double = Double.MAX_VALUE
+    }
+
+    object BlueTeamPoses {
+        // Blue team poses
+        val INITIAL_POSE: Pose2d = Pose2d(Translation2d(1.225347, 7.652309), Rotation2d()) // Next to blue speaker
+        val BLUE_SPEAKER_POSE: Pose2d = Pose2d(Translation2d(0.0, 5.671689), Rotation2d.fromDegrees(180.0))
+        val BLUE_ORIGIN: Pose2d = Pose2d(Translation2d(0.0, 0.0), Rotation2d())
+        val BLUE_AMP_POSE: Pose2d = Pose2d(Translation2d(1.813129, 8.220855), Rotation2d())
+    }
+
+    object RedTeamPoses {
+        val initialPose: Pose2d = Pose2d(Translation2d(1.225347, 7.652309), Rotation2d()) // Next to blue speaker
+        val RED_ORIGIN: Pose2d = Pose2d(Translation2d(16.542, 8.014), Rotation2d.fromDegrees(180.0))
+        val RED_SPEAKER_POSE: Pose2d = Pose2d(Translation2d(16.535595, 5.554168), Rotation2d()).relativeTo(RED_ORIGIN)
+        val redAmpPose: Pose2d = Pose2d(Translation2d(14.722884, 8.220855), Rotation2d()).relativeTo(RED_ORIGIN)
+    }
+
+    object StructureConstants {
+        val SPEAKER_HEIGHT: Double = Units.inchesToMeters(82.0)
+        val SHOOTER_ROBOT_HEIGHT: Double = Units.inchesToMeters(14.0)
     }
 }
 

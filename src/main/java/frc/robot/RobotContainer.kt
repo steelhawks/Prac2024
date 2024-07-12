@@ -44,10 +44,12 @@ object RobotContainer {
     private val resetShooterPositionTest = driverController.leftStick()
     private val toMinimumShooterPositionTest = driverController.rightStick()
 
+    private val resetHeading = driverController.b()
+
     private val slowModeToggle = driverController.rightTrigger()
 
     // this thread should run ONCE
-    val valueGetter = Thread {
+    private val valueGetter = Thread {
         while (!DriverStation.isDSAttached()) {
             println("Driver Station not attached")
             DriverStation.reportWarning("attaching DS...", false)
@@ -55,6 +57,8 @@ object RobotContainer {
         DriverStation.reportWarning("DS attached", false)
 
         alliance = DriverStation.getAlliance().get()
+
+        SwerveSubsystem.initializePoseEstimator() // configure pose on thread
 
         LEDSubsystem.defaultCommand =
             LEDIdleCommand(if (alliance == DriverStation.Alliance.Red) LEDSubsystem.LEDColor.RED else LEDSubsystem.LEDColor.BLUE)
@@ -84,6 +88,9 @@ object RobotContainer {
         intakeButton.whileTrue(IntakeCommand())
 
         resetShooterPositionTest.whileTrue(InstantCommand({}))
+        resetHeading.onTrue(InstantCommand({
+            SwerveSubsystem.zeroHeading()
+        }))
     }
 
     private fun configureDefaultCommands() {
@@ -92,7 +99,10 @@ object RobotContainer {
         SwerveSubsystem.defaultCommand = TeleopDriveCommand(
             { driverController.leftY },
             { driverController.leftX },
-            { driverController.rightX })
+            { driverController.rightX },
+            { true })
+            // idk how this hid.pov thing works
+//            { driverController.hid.pov == 180 }) // Robot centric boolean
     }
 
     private fun configureTriggers() {

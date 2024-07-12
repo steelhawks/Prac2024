@@ -1,12 +1,13 @@
-package frc.robot.commands
+package frc.robot.commands.intake
 
 import edu.wpi.first.wpilibj2.command.Command
+import frc.robot.NoteStatus
 import frc.robot.subsystems.IntakeSubsystem
+import frc.robot.subsystems.LEDSubsystem
 
 class IntakeCommand : Command() {
     private val intakeSubsystem = IntakeSubsystem
     private var beamStartBroken = false
-
 
     init {
         // each subsystem used by the command must be passed into the addRequirements() method
@@ -30,6 +31,7 @@ class IntakeCommand : Command() {
     }
 
     override fun end(interrupted: Boolean) {
+        intakeSubsystem.noteStatus = NoteStatus.INTAKEN
         intakeSubsystem.stop()
     }
 }

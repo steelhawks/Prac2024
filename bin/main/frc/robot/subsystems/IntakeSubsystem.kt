@@ -3,9 +3,11 @@ package frc.robot.subsystems
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj.DigitalInput
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import edu.wpi.first.wpilibj2.command.SubsystemBase
+import edu.wpi.first.wpilibj2.command.*
 import frc.robot.Constants
+import frc.robot.NoteStatus
 
 
 object IntakeSubsystem : SubsystemBase() {
@@ -16,7 +18,9 @@ object IntakeSubsystem : SubsystemBase() {
     private val intakeBeam = DigitalInput(Constants.Intake.BEAM_BREAKER_INTAKE)
     private val armBeam = DigitalInput(Constants.Intake.BEAM_BREAKER_ARM)
 
-    private val prevBeamBroken = false
+//    private val prevBeamBroken = false
+    var noteStatus: NoteStatus = NoteStatus.NOTHING
+
 
     init {
         configureMotors()
@@ -34,7 +38,7 @@ object IntakeSubsystem : SubsystemBase() {
         m_intakeMotor2.set(Constants.Intake.INTAKE_SPEED)
     }
 
-    fun configureMotors() {
+    private fun configureMotors() {
         m_intakeMotor1.inverted = false
         m_intakeMotor2.inverted = true
         m_forkMotor.inverted = true
@@ -42,6 +46,14 @@ object IntakeSubsystem : SubsystemBase() {
         m_intakeMotor1.setNeutralMode(NeutralModeValue.Coast)
         m_intakeMotor2.setNeutralMode(NeutralModeValue.Coast)
         m_forkMotor.setNeutralMode(NeutralModeValue.Coast)
+    }
+
+    fun intakeLEDCommand(alliance: DriverStation.Alliance): Command {
+        return LEDSubsystem.flashCommand(
+            if (alliance == DriverStation.Alliance.Red) LEDSubsystem.LEDColor.RED else if (alliance == DriverStation.Alliance.Blue) LEDSubsystem.LEDColor.BLUE else LEDSubsystem.LEDColor.GREEN,
+            0.1,
+            1.0
+        )
     }
 
     fun stop() {
@@ -56,5 +68,9 @@ object IntakeSubsystem : SubsystemBase() {
     override fun periodic() {
         SmartDashboard.putBoolean("intake/intake beam", intakeBeamBroken)
         SmartDashboard.putBoolean("intake/arm beam", armBeamBroken)
+
+//        while (intakeBeamBroken) { // dangerous code
+//            LEDSubsystem.setColor(LEDSubsystem.LEDColor.GREEN)
+//        }
     }
 }
