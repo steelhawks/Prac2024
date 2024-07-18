@@ -208,6 +208,10 @@ object Constants {
         const val HOME_POSITION: Double = 1.05
 
         const val SHOOTER_TOLERANCE: Double = 50.0
+
+        // testing values
+        const val TOP_SHOOTER_SPEED: Double = 0.4
+        const val BOTTOM_SHOOTER_SPEED: Double = 0.4
     }
 
     object LimelightConstants {

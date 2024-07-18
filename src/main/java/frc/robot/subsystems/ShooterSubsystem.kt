@@ -90,15 +90,6 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
         m_pivotMotor.setPosition(0.0)
     }
 
-    fun goHome() {
-//        m_pivotMotor.setPosition(30.0)
-        setGoal(Constants.Shooter.HOME_POSITION)
-    }
-
-    fun stopPivot() {
-        m_topShooterMotor.stopMotor()
-    }
-
     override fun useOutput(output: Double, setpoint: TrapezoidProfile.State?) {
         val feedForward = setpoint?.let { pivotFeedForward.calculate(it.position, setpoint.velocity) }
         m_pivotMotor.setVoltage(output + feedForward!!)
@@ -110,6 +101,26 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
 
     override fun getMeasurement(): Double {
         return canCoderVal * Math.PI / 180 + 3.05
+    }
+
+    fun goHome() {
+//        m_pivotMotor.setPosition(30.0)
+        setGoal(Constants.Shooter.HOME_POSITION)
+    }
+
+    fun stopShooter() {
+        m_topShooterMotor.stopMotor()
+        m_bottomShooterMotor.stopMotor()
+
+    }
+
+    fun stopPivot() {
+        m_topShooterMotor.stopMotor()
+    }
+
+    fun manualShot() {
+        m_topShooterMotor.set(Constants.Shooter.TOP_SHOOTER_SPEED)
+        m_bottomShooterMotor.set(Constants.Shooter.BOTTOM_SHOOTER_SPEED)
     }
 
     override fun periodic() {

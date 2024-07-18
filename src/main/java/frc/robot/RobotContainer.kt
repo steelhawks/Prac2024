@@ -9,12 +9,14 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
 import frc.robot.commands.Autos
+import frc.robot.commands.FeederTestCommand
 import frc.robot.commands.led.LEDIdleCommand
 import frc.robot.commands.led.LEDNoteIntakenCommand
 import frc.robot.commands.TeleopDriveCommand
 import frc.robot.commands.arm.ArmHomePositionCommand
 import frc.robot.commands.intake.IntakeCommand
 import frc.robot.commands.intake.IntakeReverseCommand
+import frc.robot.commands.shooter.ManualShotCommand
 import frc.robot.commands.shooter.ShooterHomePositionCommand
 import frc.robot.subsystems.*
 
@@ -90,6 +92,9 @@ object RobotContainer {
         resetHeading.onTrue(InstantCommand({
             SwerveSubsystem.zeroHeading()
         }))
+
+        driverController.x().whileTrue(ManualShotCommand())
+        driverController.y().whileTrue(FeederTestCommand())
     }
 
     private fun configureDefaultCommands() {
