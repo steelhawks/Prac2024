@@ -254,6 +254,43 @@ object Constants {
         val SPEAKER_HEIGHT: Double = Units.inchesToMeters(82.0)
         val SHOOTER_ROBOT_HEIGHT: Double = Units.inchesToMeters(14.0)
     }
+
+    object AmpArm {
+        const val SHOOTER_MOTOR_ID: Int = 23
+        const val PIVOT_MOTOR_ID: Int = 24
+
+        const val CAN_CODER_ID: Int = 25
+        const val PIVOT_KS: Double = 0.14
+        const val PIVOT_KG: Double = 0.195
+        const val PIVOT_KV: Double = 0.85
+
+        const val PIVOT_KP: Double = 1.5
+        const val PIVOT_KI: Double = 0.0
+        const val PIVOT_KD: Double = 0.0
+
+        const val INTEGRATOR_ZONE: Double = 0.0
+
+        const val PIVOT_TOLERANCE: Double = 0.01
+
+        const val K_MAX_VELOCITY_RAD_PER_SECOND: Double = 13.0
+        const val K_MAX_ACCELERATION_RAD_PER_SECOND_SQUARED: Double = 15.0
+
+        const val ARM_OFFSET: Double = -Math.PI / 2
+
+        // Score positions in radians
+        const val HOME_POSITION: Double = -2.4
+        const val DANGLE_POSITION: Double = -Math.PI / 2
+        const val HAND_OFF_POSITION: Double = -2.4
+        const val AMP_SLAM_POSITION: Double = -0.20 // NOT USED ANYMORE
+        const val CLIMB_IDLE_POSITION: Double = -1.1
+        const val AMP_SHOOT_POSITION: Double = -0.55
+        const val TRAP_POSITION: Double = 1.37
+
+        // Manual testing values
+        const val MANUAL_ARM_PIVOT_SPEED: Double = 0.1
+        const val HANDOFF_SPEED: Double = -0.3
+        const val SHOOT_SPEED: Double = 0.8
+    }
 }
 
 

@@ -2,6 +2,8 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Real Field": "Field2d",
+      "/SmartDashboard/Simulator Field": "Field2d",
       "/SmartDashboard/field": "Field2d"
     }
   },

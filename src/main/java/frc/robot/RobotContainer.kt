@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
+import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
@@ -11,13 +12,11 @@ import frc.robot.commands.Autos
 import frc.robot.commands.led.LEDIdleCommand
 import frc.robot.commands.led.LEDNoteIntakenCommand
 import frc.robot.commands.TeleopDriveCommand
+import frc.robot.commands.arm.ArmHomePositionCommand
 import frc.robot.commands.intake.IntakeCommand
 import frc.robot.commands.intake.IntakeReverseCommand
 import frc.robot.commands.shooter.ShooterHomePositionCommand
-import frc.robot.subsystems.IntakeSubsystem
-import frc.robot.subsystems.LEDSubsystem
-import frc.robot.subsystems.ShooterSubsystem
-import frc.robot.subsystems.SwerveSubsystem
+import frc.robot.subsystems.*
 
 
 /**
@@ -95,6 +94,17 @@ object RobotContainer {
 
     private fun configureDefaultCommands() {
         ShooterSubsystem.defaultCommand = ShooterHomePositionCommand()
+//        InstantCommand({
+//            ArmSubsystem.defaultCommand = ArmHomePositionCommand()
+//            WaitCommand(2.0)
+//            println("Done")
+//            ArmSubsystem.defaultCommand.cancel()
+//            ArmSubsystem.removeDefaultCommand()
+//        })
+        ArmSubsystem.defaultCommand = ArmHomePositionCommand()
+//        InstantCommand({
+//            ArmHomePositionCommand()
+//        })
 
         SwerveSubsystem.defaultCommand = TeleopDriveCommand(
             { driverController.leftY },

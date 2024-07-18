@@ -8,6 +8,7 @@ import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.trajectory.TrapezoidProfile
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem
 import frc.robot.Constants
 
@@ -29,6 +30,9 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
     private val m_topShooterMotor: TalonFX = TalonFX(Constants.Shooter.TOP_SHOOTER_MOTOR_ID, Constants.CANIVORE_NAME)
 
     private val m_canCoder = CANcoder(Constants.Shooter.CANCODER_ID, Constants.CANIVORE_NAME)
+
+    val canCoderVal
+        get() = m_canCoder.absolutePosition.valueAsDouble * 360 - 24.7
 
     private val bottomShooterPIDController: PIDController =
         PIDController(
@@ -87,8 +91,8 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
     }
 
     fun goHome() {
-        m_pivotMotor.setPosition(30.0)
-//        setGoal(Constants.Shooter.HOME_POSITION)
+//        m_pivotMotor.setPosition(30.0)
+        setGoal(Constants.Shooter.HOME_POSITION)
     }
 
     fun stopPivot() {
@@ -96,11 +100,25 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
     }
 
     override fun useOutput(output: Double, setpoint: TrapezoidProfile.State?) {
-        println("Use Output")
+        val feedForward = setpoint?.let { pivotFeedForward.calculate(it.position, setpoint.velocity) }
+        m_pivotMotor.setVoltage(output + feedForward!!)
+
+        SmartDashboard.putNumber("shooter/feedforward", feedForward)
+        SmartDashboard.putNumber("shooter/setpoint position", setpoint.position)
+        SmartDashboard.putNumber("shooter/setpoint velocity", setpoint.velocity)
     }
 
     override fun getMeasurement(): Double {
-        println("Get Measurement")
-        return 0.0
+        return canCoderVal * Math.PI / 180 + 3.05
+    }
+
+    override fun periodic() {
+        if (m_enabled) {
+            useOutput(m_controller.calculate(measurement), m_controller.setpoint)
+        }
+
+        SmartDashboard.putNumber("shooter/goal", controller.goal.position)
+        SmartDashboard.putNumber("shooter/pivot angle", measurement)
+        SmartDashboard.putNumber("shooter/pivot voltage", m_pivotMotor.motorVoltage.valueAsDouble)
     }
 }
