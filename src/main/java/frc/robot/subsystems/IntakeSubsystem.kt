@@ -1,5 +1,6 @@
 package frc.robot.subsystems
 
+import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj.DigitalInput
@@ -21,9 +22,34 @@ object IntakeSubsystem : SubsystemBase() {
 //    private val prevBeamBroken = false
     var noteStatus: NoteStatus = NoteStatus.NOTHING
 
+    enum class IntakeDirection {
+        TO_SHOOTER,
+        TO_AMP_ARM,
+        TO_INTAKE
+    }
 
     init {
         configureMotors()
+    }
+
+    fun fork(dir: IntakeDirection) {
+        when (dir) {
+            IntakeDirection.TO_SHOOTER -> {
+                m_intakeMotor1.set(-Constants.Intake.INTAKE_FEED_SPEED)
+                m_intakeMotor2.set(-Constants.Intake.INTAKE_FEED_SPEED)
+                m_forkMotor.set(Constants.Intake.FORK_SPEED)
+            }
+            IntakeDirection.TO_AMP_ARM -> {
+                m_intakeMotor1.set(-Constants.Intake.INTAKE_FEED_SPEED / 3)
+                m_intakeMotor2.set(-Constants.Intake.INTAKE_FEED_SPEED / 3)
+                m_forkMotor.set(-Constants.Intake.FORK_SPEED / 3)
+            }
+            IntakeDirection.TO_INTAKE -> {
+                m_intakeMotor1.set(-Constants.Intake.INTAKE_FEED_SPEED / 3.5)
+                m_intakeMotor2.set(-Constants.Intake.INTAKE_FEED_SPEED / 3.5)
+                m_forkMotor.set(Constants.Intake.FORK_SPEED)
+            }
+        }
     }
 
     fun intake() {
@@ -36,6 +62,13 @@ object IntakeSubsystem : SubsystemBase() {
     fun intakeReverse() {
         m_intakeMotor1.set(Constants.Intake.INTAKE_SPEED)
         m_intakeMotor2.set(Constants.Intake.INTAKE_SPEED)
+    }
+
+    fun intakeToArm() {
+        m_forkMotor.setVoltage(-1.0)
+
+        m_intakeMotor1.set(-Constants.Intake.FORK_SPEED)
+        m_intakeMotor2.set(-Constants.Intake.FORK_SPEED)
     }
 
     private fun configureMotors() {

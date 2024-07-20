@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
-import edu.wpi.first.wpilibj2.command.WaitCommand
+import edu.wpi.first.wpilibj2.command.RepeatCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
@@ -13,9 +13,13 @@ import frc.robot.commands.FeederTestCommand
 import frc.robot.commands.led.LEDIdleCommand
 import frc.robot.commands.led.LEDNoteIntakenCommand
 import frc.robot.commands.TeleopDriveCommand
+import frc.robot.commands.arm.ArmHandoffCommand
 import frc.robot.commands.arm.ArmHomePositionCommand
+import frc.robot.commands.arm.ArmShootCommand
 import frc.robot.commands.intake.IntakeCommand
 import frc.robot.commands.intake.IntakeReverseCommand
+import frc.robot.commands.intake.IntakeToArmCommand
+import frc.robot.commands.led.LEDNoteToArmCommand
 import frc.robot.commands.shooter.ManualShotCommand
 import frc.robot.commands.shooter.ShooterHomePositionCommand
 import frc.robot.subsystems.*
@@ -41,9 +45,6 @@ object RobotContainer {
 
     private val reverseIntakeButton = driverController.leftBumper()
     private val intakeButton = driverController.rightBumper()
-
-    private val resetShooterPositionTest = driverController.leftStick()
-    private val toMinimumShooterPositionTest = driverController.rightStick()
 
     private val resetHeading = driverController.b()
 
@@ -71,7 +72,8 @@ object RobotContainer {
         valueGetter.start()
 
         configureDefaultCommands()
-        configureBindings()
+        configureDriverBindings()
+        configureOperatorBindings()
         // Reference the Autos object so that it is initialized, placing the chooser on the dashboard
         Autos
     }
@@ -83,33 +85,35 @@ object RobotContainer {
      * subclasses such for [Xbox][CommandXboxController]/[PS4][edu.wpi.first.wpilibj2.command.button.CommandPS4Controller]
      * controllers or [Flight joysticks][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
-    private fun configureBindings() {
+    private fun configureDriverBindings() {
         slowModeToggle.whileTrue(InstantCommand({ SwerveSubsystem.toggleSpeedChange() }))
         reverseIntakeButton.whileTrue(IntakeReverseCommand())
         intakeButton.whileTrue(IntakeCommand())
 
-        resetShooterPositionTest.whileTrue(InstantCommand({}))
         resetHeading.onTrue(InstantCommand({
             SwerveSubsystem.zeroHeading()
         }))
 
         driverController.x().whileTrue(ManualShotCommand())
         driverController.y().whileTrue(FeederTestCommand())
+
+        driverController.povLeft().whileTrue(ArmShootCommand())
+        driverController.povRight().whileTrue(IntakeToArmCommand())
+
+
+    }
+
+    private fun configureOperatorBindings() {
+        operatorController.leftBumper()
+            .and { IntakeSubsystem.noteStatus == NoteStatus.ARM }
+            .onTrue(
+                ArmHandoffCommand()
+            )
     }
 
     private fun configureDefaultCommands() {
         ShooterSubsystem.defaultCommand = ShooterHomePositionCommand()
-//        InstantCommand({
-//            ArmSubsystem.defaultCommand = ArmHomePositionCommand()
-//            WaitCommand(2.0)
-//            println("Done")
-//            ArmSubsystem.defaultCommand.cancel()
-//            ArmSubsystem.removeDefaultCommand()
-//        })
         ArmSubsystem.defaultCommand = ArmHomePositionCommand()
-//        InstantCommand({
-//            ArmHomePositionCommand()
-//        })
 
         SwerveSubsystem.defaultCommand = TeleopDriveCommand(
             { driverController.leftY },
@@ -148,6 +152,21 @@ object RobotContainer {
                     )
             )
 
+        Trigger {
+            IntakeSubsystem.armBeamBroken
+        }
+            .onTrue(
+                LEDNoteToArmCommand(LEDSubsystem.LEDColor.PURPLE)
+            )
+
+        Trigger {
+            ShooterSubsystem.firing
+        }
+            .whileTrue(
+                RepeatCommand(
+                    ShooterSubsystem.shooterLEDCommand()
+                )
+            )
     }
 
     fun resetControllerRumble() {

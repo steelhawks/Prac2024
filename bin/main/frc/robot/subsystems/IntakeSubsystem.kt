@@ -68,9 +68,5 @@ object IntakeSubsystem : SubsystemBase() {
     override fun periodic() {
         SmartDashboard.putBoolean("intake/intake beam", intakeBeamBroken)
         SmartDashboard.putBoolean("intake/arm beam", armBeamBroken)
-
-//        while (intakeBeamBroken) { // dangerous code
-//            LEDSubsystem.setColor(LEDSubsystem.LEDColor.GREEN)
-//        }
     }
 }

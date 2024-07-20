@@ -1,21 +1,21 @@
-package frc.robot.commands
+package frc.robot.commands.arm
 
 import edu.wpi.first.wpilibj2.command.Command
-import frc.robot.subsystems.FeederSubsystem
+import frc.robot.subsystems.ArmSubsystem
 
-class FeederTestCommand : Command() {
-    private val feederSubsystem = FeederSubsystem
+class ArmShootCommand : Command() {
+    private val armSubsystem = ArmSubsystem
 
 
     init {
         // each subsystem used by the command must be passed into the addRequirements() method
-        addRequirements(feederSubsystem)
+        addRequirements(armSubsystem)
     }
 
     override fun initialize() {}
 
     override fun execute() {
-        feederSubsystem.feedToShooter()
+        armSubsystem.shoot(0.0)
     }
 
     override fun isFinished(): Boolean {
@@ -24,6 +24,6 @@ class FeederTestCommand : Command() {
     }
 
     override fun end(interrupted: Boolean) {
-        feederSubsystem.stopFeed()
+        armSubsystem.stopShooter()
     }
 }

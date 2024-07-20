@@ -193,6 +193,14 @@ object LEDSubsystem : SubsystemBase() {
         )
     }
 
+    fun fadeCommand(color: LEDColor, interval: Double, time: Double): Command {
+        return ParallelDeadlineGroup(
+            Commands.run({
+                this.fade(color)
+            }, this)
+        )
+    }
+
 
     private val currentColor: LEDColor
         get() = _currentColor

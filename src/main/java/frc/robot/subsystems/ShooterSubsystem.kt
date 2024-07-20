@@ -1,5 +1,6 @@
 package frc.robot.subsystems
 
+import com.ctre.phoenix6.StatusSignal
 import com.ctre.phoenix6.hardware.CANcoder
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.NeutralModeValue
@@ -9,7 +10,9 @@ import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem
+import frc.lib.util.COTSTalonFXSwerveConstants
 import frc.robot.Constants
 
 object ShooterSubsystem : ProfiledPIDSubsystem(
@@ -30,6 +33,19 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
     private val m_topShooterMotor: TalonFX = TalonFX(Constants.Shooter.TOP_SHOOTER_MOTOR_ID, Constants.CANIVORE_NAME)
 
     private val m_canCoder = CANcoder(Constants.Shooter.CANCODER_ID, Constants.CANIVORE_NAME)
+
+    val firing: Boolean
+        get() {
+            val threshold = 10.0
+
+            val bottomMotorVelocitySignal: StatusSignal<Double> = m_bottomShooterMotor.velocity
+            val topMotorVelocitySignal: StatusSignal<Double> = m_topShooterMotor.velocity
+            val bottomMotorVelocity: Double? = bottomMotorVelocitySignal.value
+            val topMotorVelocity: Double? = topMotorVelocitySignal.value
+
+            return (bottomMotorVelocity != null && bottomMotorVelocity > threshold) ||
+                    (topMotorVelocity != null && topMotorVelocity > threshold)
+        }
 
     val canCoderVal
         get() = m_canCoder.absolutePosition.valueAsDouble * 360 - 24.7
@@ -83,8 +99,8 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
 
     private fun configureMotors() {
         m_pivotMotor.setNeutralMode(NeutralModeValue.Brake)
-        m_bottomShooterMotor.setNeutralMode(NeutralModeValue.Brake)
-        m_topShooterMotor.setNeutralMode(NeutralModeValue.Brake)
+        m_bottomShooterMotor.setNeutralMode(NeutralModeValue.Coast)
+        m_topShooterMotor.setNeutralMode(NeutralModeValue.Coast)
 
         m_pivotMotor.inverted = false
         m_pivotMotor.setPosition(0.0)
@@ -104,14 +120,17 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
     }
 
     fun goHome() {
-//        m_pivotMotor.setPosition(30.0)
         setGoal(Constants.Shooter.HOME_POSITION)
+//        setGoal(Constants.Shooter.DOWN_POSITION)
+    }
+
+    fun goDown() {
+        setGoal(Constants.Shooter.DOWN_POSITION)
     }
 
     fun stopShooter() {
         m_topShooterMotor.stopMotor()
         m_bottomShooterMotor.stopMotor()
-
     }
 
     fun stopPivot() {
@@ -123,6 +142,14 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
         m_bottomShooterMotor.set(Constants.Shooter.BOTTOM_SHOOTER_SPEED)
     }
 
+    fun shooterLEDCommand(): Command {
+        return LEDSubsystem.flashCommand(
+            LEDSubsystem.LEDColor.GREEN,
+            0.05,
+            2.0
+        )
+    }
+
     override fun periodic() {
         if (m_enabled) {
             useOutput(m_controller.calculate(measurement), m_controller.setpoint)
@@ -131,5 +158,7 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
         SmartDashboard.putNumber("shooter/goal", controller.goal.position)
         SmartDashboard.putNumber("shooter/pivot angle", measurement)
         SmartDashboard.putNumber("shooter/pivot voltage", m_pivotMotor.motorVoltage.valueAsDouble)
+
+        SmartDashboard.putBoolean("shooter/is moving", firing)
     }
 }

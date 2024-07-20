@@ -59,7 +59,7 @@ object Constants {
 //        val TRACK_WIDTH: Double = Units.inchesToMeters(26.75) // width old
 //        val WHEEL_BASE: Double = Units.inchesToMeters(26.75) // length old
 
-        private val TRACK_WIDTH: Double = Units.inchesToMeters(29.5) // width new
+        val TRACK_WIDTH: Double = Units.inchesToMeters(29.5) // width new
         private val WHEEL_BASE: Double = Units.inchesToMeters(30.5) // length new
         val WHEEL_CIRCUMFERENCE: Double = CHOSEN_MODULE.wheelCircumference
 
@@ -125,6 +125,17 @@ object Constants {
         const val AUTO_ALIGN_KI = 0
         const val AUTO_ALIGN_KD = 0
     }
+
+    object AutonConstants {
+        const val TRANSLATION_KP: Double = 1.0
+        const val TRANSLATION_KI: Double = 0.001
+        const val TRANSLATION_KD: Double = 0.0
+
+        const val ROTATION_KP: Double = 0.1
+        const val ROTATION_KI: Double = 0.0011
+        const val ROTATION_KD: Double = 0.01
+    }
+
     object Modules {
         object FrontLeft {
             private const val driveMotorID: Int = 1
@@ -206,6 +217,8 @@ object Constants {
         const val K_MAX_ACCELERATION_RAD_PER_SEC_SQUARED: Double = 8.0
 
         const val HOME_POSITION: Double = 1.05
+
+        const val DOWN_POSITION: Double = .25
 
         const val SHOOTER_TOLERANCE: Double = 50.0
 

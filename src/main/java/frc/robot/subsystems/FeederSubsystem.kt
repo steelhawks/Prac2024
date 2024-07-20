@@ -12,7 +12,11 @@ object FeederSubsystem : SubsystemBase() {
         m_feederMotor.setNeutralMode(NeutralModeValue.Brake)
     }
 
-    fun feederTest() {
+    fun feedToShooter() {
+        m_feederMotor.set(10.0)
+    }
+
+    fun feedBackToIntake() {
         m_feederMotor.set(-0.5)
     }
 

@@ -9,6 +9,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem
 import frc.robot.Constants
+import kotlin.math.abs
 
 object ArmSubsystem : ProfiledPIDSubsystem(
     ProfiledPIDController(
@@ -35,7 +36,8 @@ object ArmSubsystem : ProfiledPIDSubsystem(
     }
 
     enum class ArmStatus {
-        NOTHING, INTAKING
+        NOTHING,
+        INTAKING,
     }
 
     val status = ArmStatus.NOTHING
@@ -60,6 +62,19 @@ object ArmSubsystem : ProfiledPIDSubsystem(
         m_shootMotor.setNeutralMode(NeutralModeValue.Coast)
 
         m_pivotMotor.setPosition(-90.0 / 14.7)
+    }
+
+    fun shoot(direction: Double) {
+//        println(Dir)
+        if (direction == 0.0) {
+            m_shootMotor.set(Constants.AmpArm.SHOOT_SPEED)
+        } else if (direction == 1.0) {
+            m_shootMotor.set(-Constants.AmpArm.SHOOT_SPEED)
+        }
+    }
+
+    fun stopShooter() {
+        m_shootMotor.stopMotor()
     }
 
     override fun useOutput(output: Double, setpoint: TrapezoidProfile.State?) {
@@ -89,9 +104,16 @@ object ArmSubsystem : ProfiledPIDSubsystem(
         setGoal(Position.HOME.rotations)
     }
 
+    fun goToHandoff() {
+        setGoal(Position.HANDOFF.rotations)
+    }
+
     fun stopArm() {
         m_pivotMotor.stopMotor()
     }
+
+    val inHandoffPosition
+        get() = abs(measurement - Position.HANDOFF.rotations) <= Constants.AmpArm.PIVOT_TOLERANCE * 5
 
     val danglePosition = InstantCommand({
     setGoal(Position.DANGLE.rotations)

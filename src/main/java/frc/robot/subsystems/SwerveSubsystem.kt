@@ -186,29 +186,29 @@ object SwerveSubsystem : SubsystemBase() {
 //        AutoBuilder.configureHolonomic(
 //            this::getPose,
 //            this::setPose,
-//            this::getRobotRelativeSpeeds,
+//            this::robotRelativeSpeeds,
 //            this::driveRobotRelative,
 //            HolonomicPathFollowerConfig(
 //                PIDConstants(
-//                    Constants.AutoConstants.translationkP,
-//                    Constants.AutoConstants.translationkI,
-//                    Constants.AutoConstants.translationkD
+//                    Constants.AutonConstants.TRANSLATION_KP,
+//                    Constants.AutonConstants.TRANSLATION_KI,
+//                    Constants.AutonConstants.TRANSLATION_KD,
 //                ),
 //                PIDConstants(
-//                    Constants.AutoConstants.rotationkP,
-//                    Constants.AutoConstants.rotationkI,
-//                    Constants.AutoConstants.rotationkD
+//                    Constants.AutonConstants.ROTATION_KP,
+//                    Constants.AutonConstants.ROTATION_KI,
+//                    Constants.AutonConstants.ROTATION_KD
 //                ),
 //                4.3,
-//                Constants.Swerve.trackWidth / sqrt(2.0),
+//                Constants.Swerve.TRACK_WIDTH / sqrt(2.0),
 //                ReplanningConfig()
 //            ),
-//            BooleanSupplier {
+//            {
 //                val alliance = DriverStation.getAlliance()
 //                if (alliance.isPresent) {
-//                    return@configureHolonomic alliance.get() == Alliance.Red
+//                    return@configureHolonomic alliance.get() == DriverStation.Alliance.Red
 //                }
-//                false
+//                return@configureHolonomic false
 //            },
 //            this
 //        )
@@ -315,7 +315,7 @@ object SwerveSubsystem : SubsystemBase() {
         }
     }
 
-    fun setPose(pose: Pose2d?) {
+    private fun setPose(pose: Pose2d?) {
         poseEstimator?.resetPosition(gyroYaw, modulePositions, pose)
     }
 
@@ -335,10 +335,10 @@ object SwerveSubsystem : SubsystemBase() {
     val heading: Rotation2d
         get() = getRelativePose().rotation
 
-    val gyroYaw: Rotation2d
+    private val gyroYaw: Rotation2d
         get() = Rotation2d.fromDegrees(gyro.yaw.value)
 
-    val modulePositions: Array<SwerveModulePosition>
+    private val modulePositions: Array<SwerveModulePosition>
         get() {
             val positions = Array(4) { SwerveModulePosition(0.0, Rotation2d(0.0)) }
             for (mod in m_swerveModules) {
@@ -356,13 +356,21 @@ object SwerveSubsystem : SubsystemBase() {
             return states
         }
 
-//    fun getRobotRelativeSpeeds: ChassisSpeeds
-//        return Constants.Swerve.SWERVE_KINEMATICS.toChassisSpeeds(moduleStates)
+//    val robotRelativeSpeeds: ChassisSpeeds
+//        get() {
+//            return Constants.Swerve.SWERVE_KINEMATICS.toChassisSpeeds(moduleStates)
+//        }
 
-//    fun getRobotRelativeSpeeds(): ChassisSpeeds {
-//        val test = Constants.Swerve.SWERVE_KINEMATICS.toChassisSpeeds()
-//        return test
-//    }
+    fun driveRobotRelative(chassisSpeeds: ChassisSpeeds?) {
+        val swerveModuleStates: Array<SwerveModuleState> =
+            Constants.Swerve.SWERVE_KINEMATICS.toSwerveModuleStates(chassisSpeeds)
+
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.MAX_SPEED)
+
+        for (mod in m_swerveModules) {
+            mod.setDesiredState(swerveModuleStates[mod.swerveModuleNumber], false)
+        }
+    }
 
     override fun periodic() {
         if (poseEstimator != null)
