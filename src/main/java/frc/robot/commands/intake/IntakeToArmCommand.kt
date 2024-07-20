@@ -9,7 +9,7 @@ class IntakeToArmCommand : Command() {
     private val armSubsystem = ArmSubsystem
     private val intakeSubsystem = IntakeSubsystem
 
-    private var prevBreamBroken = false
+    private var prevBeamBroken = false
 
     init {
         // each subsystem used by the command must be passed into the addRequirements() method
@@ -19,29 +19,28 @@ class IntakeToArmCommand : Command() {
     override fun initialize() {
         intakeSubsystem.noteStatus = NoteStatus.INTAKING
 
-        prevBreamBroken = IntakeSubsystem.armBeamBroken
+        prevBeamBroken = false
     }
 
     override fun execute() {
         intakeSubsystem.intakeToArm()
 
-        armSubsystem.shoot(1.0) // test val
+        armSubsystem.shoot(false)
+
+        if (intakeSubsystem.armBeamBroken) {
+            prevBeamBroken = true
+        }
     }
 
     override fun isFinished(): Boolean {
-        // TODO: Make this return true when this Command no longer needs to run execute()
-        if (prevBreamBroken) {
-            return !IntakeSubsystem.armBeamBroken
-        }
-
-        return IntakeSubsystem.armBeamBroken
+        return prevBeamBroken && !IntakeSubsystem.armBeamBroken
     }
 
     override fun end(interrupted: Boolean) {
         intakeSubsystem.stop()
         armSubsystem.stopShooter()
 
-        if (prevBreamBroken)
+        if (prevBeamBroken)
             intakeSubsystem.noteStatus = NoteStatus.ARM
         else
             intakeSubsystem.noteStatus = NoteStatus.INTAKEN

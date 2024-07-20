@@ -21,7 +21,7 @@ class LEDNoteToArmCommand(private val color: LEDSubsystem.LEDColor) : Command() 
 
     override fun isFinished(): Boolean {
         // TODO: Make this return true when this Command no longer needs to run execute()
-        return !IntakeSubsystem.armBeamBroken
+        return false
     }
 
     override fun end(interrupted: Boolean) {}

@@ -2,18 +2,15 @@ package frc.robot.commands.arm
 
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.CommandScheduler
-import edu.wpi.first.wpilibj2.command.Commands
-import edu.wpi.first.wpilibj2.command.WaitCommand
 import frc.robot.NoteStatus
 import frc.robot.subsystems.ArmSubsystem
 import frc.robot.subsystems.IntakeSubsystem
 
-class ArmHandoffCommand : Command() {
+class ArmShootInAmpCommand : Command() {
     private val armSubsystem = ArmSubsystem
     private var noteShot = false // goes true when note was shot in amp
     private val timer = Timer()
-    private val shootTime = 1.0
+    private val shootTime = .25
 
     // instead of time change to rotations
 
@@ -30,7 +27,7 @@ class ArmHandoffCommand : Command() {
 
     override fun execute() {
         if (armSubsystem.inHandoffPosition) {
-            armSubsystem.shoot(0.0)
+        armSubsystem.shoot(true)
             if (!timer.hasElapsed(shootTime)) {
                 timer.start()
             }

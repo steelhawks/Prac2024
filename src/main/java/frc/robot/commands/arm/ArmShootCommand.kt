@@ -15,7 +15,7 @@ class ArmShootCommand : Command() {
     override fun initialize() {}
 
     override fun execute() {
-        armSubsystem.shoot(0.0)
+        armSubsystem.shoot(true)
     }
 
     override fun isFinished(): Boolean {

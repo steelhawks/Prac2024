@@ -65,10 +65,10 @@ object IntakeSubsystem : SubsystemBase() {
     }
 
     fun intakeToArm() {
-        m_forkMotor.setVoltage(-1.0)
+        m_forkMotor.setVoltage(-0.8)
 
-        m_intakeMotor1.set(-Constants.Intake.FORK_SPEED)
-        m_intakeMotor2.set(-Constants.Intake.FORK_SPEED)
+        m_intakeMotor1.set(-Constants.Intake.FORK_SPEED / 2)
+        m_intakeMotor2.set(-Constants.Intake.FORK_SPEED / 2)
     }
 
     private fun configureMotors() {

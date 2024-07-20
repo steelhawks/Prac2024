@@ -9,11 +9,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
 import frc.robot.commands.Autos
-import frc.robot.commands.FeederTestCommand
 import frc.robot.commands.led.LEDIdleCommand
 import frc.robot.commands.led.LEDNoteIntakenCommand
 import frc.robot.commands.TeleopDriveCommand
-import frc.robot.commands.arm.ArmHandoffCommand
+import frc.robot.commands.arm.ArmShootInAmpCommand
 import frc.robot.commands.arm.ArmHomePositionCommand
 import frc.robot.commands.arm.ArmShootCommand
 import frc.robot.commands.intake.IntakeCommand
@@ -40,15 +39,22 @@ object RobotContainer {
     var alliance: DriverStation.Alliance? = null
         private set
 
+    // driver controller and triggers
     private val driverController = CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT)
-    private val operatorController = CommandXboxController(OperatorConstants.OPERATOR_CONTROLLER_PORT)
-
-    private val reverseIntakeButton = driverController.leftBumper()
-    private val intakeButton = driverController.rightBumper()
-
-    private val resetHeading = driverController.b()
 
     private val slowModeToggle = driverController.rightTrigger()
+    private val reverseIntakeButton = driverController.leftBumper()
+    private val intakeButton = driverController.rightBumper()
+    private val resetHeading = driverController.b()
+
+    // test triggers
+    private val manualShooterButton = driverController.x()
+
+
+    // operator controller and triggers
+    private val operatorController = CommandXboxController(OperatorConstants.OPERATOR_CONTROLLER_PORT)
+
+    private val fireNoteToAmp = operatorController.y()
 
     // this thread should run ONCE
     private val valueGetter = Thread {
@@ -94,20 +100,21 @@ object RobotContainer {
             SwerveSubsystem.zeroHeading()
         }))
 
-        driverController.x().whileTrue(ManualShotCommand())
-        driverController.y().whileTrue(FeederTestCommand())
+        manualShooterButton.whileTrue(ManualShotCommand())
 
         driverController.povLeft().whileTrue(ArmShootCommand())
-        driverController.povRight().whileTrue(IntakeToArmCommand())
-
-
+        driverController.povRight().onTrue(IntakeToArmCommand())
     }
 
     private fun configureOperatorBindings() {
-        operatorController.leftBumper()
+        fireNoteToAmp
+            .and { IntakeSubsystem.noteStatus != NoteStatus.ARM }
+            .onTrue(IntakeToArmCommand())
+
+        fireNoteToAmp
             .and { IntakeSubsystem.noteStatus == NoteStatus.ARM }
             .onTrue(
-                ArmHandoffCommand()
+                ArmShootInAmpCommand()
             )
     }
 
@@ -153,9 +160,9 @@ object RobotContainer {
             )
 
         Trigger {
-            IntakeSubsystem.armBeamBroken
+            IntakeSubsystem.noteStatus == NoteStatus.ARM
         }
-            .onTrue(
+            .whileTrue(
                 LEDNoteToArmCommand(LEDSubsystem.LEDColor.PURPLE)
             )
 

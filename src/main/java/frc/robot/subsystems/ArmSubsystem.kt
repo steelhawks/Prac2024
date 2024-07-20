@@ -9,6 +9,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem
 import frc.robot.Constants
+import java.net.CookieStore
 import kotlin.math.abs
 
 object ArmSubsystem : ProfiledPIDSubsystem(
@@ -64,12 +65,11 @@ object ArmSubsystem : ProfiledPIDSubsystem(
         m_pivotMotor.setPosition(-90.0 / 14.7)
     }
 
-    fun shoot(direction: Double) {
-//        println(Dir)
-        if (direction == 0.0) {
+    fun shoot(towardsAmp: Boolean) {
+        if (towardsAmp) {
             m_shootMotor.set(Constants.AmpArm.SHOOT_SPEED)
-        } else if (direction == 1.0) {
-            m_shootMotor.set(-Constants.AmpArm.SHOOT_SPEED)
+        } else {
+            m_shootMotor.set(Constants.AmpArm.HANDOFF_SPEED)
         }
     }
 
