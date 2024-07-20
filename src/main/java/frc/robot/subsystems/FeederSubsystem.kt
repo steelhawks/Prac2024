@@ -9,7 +9,7 @@ object FeederSubsystem : SubsystemBase() {
     private val m_feederMotor: TalonFX = TalonFX(Constants.Shooter.FEEDER_MOTOR_ID, Constants.CANIVORE_NAME)
 
     init {
-        m_feederMotor.setNeutralMode(NeutralModeValue.Brake)
+        m_feederMotor.setNeutralMode(NeutralModeValue.Coast)
     }
 
     fun feedToShooter() {
@@ -22,9 +22,5 @@ object FeederSubsystem : SubsystemBase() {
 
     fun stopFeed() {
         m_feederMotor.stopMotor()
-    }
-
-    fun feedToAmpArm() {
-//        m_feederMotor.set()
     }
 }

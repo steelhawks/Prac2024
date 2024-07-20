@@ -142,6 +142,11 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
         m_bottomShooterMotor.set(Constants.Shooter.BOTTOM_SHOOTER_SPEED)
     }
 
+    fun reverseToIntake() {
+        m_topShooterMotor.set(-Constants.Shooter.TOP_SHOOTER_SPEED / 3)
+        m_bottomShooterMotor.set(-Constants.Shooter.BOTTOM_SHOOTER_SPEED / 3)
+    }
+
     fun shooterLEDCommand(): Command {
         return LEDSubsystem.flashCommand(
             LEDSubsystem.LEDColor.GREEN,

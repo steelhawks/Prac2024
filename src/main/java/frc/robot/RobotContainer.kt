@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.RepeatCommand
+import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
@@ -36,6 +37,12 @@ import frc.robot.subsystems.*
  * directly reference the (single instance of the) object.
  */
 object RobotContainer {
+    enum class RobotState {
+        DISABLED, TELEOP, AUTON, TEST
+    }
+
+    lateinit var robotState: RobotState
+
     var alliance: DriverStation.Alliance? = null
         private set
 
@@ -103,13 +110,14 @@ object RobotContainer {
         manualShooterButton.whileTrue(ManualShotCommand())
 
         driverController.povLeft().whileTrue(ArmShootCommand())
-        driverController.povRight().onTrue(IntakeToArmCommand())
     }
 
     private fun configureOperatorBindings() {
         fireNoteToAmp
             .and { IntakeSubsystem.noteStatus != NoteStatus.ARM }
-            .onTrue(IntakeToArmCommand())
+            .onTrue(
+                IntakeToArmCommand().withTimeout(2.0)
+            )
 
         fireNoteToAmp
             .and { IntakeSubsystem.noteStatus == NoteStatus.ARM }
@@ -127,7 +135,7 @@ object RobotContainer {
             { driverController.leftX },
             { driverController.rightX },
             { true })
-            // idk how this hid.pov thing works
+        // idk how this hid.pov thing works
 //            { driverController.hid.pov == 180 }) // Robot centric boolean
     }
 

@@ -69,6 +69,7 @@ object Robot : TimedRobot()
     /** This method is called once each time the robot enters Disabled mode.  */
     override fun disabledInit()
     {
+        RobotContainer.robotState = RobotContainer.RobotState.DISABLED
         RobotContainer.resetControllerRumble()
     }
 
@@ -83,6 +84,7 @@ object Robot : TimedRobot()
     {
         // We store the command as a Robot property in the rare event that the selector on the dashboard
         // is modified while the command is running since we need to access it again in teleopInit()
+        RobotContainer.robotState = RobotContainer.RobotState.AUTON
         autonomousCommand = Autos.selectedAutonomousCommand
         autonomousCommand.schedule()
     }
@@ -94,6 +96,7 @@ object Robot : TimedRobot()
     {
         // This makes sure that the autonomous stops running when teleop starts running. If you want the
         // autonomous to continue until interrupted by another command, remove this line or comment it out.
+        RobotContainer.robotState = RobotContainer.RobotState.TELEOP
         autonomousCommand.cancel()
     }
 
@@ -103,6 +106,7 @@ object Robot : TimedRobot()
     override fun testInit()
     {
         // Cancels all running commands at the start of test mode.
+        RobotContainer.robotState = RobotContainer.RobotState.TEST
         CommandScheduler.getInstance().cancelAll()
     }
 
