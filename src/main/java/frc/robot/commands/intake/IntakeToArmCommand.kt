@@ -17,15 +17,19 @@ class IntakeToArmCommand : Command() {
     }
 
     override fun initialize() {
-        intakeSubsystem.noteStatus = NoteStatus.INTAKING
+        if (!armSubsystem.armInPosition(ArmSubsystem.Position.HOME)) {
+            armSubsystem.goHome()
+        }
 
+        intakeSubsystem.noteStatus = NoteStatus.INTAKING
         prevBeamBroken = false
     }
 
     override fun execute() {
-        intakeSubsystem.intakeToArm()
-
-        armSubsystem.shoot(false)
+        if (armSubsystem.armInPosition(ArmSubsystem.Position.HOME)) {
+            intakeSubsystem.intakeToArm()
+            armSubsystem.shoot(false)
+        }
 
         if (intakeSubsystem.armBeamBroken) {
             prevBeamBroken = true

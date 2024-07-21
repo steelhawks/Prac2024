@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.RepeatCommand
 import edu.wpi.first.wpilibj2.command.WaitCommand
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
@@ -16,9 +17,11 @@ import frc.robot.commands.TeleopDriveCommand
 import frc.robot.commands.arm.ArmShootInAmpCommand
 import frc.robot.commands.arm.ArmHomePositionCommand
 import frc.robot.commands.arm.ArmShootCommand
+import frc.robot.commands.elevator.ManualElevatorControlCommand
 import frc.robot.commands.intake.IntakeCommand
 import frc.robot.commands.intake.IntakeReverseCommand
 import frc.robot.commands.intake.IntakeToArmCommand
+import frc.robot.commands.led.LEDModeChangedCommand
 import frc.robot.commands.led.LEDNoteToArmCommand
 import frc.robot.commands.shooter.ManualShotCommand
 import frc.robot.commands.shooter.ShooterHomePositionCommand
@@ -40,6 +43,12 @@ object RobotContainer {
     enum class RobotState {
         DISABLED, TELEOP, AUTON, TEST
     }
+
+    enum class ManualMode {
+        LOCKED, UNLOCKED
+    }
+
+    private var elevatorManual = ManualMode.LOCKED
 
     lateinit var robotState: RobotState
 
@@ -99,6 +108,14 @@ object RobotContainer {
      * controllers or [Flight joysticks][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureDriverBindings() {
+        driverController.leftStick().onTrue(InstantCommand({
+            if (elevatorManual == ManualMode.UNLOCKED) {
+                elevatorManual = ManualMode.LOCKED
+            } else {
+                elevatorManual = ManualMode.UNLOCKED
+            }
+        }))
+
         slowModeToggle.whileTrue(InstantCommand({ SwerveSubsystem.toggleSpeedChange() }))
         reverseIntakeButton.whileTrue(IntakeReverseCommand())
         intakeButton.whileTrue(IntakeCommand())
@@ -110,11 +127,17 @@ object RobotContainer {
         manualShooterButton.whileTrue(ManualShotCommand())
 
         driverController.povLeft().whileTrue(ArmShootCommand())
+
+        driverController.povUp()
+            .or(driverController.povDown())
+            .and { elevatorManual == ManualMode.UNLOCKED }
+            .whileTrue(ManualElevatorControlCommand { driverController.hid.pov == 180 })
     }
 
     private fun configureOperatorBindings() {
         fireNoteToAmp
             .and { IntakeSubsystem.noteStatus != NoteStatus.ARM }
+            .and { elevatorManual != ManualMode.UNLOCKED }
             .onTrue(
                 IntakeToArmCommand().withTimeout(2.0)
             )
@@ -130,13 +153,13 @@ object RobotContainer {
         ShooterSubsystem.defaultCommand = ShooterHomePositionCommand()
         ArmSubsystem.defaultCommand = ArmHomePositionCommand()
 
+        ArmSubsystem.removeDefaultCommand()
+
         SwerveSubsystem.defaultCommand = TeleopDriveCommand(
             { driverController.leftY },
             { driverController.leftX },
             { driverController.rightX },
-            { true })
-        // idk how this hid.pov thing works
-//            { driverController.hid.pov == 180 }) // Robot centric boolean
+            { true }) // field relative
     }
 
     private fun configureTriggers() {

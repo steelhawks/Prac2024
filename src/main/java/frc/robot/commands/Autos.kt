@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
-import frc.robot.RobotContainer
 import frc.robot.commands.shooter.ManualShotCommand
 import frc.robot.subsystems.ExampleSubsystem
 
@@ -47,7 +46,6 @@ object Autos
 
     val selectedAutonomousCommand: Command
         get() = AutoMode[getAutonSelector]
-//        get() = autoModeChooser.selected?.command ?: defaultAutonomousCommand
 
     /** Example static factory for an autonomous command.  */
     private fun exampleAuto(): Command =
@@ -57,8 +55,8 @@ object Autos
 
     private fun testAuto(): Command {
         return SequentialCommandGroup(
-            ManualShotCommand(),
-            TeleopDriveCommand({0.0}, {0.0}, {0.2}, { true })
+            ManualShotCommand().withTimeout(2.0),
+            TeleopDriveCommand({0.0}, {0.0}, {0.2}, { true }).withTimeout(5.0)
         )
     }
 
@@ -73,7 +71,6 @@ object Autos
     @Suppress("unused")
     private enum class AutoMode(val optionName: String, val command: Command)
     {
-        // TODO: Replace with real auto modes and their corresponding commands
         CUSTOM_AUTO_1("Custom Auto Mode 1", exampleAuto()),
         CUSTOM_AUTO_2("Custom Auto Mode 2", exampleAuto2()),
         CUSTOM_AUTO_3("Custom Auto Mode 3", ExampleCommand()),

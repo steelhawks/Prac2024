@@ -94,7 +94,7 @@ object ArmSubsystem : ProfiledPIDSubsystem(
         return (angle + 180) % 360 - 180
     }
 
-    val canCoderPositionDegrees: Double
+    private val canCoderPositionDegrees: Double
         get() = ((m_canCoder.absolutePosition.valueAsDouble * 360 + 360) - 63) % 360
 
     override fun periodic() {
@@ -111,6 +111,10 @@ object ArmSubsystem : ProfiledPIDSubsystem(
         setGoal(Position.AMP_SHOOT.rotations)
     }
 
+    fun goToDanglePosition() {
+        setGoal(Position.DANGLE.rotations)
+    }
+
     fun goToReverseIntakePos() {
         setGoal(Position.HOME.rotations + .2)
     }
@@ -122,8 +126,10 @@ object ArmSubsystem : ProfiledPIDSubsystem(
     val inAmpFirePosition
         get() = abs(measurement - Position.AMP_SHOOT.rotations) <= Constants.AmpArm.PIVOT_TOLERANCE * 5
 
-    val danglePosition = InstantCommand({
-    setGoal(Position.DANGLE.rotations)
-        this.enable()
-    }, this)
+    val inDanglePosition
+        get() = abs(measurement - Position.DANGLE.rotations) <= Constants.AmpArm.PIVOT_TOLERANCE * 5
+
+    fun armInPosition(pos: Position): Boolean {
+        return abs(measurement - pos.rotations) <= Constants.AmpArm.PIVOT_TOLERANCE * 5
+    }
 }

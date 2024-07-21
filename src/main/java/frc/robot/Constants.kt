@@ -308,6 +308,35 @@ object Constants {
         const val HANDOFF_SPEED: Double = -0.3
         const val SHOOT_SPEED: Double = 0.8
     }
+
+    object Elevator {
+        const val LEFT_MOTOR_ID: Int = 20
+        const val RIGHT_MOTOR_ID: Int = 21
+
+        const val KS: Double = 0.0
+        const val KG: Double = 0.15
+        const val KV: Double = 2.6
+
+        const val KP: Double = 3.9
+        const val KI: Double = 0.0
+        const val KD: Double = 0.001
+
+        const val K_MAX_VELOCITY_PER_SECOND: Double = 5.2
+        const val K_MAX_ACCELERATION_PER_SEC_SQUARED: Double = 8.0
+
+
+        const val CLIMB_ROTATIONS: Double = 3.0
+        const val AMP_ROTATIONS: Double = 2.3
+        const val HOME_ROTATIONS: Double = 0.0
+        const val TRAP_ROTATIONS: Double = 1.5
+        const val MAX_ROTATIONS: Double = 3.0
+
+        const val LIMIT_SWITCH_LOWER_CHANNEL: Int = 0
+        const val CANCODER_ID: Int = 22
+
+        const val TOLERANCE: Double = 0.005
+        const val MANUAL_ELEVATOR_SPEED: Double = 0.5
+    }
 }
 
 
