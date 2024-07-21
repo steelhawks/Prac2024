@@ -1,27 +1,53 @@
 package frc.robot.commands
 
-import com.pathplanner.lib.commands.PathPlannerAuto
+import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.PrintCommand
-import edu.wpi.first.wpilibj2.command.RepeatCommand
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
+import frc.robot.RobotContainer
 import frc.robot.commands.shooter.ManualShotCommand
 import frc.robot.subsystems.ExampleSubsystem
 
 object Autos
 {
-    private val autoModeChooser = SendableChooser<AutoMode>().apply {
-        AutoMode.values().forEach { addOption(it.optionName, it) }
-        setDefaultOption(AutoMode.default.optionName, AutoMode.default)
-    }
+//    private val autoModeChooser = SendableChooser<AutoMode>().apply {
+//        AutoMode.values().forEach { addOption(it.optionName, it) }
+//        setDefaultOption(AutoMode.default.optionName, AutoMode.default)
+//    }
+
+    private val autonSelector: Array<DigitalInput> = arrayOf(
+        DigitalInput(10),
+        DigitalInput(11),
+        DigitalInput(12),
+        DigitalInput(13),
+        DigitalInput(18),
+        DigitalInput(19),
+        DigitalInput(20),
+        DigitalInput(21),
+        DigitalInput(22),
+        DigitalInput(23),
+        DigitalInput(24)
+    )
+
+    val getAutonSelector: Int
+        get() {
+            for (i in autonSelector.indices) {
+                if (!autonSelector[i].get()) {
+                    return i
+                }
+            }
+
+            return 0
+        }
 
     val defaultAutonomousCommand: Command
         get() = AutoMode.default.command
 
     val selectedAutonomousCommand: Command
-        get() = autoModeChooser.selected?.command ?: defaultAutonomousCommand
+        get() = AutoMode[getAutonSelector]
+//        get() = autoModeChooser.selected?.command ?: defaultAutonomousCommand
 
     /** Example static factory for an autonomous command.  */
     private fun exampleAuto(): Command =
@@ -57,6 +83,20 @@ object Autos
 
         companion object
         {
+            operator fun get(autonSelector: Int): Command {
+                var i = 0
+                for (autoMode in entries) {
+                    if (i != autonSelector) {
+                        i++
+                        continue
+                    } else {
+                        return autoMode.command
+                    }
+                }
+
+                return defaultAutonomousCommand
+            }
+
             /** The default auto mode. */
             val default = CUSTOM_AUTO_4
         }

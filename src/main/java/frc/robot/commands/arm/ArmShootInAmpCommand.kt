@@ -20,14 +20,14 @@ class ArmShootInAmpCommand : Command() {
 
     override fun initialize() {
         noteShot = false
-        armSubsystem.goToHandoff()
+        armSubsystem.goToAmpFirePosition()
         timer.reset()
         timer.stop()
     }
 
     override fun execute() {
-        if (armSubsystem.inHandoffPosition) {
-        armSubsystem.shoot(true)
+        if (armSubsystem.inAmpFirePosition) {
+            armSubsystem.shoot(true)
             if (!timer.hasElapsed(shootTime)) {
                 timer.start()
             }

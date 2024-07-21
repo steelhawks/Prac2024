@@ -64,6 +64,8 @@ object Robot : TimedRobot()
 
 
         SmartDashboard.putString("Note Status", IntakeSubsystem.noteStatus.name)
+        SmartDashboard.putNumber("Auton Selected", Autos.getAutonSelector.toDouble())
+        SmartDashboard.putString("Auton Name", autonomousCommand.name)
     }
 
     /** This method is called once each time the robot enters Disabled mode.  */

@@ -9,7 +9,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem
 import frc.robot.Constants
-import java.net.CookieStore
 import kotlin.math.abs
 
 object ArmSubsystem : ProfiledPIDSubsystem(
@@ -29,7 +28,7 @@ object ArmSubsystem : ProfiledPIDSubsystem(
     enum class Position(val rotations: Double) {
         HOME(Constants.AmpArm.HOME_POSITION),
         DANGLE(Constants.AmpArm.DANGLE_POSITION),
-        HANDOFF(Constants.AmpArm.HANDOFF_SPEED),
+        HANDOFF(Constants.AmpArm.HAND_OFF_POSITION),
         AMP_SLAM(Constants.AmpArm.AMP_SLAM_POSITION),
         AMP_SHOOT(Constants.AmpArm.AMP_SHOOT_POSITION),
         CLIMB_POSITION(Constants.AmpArm.CLIMB_IDLE_POSITION),
@@ -73,6 +72,10 @@ object ArmSubsystem : ProfiledPIDSubsystem(
         }
     }
 
+    fun reverseToIntake() {
+        m_shootMotor.set(-Constants.AmpArm.HANDOFF_SPEED)
+    }
+
     fun stopShooter() {
         m_shootMotor.stopMotor()
     }
@@ -104,16 +107,20 @@ object ArmSubsystem : ProfiledPIDSubsystem(
         setGoal(Position.HOME.rotations)
     }
 
-    fun goToHandoff() {
-        setGoal(Position.HANDOFF.rotations)
+    fun goToAmpFirePosition() {
+        setGoal(Position.AMP_SHOOT.rotations)
+    }
+
+    fun goToReverseIntakePos() {
+        setGoal(Position.HOME.rotations + .2)
     }
 
     fun stopArm() {
         m_pivotMotor.stopMotor()
     }
 
-    val inHandoffPosition
-        get() = abs(measurement - Position.HANDOFF.rotations) <= Constants.AmpArm.PIVOT_TOLERANCE * 5
+    val inAmpFirePosition
+        get() = abs(measurement - Position.AMP_SHOOT.rotations) <= Constants.AmpArm.PIVOT_TOLERANCE * 5
 
     val danglePosition = InstantCommand({
     setGoal(Position.DANGLE.rotations)
