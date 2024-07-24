@@ -60,6 +60,13 @@ object Autos
         )
     }
 
+    private fun testAutoShootThenMoveForward(): Command {
+        return SequentialCommandGroup(
+            ManualShotCommand().withTimeout(1.0),
+            TeleopDriveCommand({.2}, {0.0}, {0.0}, { true }).withTimeout(1.0)
+        )
+    }
+
     /**
      * An enumeration of the available autonomous modes. It provides an easy
      * way to manage all our autonomous modes. The [autoModeChooser] iterates
@@ -75,7 +82,7 @@ object Autos
         CUSTOM_AUTO_2("Custom Auto Mode 2", exampleAuto2()),
         CUSTOM_AUTO_3("Custom Auto Mode 3", ExampleCommand()),
         CUSTOM_AUTO_4("Custom Auto Mode 4", testAuto()),
-//        PATH_PLANNER_AUTO_4("Path Planner 4", PathPlannerAuto("Test")),
+        CUSTOM_AUTO_5("Custom Auto Mode 5", testAutoShootThenMoveForward())
         ;
 
         companion object

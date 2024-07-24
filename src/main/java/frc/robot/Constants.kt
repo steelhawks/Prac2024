@@ -197,6 +197,8 @@ object Constants {
         const val PIVOT_KI: Double = 0.0
         const val PIVOT_KD: Double = 0.0
 
+        const val PIVOT_TOLERANCE: Double = 0.01
+
         const val TOP_SHOOTER_KS: Double = 0.19655
         const val TOP_SHOOTER_KV: Double = 0.00212586
         const val TOP_SHOOTER_KA: Double = 0.00025997

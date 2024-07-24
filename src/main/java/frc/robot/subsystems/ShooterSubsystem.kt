@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem
 import frc.lib.util.COTSTalonFXSwerveConstants
 import frc.robot.Constants
+import kotlin.math.abs
 
 object ShooterSubsystem : ProfiledPIDSubsystem(
     ProfiledPIDController(
@@ -142,6 +143,17 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
         m_bottomShooterMotor.set(Constants.Shooter.BOTTOM_SHOOTER_SPEED)
     }
 
+    fun rampShooter(topRPM: Double, bottomRPM: Double) {
+        val topFeedforward = topShooterFeedForward.calculate(topRPM)
+        val bottomFeedforward = bottomShooterFeedForward.calculate(bottomRPM)
+
+        val topPID = topShooterPIDController.calculate(shooterTopRPM, topRPM)
+        val bottomPID = bottomShooterPIDController.calculate(shooterBottomRPM, bottomRPM)
+
+        m_topShooterMotor.setVoltage(topPID + topFeedforward)
+        m_bottomShooterMotor.setVoltage(bottomPID + bottomFeedforward)
+    }
+
     fun reverseToIntake() {
         m_topShooterMotor.set(-Constants.Shooter.TOP_SHOOTER_SPEED / 3)
         m_bottomShooterMotor.set(-Constants.Shooter.BOTTOM_SHOOTER_SPEED / 3)
@@ -149,11 +161,30 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
 
     fun shooterLEDCommand(): Command {
         return LEDSubsystem.flashCommand(
-            LEDSubsystem.LEDColor.GREEN,
-            0.05,
+            LEDSubsystem.LEDColor.PURPLE,
+            0.1,
             2.0
         )
     }
+
+    private val shooterTopRPM: Double
+        get() = m_topShooterMotor.velocity.value * 60
+
+    private val shooterBottomRPM: Double
+        get() = m_bottomShooterMotor.velocity.value * 60
+
+    private val pivotAtSetpoint: Boolean
+        get() = abs(measurement - controller.goal.position) <= Constants.Shooter.PIVOT_TOLERANCE * 1.5
+
+    private val topShooterAtSetpoint: Boolean
+        get() = abs((shooterTopRPM - topShooterPIDController.setpoint)) <= Constants.Shooter.SHOOTER_TOLERANCE * 1.5
+
+    private val bottomShooterAtSetpoint: Boolean
+        get() = abs((shooterBottomRPM - bottomShooterPIDController.setpoint)) <= Constants.Shooter.SHOOTER_TOLERANCE * 1.5
+
+    val isReadyToShoot: Boolean
+        get() = topShooterAtSetpoint && bottomShooterAtSetpoint && pivotAtSetpoint
+
 
     override fun periodic() {
         if (m_enabled) {

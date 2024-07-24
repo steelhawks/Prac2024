@@ -2,12 +2,9 @@ package frc.robot
 
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID
-import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.RepeatCommand
-import edu.wpi.first.wpilibj2.command.WaitCommand
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
@@ -21,10 +18,8 @@ import frc.robot.commands.elevator.ManualElevatorControlCommand
 import frc.robot.commands.intake.IntakeCommand
 import frc.robot.commands.intake.IntakeReverseCommand
 import frc.robot.commands.intake.IntakeToArmCommand
-import frc.robot.commands.led.LEDModeChangedCommand
 import frc.robot.commands.led.LEDNoteToArmCommand
-import frc.robot.commands.shooter.ManualShotCommand
-import frc.robot.commands.shooter.ShooterHomePositionCommand
+import frc.robot.commands.shooter.*
 import frc.robot.subsystems.*
 
 
@@ -132,6 +127,8 @@ object RobotContainer {
             .or(driverController.povDown())
             .and { elevatorManual == ManualMode.UNLOCKED }
             .whileTrue(ManualElevatorControlCommand { driverController.hid.pov == 180 })
+
+        driverController.leftTrigger().whileTrue(FerryShot())
     }
 
     private fun configureOperatorBindings() {
@@ -147,6 +144,18 @@ object RobotContainer {
             .onTrue(
                 ArmShootInAmpCommand()
             )
+
+        operatorController.leftBumper().whileTrue(
+            RampShooter(
+                2000.0,
+                2000.0,
+                0.6
+            )
+        )
+
+        operatorController.leftBumper().whileTrue(
+            AmpShot()
+        )
     }
 
     private fun configureDefaultCommands() {
