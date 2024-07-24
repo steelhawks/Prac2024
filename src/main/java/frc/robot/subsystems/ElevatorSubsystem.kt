@@ -11,8 +11,9 @@ import edu.wpi.first.math.controller.ElevatorFeedforward
 import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj.DigitalInput
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem
+import edu.wpi.first.wpilibj2.command.*
 import frc.robot.Constants
 
 object ElevatorSubsystem : ProfiledPIDSubsystem(
@@ -38,7 +39,9 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
     private val elevatorRight = TalonFX(Constants.Elevator.RIGHT_MOTOR_ID, Constants.CANIVORE_NAME)
 
     private val lowerLimitSwitch = DigitalInput(Constants.Elevator.LIMIT_SWITCH_LOWER_CHANNEL)
-    private val canCoder = CANcoder(Constants.Elevator.CANCODER_ID)
+    private val canCoder = CANcoder(Constants.Elevator.CANCODER_ID, Constants.CANIVORE_NAME)
+    private val initialValue = canCoder.position.value
+
 
     private val feedforward = ElevatorFeedforward(Constants.Elevator.KS, Constants.Elevator.KG, Constants.Elevator.KV)
 
@@ -47,7 +50,12 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
         canCoder.configurator.apply(CANcoderConfiguration().withMagnetSensor(MagnetSensorConfigs().withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)))
 
         configureMotors()
-        resetCANCoder()
+
+        if (atElevatorMin) {
+            resetCANCoder()
+        } else {
+            DriverStation.reportWarning("ELEVATOR IS NOT AT MINIMUM... DO NOT MOVE", false)
+        }
 
         enable()
     }
@@ -60,24 +68,34 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
         elevatorRight.inverted = true
     }
 
+
+    // manual control by straight calling this doesnt work because of the pid
+    // to make this work make a command that disables the pid controller then uses this.
     fun controlElevator(isDown: Boolean) {
         var speed = Constants.Elevator.MANUAL_ELEVATOR_SPEED
-        if (isDown) {
-            if (atElevatorMin) {
-                stopElevator()
-                return
-            }
-        } else {
-            if (atElevatorMax) {
-                stopElevator()
-                return
-            }
 
+        if (atElevatorMin || atElevatorMax) {
+            stopElevator()
+            return
+        }
+
+        if (!isDown) {
             speed = -speed
         }
 
         elevatorLeft.set(speed)
         elevatorRight.set(speed)
+    }
+
+    fun getHomeCommand(): Command {
+        return Commands.runOnce({this::disable})
+            .andThen({
+                Commands.run({
+                    controlElevator(true)
+                }, this)
+            }).until(this::atElevatorMin)
+            .andThen(Commands.runOnce(this::stopElevator))
+            .andThen(Commands.runOnce(this::enable))
     }
 
     fun goHome() {
@@ -89,11 +107,11 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
         elevatorRight.stopMotor()
     }
 
-    fun resetCANCoder() {
+    private fun resetCANCoder() {
         canCoder.setPosition(0.0)
     }
 
-    private val atElevatorMax: Boolean
+    val atElevatorMax: Boolean
         get() = measurement >= Constants.Elevator.MAX_ROTATIONS
 
     val atElevatorMin: Boolean
@@ -118,9 +136,16 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
 
     override fun getMeasurement(): Double = canCoder.position.value
 
+    fun getAmpCommand() {
+        setGoal(ElevatorLevel.AMP.rotations)
+    }
+
     override fun periodic() {
         if (m_enabled) {
             useOutput(m_controller.calculate(measurement), m_controller.setpoint)
         }
+
+        SmartDashboard.putBoolean("elevator/lower limit hit", atElevatorMin)
+        SmartDashboard.putNumber("elevator/rotations", measurement)
     }
 }

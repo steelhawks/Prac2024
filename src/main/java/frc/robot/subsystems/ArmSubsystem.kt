@@ -107,16 +107,12 @@ object ArmSubsystem : ProfiledPIDSubsystem(
         setGoal(Position.HOME.rotations)
     }
 
-    fun goToAmpFirePosition() {
-        setGoal(Position.AMP_SHOOT.rotations)
-    }
-
-    fun goToDanglePosition() {
+    fun goToDangle() {
         setGoal(Position.DANGLE.rotations)
     }
 
-    fun goToReverseIntakePos() {
-        setGoal(Position.HOME.rotations + .2)
+    fun goToAmpFirePosition() {
+        setGoal(Position.AMP_SHOOT.rotations)
     }
 
     fun stopArm() {

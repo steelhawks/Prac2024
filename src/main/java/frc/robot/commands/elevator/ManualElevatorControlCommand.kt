@@ -15,7 +15,7 @@ class ManualElevatorControlCommand(private val isDown: () -> Boolean) : Command(
     }
 
     override fun initialize() {
-        armSubsystem.goToDanglePosition()
+        armSubsystem.goToDangle()
     }
 
     override fun execute() {

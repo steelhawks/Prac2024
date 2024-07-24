@@ -2,6 +2,7 @@ package frc.robot
 
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.RepeatCommand
@@ -15,7 +16,6 @@ import frc.robot.commands.led.LEDIdleCommand
 import frc.robot.commands.led.LEDNoteIntakenCommand
 import frc.robot.commands.TeleopDriveCommand
 import frc.robot.commands.arm.ArmShootInAmpCommand
-import frc.robot.commands.arm.ArmHomePositionCommand
 import frc.robot.commands.arm.ArmShootCommand
 import frc.robot.commands.elevator.ManualElevatorControlCommand
 import frc.robot.commands.intake.IntakeCommand
@@ -109,10 +109,10 @@ object RobotContainer {
      */
     private fun configureDriverBindings() {
         driverController.leftStick().onTrue(InstantCommand({
-            if (elevatorManual == ManualMode.UNLOCKED) {
-                elevatorManual = ManualMode.LOCKED
+            elevatorManual = if (elevatorManual == ManualMode.UNLOCKED) {
+                ManualMode.LOCKED
             } else {
-                elevatorManual = ManualMode.UNLOCKED
+                ManualMode.UNLOCKED
             }
         }))
 
@@ -137,7 +137,7 @@ object RobotContainer {
     private fun configureOperatorBindings() {
         fireNoteToAmp
             .and { IntakeSubsystem.noteStatus != NoteStatus.ARM }
-            .and { elevatorManual != ManualMode.UNLOCKED }
+            .and { ElevatorSubsystem.atElevatorMin }
             .onTrue(
                 IntakeToArmCommand().withTimeout(2.0)
             )
@@ -150,10 +150,15 @@ object RobotContainer {
     }
 
     private fun configureDefaultCommands() {
-        ShooterSubsystem.defaultCommand = ShooterHomePositionCommand()
-        ArmSubsystem.defaultCommand = ArmHomePositionCommand()
+        ArmSubsystem.goToDangle()
 
-        ArmSubsystem.removeDefaultCommand()
+        ShooterSubsystem.defaultCommand = ShooterHomePositionCommand()
+
+        if (ElevatorSubsystem.atElevatorMin) {
+            println("Elevator good and can reset");
+        } else {
+            DriverStation.reportWarning("ELEVATOR IS NOT RESET... Resetting to Home Now", false)
+        }
 
         SwerveSubsystem.defaultCommand = TeleopDriveCommand(
             { driverController.leftY },
