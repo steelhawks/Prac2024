@@ -146,20 +146,16 @@ object RobotContainer {
             )
 
         operatorController.leftBumper().whileTrue(
-            RampShooter(
-                2000.0,
-                2000.0,
-                0.6
-            )
+            SubwooferShot()
         )
 
-        operatorController.leftBumper().whileTrue(
-            AmpShot()
+        operatorController.rightBumper().whileTrue(
+            PodiumShot()
         )
     }
 
     private fun configureDefaultCommands() {
-        ArmSubsystem.goToDangle()
+        ArmSubsystem.goHome()
 
         ShooterSubsystem.defaultCommand = ShooterHomePositionCommand()
 
@@ -211,14 +207,37 @@ object RobotContainer {
                 LEDNoteToArmCommand(LEDSubsystem.LEDColor.PURPLE)
             )
 
+//        Trigger {
+//            ShooterSubsystem.firing
+//        }
+//            .whileTrue(
+//                RepeatCommand(
+//                    ShooterSubsystem.shooterLEDCommand()
+//                )
+//            )
+
         Trigger {
-            ShooterSubsystem.firing
-        }
-            .whileTrue(
+            ShooterSubsystem.isReadyToShoot
+        }.and(driverController.leftTrigger()
+            .or(operatorController.leftBumper())
+            .or(operatorController.rightBumper())
+            .or(operatorController.leftTrigger())
+            .or(operatorController.rightTrigger()))
+            .onTrue(
                 RepeatCommand(
                     ShooterSubsystem.shooterLEDCommand()
+                ).withTimeout(2.0)
+                    .deadlineWith(
+                    Commands.run({
+                        driverController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 1.0)
+                        operatorController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 1.0)
+                    })
                 )
             )
+            .onFalse(Commands.run({
+                driverController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 0.0)
+                operatorController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 0.0)
+            }))
     }
 
     fun resetControllerRumble() {

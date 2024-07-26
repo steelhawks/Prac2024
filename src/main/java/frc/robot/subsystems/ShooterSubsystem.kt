@@ -196,5 +196,9 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
         SmartDashboard.putNumber("shooter/pivot voltage", m_pivotMotor.motorVoltage.valueAsDouble)
 
         SmartDashboard.putBoolean("shooter/is moving", firing)
+        SmartDashboard.putBoolean("shooter/is ready to shoot", isReadyToShoot)
+        SmartDashboard.putBoolean("shooter/at pivot setpoint", pivotAtSetpoint)
+        SmartDashboard.putBoolean("shooter/top shooter at setpoint", topShooterAtSetpoint)
+        SmartDashboard.putBoolean("shooter/bottom shooter at setpoint", bottomShooterAtSetpoint)
     }
 }

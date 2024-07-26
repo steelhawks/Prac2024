@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.AddressableLEDBuffer
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.*
 import frc.robot.Constants
-import java.time.Instant
 
 
 object LEDSubsystem : SubsystemBase() {
@@ -21,8 +20,8 @@ object LEDSubsystem : SubsystemBase() {
     private var bounceWaveDirection = BounceWaveDirection.FORWARD
     private var _currentColor = LEDColor.OFF
 
-    private const val waveLength = 6
-    private const val bounceWaveLength = 6
+    private const val WAVE_LENGTH = 6
+    private const val BOUNCE_WAVE_LENGTH = 6
 
     private var fadeMultiplier = 0.0
     private var fadeDirection = FadeDirection.IN
@@ -95,8 +94,8 @@ object LEDSubsystem : SubsystemBase() {
 
     fun wave(color: LEDColor) {
         for (i in 0 until stripLength!!) {
-            if ((i >= waveIndex && i < waveIndex + waveLength)
-                || (waveIndex + waveLength > stripLength!! && i < (waveIndex + waveLength) % stripLength!!)
+            if ((i >= waveIndex && i < waveIndex + WAVE_LENGTH)
+                || (waveIndex + WAVE_LENGTH > stripLength!! && i < (waveIndex + WAVE_LENGTH) % stripLength!!)
             ) {
                 LEDBuffer.setRGB(i, color.r, color.g, color.b)
                 LEDBuffer.setRGB(i + stripStart!!, color.r, color.g, color.b)
@@ -115,7 +114,7 @@ object LEDSubsystem : SubsystemBase() {
 
     fun bounceWave(color: LEDColor) {
         for (i in 0 until stripLength!!) {
-            if (i >= bounceWaveIndex && i < bounceWaveIndex + bounceWaveLength) {
+            if (i >= bounceWaveIndex && i < bounceWaveIndex + BOUNCE_WAVE_LENGTH) {
                 LEDBuffer.setRGB(i, color.r, color.g, color.b)
                 LEDBuffer.setRGB(i + stripStart!!, color.r, color.g, color.b)
             } else {
@@ -126,7 +125,7 @@ object LEDSubsystem : SubsystemBase() {
 
         if (bounceWaveIndex == 0) {
             bounceWaveDirection = BounceWaveDirection.FORWARD
-        } else if (bounceWaveIndex == LEDBuffer.length - bounceWaveLength) {
+        } else if (bounceWaveIndex == LEDBuffer.length - BOUNCE_WAVE_LENGTH) {
             bounceWaveDirection = BounceWaveDirection.BACKWARD
         }
 
