@@ -1,5 +1,6 @@
 package frc.robot
 
+import com.pathplanner.lib.commands.FollowPathCommand
 import edu.wpi.first.hal.FRCNetComm.tInstances
 import edu.wpi.first.hal.FRCNetComm.tResourceType
 import edu.wpi.first.hal.HAL
@@ -45,6 +46,8 @@ object Robot : TimedRobot()
         // button bindings, and put our autonomous chooser on the dashboard.
         DriverStation.silenceJoystickConnectionWarning(true)
         RobotContainer.resetControllerRumble()
+
+//        FollowPathCommand.warmupCommand().schedule();
     }
 
     /**

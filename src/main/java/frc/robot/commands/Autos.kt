@@ -1,5 +1,7 @@
 package frc.robot.commands
 
+import com.pathplanner.lib.auto.AutoBuilder
+import com.pathplanner.lib.path.PathPlannerPath
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
@@ -82,7 +84,8 @@ object Autos
         CUSTOM_AUTO_2("Custom Auto Mode 2", exampleAuto2()),
         CUSTOM_AUTO_3("Custom Auto Mode 3", ExampleCommand()),
         CUSTOM_AUTO_4("Custom Auto Mode 4", testAuto()),
-        CUSTOM_AUTO_5("Custom Auto Mode 5", testAutoShootThenMoveForward())
+        CUSTOM_AUTO_5("Custom Auto Mode 5", testAutoShootThenMoveForward()),
+        PATHPLANNER_AUTO_1("Path Planner 1", AutoBuilder.followPath(PathPlannerPath.fromPathFile("Test Path")))
         ;
 
         companion object

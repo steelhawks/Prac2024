@@ -23,7 +23,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -38,7 +37,6 @@ import frc.robot.Constants.PoseConfig
 import frc.robot.RobotContainer
 import frc.robot.utils.SwerveModuleConstants
 import java.util.*
-import java.util.function.BooleanSupplier
 import kotlin.math.atan
 import kotlin.math.sqrt
 
@@ -183,35 +181,35 @@ object SwerveSubsystem : SubsystemBase() {
         alignPID.enableContinuousInput(0.0, 360.0)
         alignPID.setTolerance(1.0)
 
-//        AutoBuilder.configureHolonomic(
-//            this::getPose,
-//            this::setPose,
-//            this::robotRelativeSpeeds,
-//            this::driveRobotRelative,
-//            HolonomicPathFollowerConfig(
-//                PIDConstants(
-//                    Constants.AutonConstants.TRANSLATION_KP,
-//                    Constants.AutonConstants.TRANSLATION_KI,
-//                    Constants.AutonConstants.TRANSLATION_KD,
-//                ),
-//                PIDConstants(
-//                    Constants.AutonConstants.ROTATION_KP,
-//                    Constants.AutonConstants.ROTATION_KI,
-//                    Constants.AutonConstants.ROTATION_KD
-//                ),
-//                4.3,
-//                Constants.Swerve.TRACK_WIDTH / sqrt(2.0),
-//                ReplanningConfig()
-//            ),
-//            {
-//                val alliance = DriverStation.getAlliance()
-//                if (alliance.isPresent) {
-//                    return@configureHolonomic alliance.get() == DriverStation.Alliance.Red
-//                }
-//                return@configureHolonomic false
-//            },
-//            this
-//        )
+        AutoBuilder.configureHolonomic(
+            this::getPose,
+            this::setPose,
+            this::robotRelativeSpeeds,
+            this::driveRobotRelative,
+            HolonomicPathFollowerConfig(
+                PIDConstants(
+                    Constants.AutonConstants.TRANSLATION_KP,
+                    Constants.AutonConstants.TRANSLATION_KI,
+                    Constants.AutonConstants.TRANSLATION_KD,
+                ),
+                PIDConstants(
+                    Constants.AutonConstants.ROTATION_KP,
+                    Constants.AutonConstants.ROTATION_KI,
+                    Constants.AutonConstants.ROTATION_KD
+                ),
+                4.3,
+                Constants.Swerve.TRACK_WIDTH / sqrt(2.0),
+                ReplanningConfig()
+            ),
+            {
+                val alliance = DriverStation.getAlliance()
+                if (alliance.isPresent) {
+                    return@configureHolonomic alliance.get() == DriverStation.Alliance.Red
+                }
+                return@configureHolonomic false
+            },
+            this
+        )
     }
 
     private fun resetModulesToAbsolute() {
@@ -347,21 +345,28 @@ object SwerveSubsystem : SubsystemBase() {
             return positions
         }
 
-    val moduleStates: Array<SwerveModuleState>
+    private val moduleStates: Array<SwerveModuleState>
         get() {
-            val states = Array(4) { SwerveModuleState() }
+            val states = Array(m_swerveModules.size) { SwerveModuleState() }
             for (mod in m_swerveModules) {
                 states[mod.swerveModuleNumber] = mod.currentState
             }
             return states
         }
 
-//    val robotRelativeSpeeds: ChassisSpeeds
-//        get() {
-//            return Constants.Swerve.SWERVE_KINEMATICS.toChassisSpeeds(moduleStates)
-//        }
+    private val robotRelativeSpeeds: ChassisSpeeds
+        get() {
+            return Constants.Swerve.SWERVE_KINEMATICS.toChassisSpeeds(*moduleStates) // use * spread operator to spread the array of swerve states
+            // from the module states getter instead of just passing an array
+//            return Constants.Swerve.SWERVE_KINEMATICS.toChassisSpeeds(
+//                m_swerveModules[0].currentState,
+//                m_swerveModules[1].currentState,
+//                m_swerveModules[2].currentState,
+//                m_swerveModules[3].currentState
+//            )
+        }
 
-    fun driveRobotRelative(chassisSpeeds: ChassisSpeeds?) {
+    private fun driveRobotRelative(chassisSpeeds: ChassisSpeeds?) {
         val swerveModuleStates: Array<SwerveModuleState> =
             Constants.Swerve.SWERVE_KINEMATICS.toSwerveModuleStates(chassisSpeeds)
 
