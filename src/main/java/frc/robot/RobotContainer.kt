@@ -70,10 +70,9 @@ object RobotContainer {
     // this thread should run ONCE
     private val valueGetter = Thread {
         while (!DriverStation.isDSAttached()) {
-            println("Driver Station not attached")
-            DriverStation.reportWarning("attaching DS...", false)
+            DriverStation.reportWarning("Attaching DS...", false)
         }
-        DriverStation.reportWarning("DS attached", false)
+        DriverStation.reportWarning("DS Attached", false)
 
         alliance = DriverStation.getAlliance().get()
 
@@ -155,21 +154,20 @@ object RobotContainer {
     }
 
     private fun configureDefaultCommands() {
-        ArmSubsystem.goHome()
-
         ShooterSubsystem.defaultCommand = ShooterHomePositionCommand()
-
-        if (ElevatorSubsystem.atElevatorMin) {
-            println("Elevator good and can reset");
-        } else {
-            DriverStation.reportWarning("ELEVATOR IS NOT RESET... Resetting to Home Now", false)
-        }
-
         SwerveSubsystem.defaultCommand = TeleopDriveCommand(
             { driverController.leftY },
             { driverController.leftX },
             { driverController.rightX },
             { true }) // field relative
+
+        if (ElevatorSubsystem.atElevatorMin) {
+            println("Elevator good and can reset");
+            ArmSubsystem.goHome()
+        } else {
+            DriverStation.reportWarning("ELEVATOR IS NOT RESET... Resetting to Home Now", false)
+            ArmSubsystem.goToDangle()
+        }
     }
 
     private fun configureTriggers() {
@@ -227,8 +225,7 @@ object RobotContainer {
                 RepeatCommand(
                     ShooterSubsystem.shooterLEDCommand()
                 ).withTimeout(2.0)
-                    .deadlineWith(
-                    Commands.run({
+                    .deadlineWith(Commands.run({
                         driverController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 1.0)
                         operatorController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 1.0)
                     })

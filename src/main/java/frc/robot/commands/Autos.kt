@@ -49,6 +49,9 @@ object Autos
     val selectedAutonomousCommand: Command
         get() = AutoMode[getAutonSelector]
 
+    val selectedAutonomousCommandName: String
+        get() = AutoMode.entries[getAutonSelector].toString()
+
     /** Example static factory for an autonomous command.  */
     private fun exampleAuto(): Command =
         Commands.sequence(ExampleSubsystem.exampleMethodCommand(), ExampleCommand())

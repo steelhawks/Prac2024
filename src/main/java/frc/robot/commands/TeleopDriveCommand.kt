@@ -35,7 +35,7 @@ class TeleopDriveCommand(
 
         SwerveSubsystem.alignPID.setSetpoint(setpoint)
 
-        return (if (SwerveSubsystem.isLowGear()) 5 else 1) * SwerveSubsystem.alignPID
+        return (if (SwerveSubsystem.isLowGear) 5 else 1) * SwerveSubsystem.alignPID
             .calculate(continuous180To360(SwerveSubsystem.heading.degrees))
     }
 
@@ -58,7 +58,6 @@ class TeleopDriveCommand(
             fieldRelative,
             true
         )
-//        println("Executing TeleopDriveCommand with ChassisSpeeds: vx=${newDesiredSpeeds.vxMetersPerSecond}, vy=${newDesiredSpeeds.vyMetersPerSecond}, omega=${newDesiredSpeeds.omegaRadiansPerSecond}")
     }
 
     override fun isFinished(): Boolean = false

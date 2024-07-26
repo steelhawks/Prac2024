@@ -213,9 +213,10 @@ object SwerveSubsystem : SubsystemBase() {
     }
 
     private fun resetModulesToAbsolute() {
-        for (mod in m_swerveModules) {
-            mod.resetToAbsolute()
-        }
+        m_swerveModules.forEach { it.resetToAbsolute() }
+//        for (mod in m_swerveModules) {
+//            mod.resetToAbsolute()
+//        }
     }
 
     fun initializePoseEstimator() {
@@ -250,12 +251,6 @@ object SwerveSubsystem : SubsystemBase() {
 
     fun toggleSpeedChange() {
         speedMultiplier = if (speedMultiplier == 1.0) 0.2 else 1.0
-//        speedMultiplier = if (speedMultiplier == .5) 0.1 else .5
-//        speedMultiplier = .1
-    }
-
-    fun isLowGear(): Boolean {
-        return speedMultiplier == 0.2
     }
 
     fun calculateTurnAngle(target: Pose2d, robotAngle: Double): Double {
@@ -329,6 +324,9 @@ object SwerveSubsystem : SubsystemBase() {
         }
         poseEstimator?.resetPosition(gyroYaw, modulePositions, zeroPose)
     }
+
+    val isLowGear
+        get() = speedMultiplier == 0.2
 
     val heading: Rotation2d
         get() = getRelativePose().rotation

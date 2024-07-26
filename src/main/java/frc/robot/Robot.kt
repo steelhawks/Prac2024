@@ -1,11 +1,10 @@
 package frc.robot
 
-import com.pathplanner.lib.commands.FollowPathCommand
 import edu.wpi.first.hal.FRCNetComm.tInstances
 import edu.wpi.first.hal.FRCNetComm.tResourceType
 import edu.wpi.first.hal.HAL
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.TimedRobot
+import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj.util.WPILibVersion
 import edu.wpi.first.wpilibj2.command.Command
@@ -13,6 +12,12 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.robot.commands.Autos
 import frc.robot.subsystems.IntakeSubsystem
 import frc.robot.subsystems.LEDSubsystem
+import org.littletonrobotics.junction.LogFileUtil
+import org.littletonrobotics.junction.LoggedRobot
+import org.littletonrobotics.junction.Logger
+import org.littletonrobotics.junction.networktables.NT4Publisher
+import org.littletonrobotics.junction.wpilog.WPILOGReader
+import org.littletonrobotics.junction.wpilog.WPILOGWriter
 
 /**
  * The VM is configured to automatically run this object (which basically functions as a singleton class),
@@ -24,7 +29,7 @@ import frc.robot.subsystems.LEDSubsystem
  * the `Main.kt` file in the project. (If you use the IDE's Rename or Move refactorings when renaming the
  * object or package, it will get changed everywhere.)
  */
-object Robot : TimedRobot()
+object Robot : LoggedRobot()
 {
     /**
      * The autonomous command to run. While a default value is set here,
@@ -40,6 +45,30 @@ object Robot : TimedRobot()
      */
     override fun robotInit()
     {
+        Logger.recordMetadata("Crescendo", "Hawk Rider Off-season")
+        if (isReal()) {
+            Logger.addDataReceiver(NT4Publisher())
+            PowerDistribution(1, PowerDistribution.ModuleType.kRev)
+        } else {
+            setUseTiming(false)
+            try {
+                val logPath: String = LogFileUtil.findReplayLog()
+                Logger.setReplaySource(WPILOGReader(logPath))
+                Logger.addDataReceiver(
+                    WPILOGWriter(
+                        LogFileUtil.addPathSuffix(
+                            logPath,
+                            "_sim"
+                        )
+                    )
+                ) // Save outputs to a new log
+            } catch (e: Exception) {
+                DriverStation.reportWarning("Error with loading log " + e.message, true)
+            }
+        }
+
+        Logger.start()
+
         // Report the use of the Kotlin Language for "FRC Usage Report" statistics
         HAL.report(tResourceType.kResourceType_Language, tInstances.kLanguage_Kotlin, 0, WPILibVersion.Version)
         // Access the RobotContainer object so that it is initialized. This will perform all our
@@ -68,7 +97,7 @@ object Robot : TimedRobot()
 
         SmartDashboard.putString("Note Status", IntakeSubsystem.noteStatus.name)
         SmartDashboard.putNumber("Auton Selected", Autos.getAutonSelector.toDouble())
-        SmartDashboard.putString("Auton Name", autonomousCommand.name)
+        SmartDashboard.putString("Auton Name", Autos.selectedAutonomousCommandName)
     }
 
     /** This method is called once each time the robot enters Disabled mode.  */
