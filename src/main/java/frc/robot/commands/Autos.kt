@@ -8,10 +8,37 @@ import edu.wpi.first.wpilibj2.command.*
 import frc.robot.commands.intake.IntakeCommand
 import frc.robot.commands.shooter.ManualShotCommand
 import frc.robot.commands.shooter.SubwooferShot
+import frc.robot.subsystems.FeederSubsystem
+import frc.robot.subsystems.IntakeSubsystem
 import frc.robot.subsystems.ShooterSubsystem
 
 object Autos
 {
+    /** The commands used by PathPlanner */
+
+    fun configureNamedCommands() {
+        NamedCommands.registerCommand("intake", IntakeCommand())
+
+        NamedCommands.registerCommand("subwoofer shot",
+            ParallelRaceGroup(
+                WaitCommand(2.0),
+                ParallelDeadlineGroup(
+                    SequentialCommandGroup(
+                        WaitUntilCommand(ShooterSubsystem::isReadyToShoot),
+                        ParallelDeadlineGroup(
+                            WaitCommand(.3),
+                            ParallelCommandGroup(
+                                FeedToShooter(),
+                                ForkCommand(IntakeSubsystem.IntakeDirection.TO_INTAKE)
+                            )
+                        )
+                    ),
+                    SubwooferShot()
+                )
+            )
+        )
+    }
+
     private val autonSelector: Array<DigitalInput> = arrayOf(
         DigitalInput(10),
         DigitalInput(11),

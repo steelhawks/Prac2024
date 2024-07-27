@@ -3,7 +3,7 @@ package frc.robot.commands
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.FeederSubsystem
 
-class FeederTestCommand : Command() {
+class FeedToShooter : Command() {
     private val feederSubsystem = FeederSubsystem
 
 
