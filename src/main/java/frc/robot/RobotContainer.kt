@@ -1,9 +1,11 @@
 package frc.robot
 
+import com.pathplanner.lib.auto.NamedCommands
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup
 import edu.wpi.first.wpilibj2.command.RepeatCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
@@ -44,6 +46,8 @@ object RobotContainer {
     }
 
     private var elevatorManual = ManualMode.LOCKED
+    private var shooterManual = ManualMode.LOCKED
+    private var armManual = ManualMode.LOCKED
 
     lateinit var robotState: RobotState
 
@@ -52,20 +56,27 @@ object RobotContainer {
 
     // driver controller and triggers
     private val driverController = CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT)
+    private val driverModifierKey = driverController.povRight()
 
     private val slowModeToggle = driverController.rightTrigger()
-    private val reverseIntakeButton = driverController.leftBumper()
     private val intakeButton = driverController.rightBumper()
+    private val reverseIntakeButton = driverController.rightBumper().and(driverModifierKey)
     private val resetHeading = driverController.b()
-
-    // test triggers
-    private val manualShooterButton = driverController.x()
+    private val unlockElevatorControl = driverController.leftStick()
+    private val elevatorUp = driverController.povUp()
+    private val elevatorDown = driverController.povDown()
+    private val ferryShot = driverController.leftBumper()
 
 
     // operator controller and triggers
     private val operatorController = CommandXboxController(OperatorConstants.OPERATOR_CONTROLLER_PORT)
 
     private val fireNoteToAmp = operatorController.y()
+    private val subwooferShot = operatorController.leftBumper()
+    private val podiumShot = operatorController.rightBumper()
+    private val unlockShooterControl = operatorController.leftStick()
+    private val unlockArmControl = operatorController.rightStick()
+
 
     // this thread should run ONCE
     private val valueGetter = Thread {
@@ -81,7 +92,7 @@ object RobotContainer {
         LEDSubsystem.defaultCommand =
             LEDIdleCommand(if (alliance == DriverStation.Alliance.Red) LEDSubsystem.LEDColor.RED else LEDSubsystem.LEDColor.BLUE)
         configureTriggers() // configure triggers here so all threads are up to date when this is called
-        println(alliance)
+        DriverStation.reportWarning("Current alliance is $alliance", false)
     }
 
     init {
@@ -90,8 +101,7 @@ object RobotContainer {
         configureDefaultCommands()
         configureDriverBindings()
         configureOperatorBindings()
-        // Reference the Autos object so that it is initialized, placing the chooser on the dashboard
-        Autos
+        Autos.configureNamedCommands()
     }
 
     /**
@@ -102,7 +112,7 @@ object RobotContainer {
      * controllers or [Flight joysticks][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureDriverBindings() {
-        driverController.leftStick().onTrue(InstantCommand({
+        unlockElevatorControl.onTrue(InstantCommand({ // left stick BUTTON
             elevatorManual = if (elevatorManual == ManualMode.UNLOCKED) {
                 ManualMode.LOCKED
             } else {
@@ -110,45 +120,57 @@ object RobotContainer {
             }
         }))
 
-        slowModeToggle.whileTrue(InstantCommand({ SwerveSubsystem.toggleSpeedChange() }))
-        reverseIntakeButton.whileTrue(IntakeReverseCommand())
-        intakeButton.whileTrue(IntakeCommand())
+        slowModeToggle.whileTrue(InstantCommand({ SwerveSubsystem.toggleSpeedChange() })) // right trigger
+        reverseIntakeButton.whileTrue(IntakeReverseCommand()) // right bumper && modifier key (right dpad)
+        intakeButton.whileTrue(IntakeCommand()) // right bumper
 
-        resetHeading.onTrue(InstantCommand({
+        resetHeading.onTrue(InstantCommand({ // b
             SwerveSubsystem.zeroHeading()
         }))
 
-        manualShooterButton.whileTrue(ManualShotCommand())
-
-        driverController.povLeft().whileTrue(ArmShootCommand())
-
-        driverController.povUp()
-            .or(driverController.povDown())
+        elevatorUp // dpad up
+            .or(elevatorDown) // dpad down
             .and { elevatorManual == ManualMode.UNLOCKED }
             .whileTrue(ManualElevatorControlCommand { driverController.hid.pov == 180 })
 
-        driverController.leftTrigger().whileTrue(FerryShot())
+        ferryShot.whileTrue(FerryShot()) // left bumper
     }
 
     private fun configureOperatorBindings() {
-        fireNoteToAmp
+        unlockShooterControl.onTrue(InstantCommand({ // left stick BUTTOn
+            shooterManual = if (shooterManual == ManualMode.UNLOCKED) {
+                ManualMode.LOCKED
+            } else {
+                ManualMode.UNLOCKED
+            }
+        }))
+
+        unlockArmControl.onTrue(InstantCommand({ // right stick BUTTON
+            armManual = if (armManual == ManualMode.UNLOCKED) {
+                ManualMode.LOCKED
+            } else {
+                ManualMode.UNLOCKED
+            }
+        }))
+
+        fireNoteToAmp // triangle || y
             .and { IntakeSubsystem.noteStatus != NoteStatus.ARM }
             .and { ElevatorSubsystem.atElevatorMin }
             .onTrue(
                 IntakeToArmCommand().withTimeout(2.0)
             )
 
-        fireNoteToAmp
+        fireNoteToAmp // triangle || y
             .and { IntakeSubsystem.noteStatus == NoteStatus.ARM }
             .onTrue(
                 ArmShootInAmpCommand()
             )
 
-        operatorController.leftBumper().whileTrue(
+        subwooferShot.whileTrue( // left bumper
             SubwooferShot()
         )
 
-        operatorController.rightBumper().whileTrue(
+        podiumShot.whileTrue( // right bumper
             PodiumShot()
         )
     }
@@ -159,7 +181,10 @@ object RobotContainer {
             { driverController.leftY },
             { driverController.leftX },
             { driverController.rightX },
-            { true }) // field relative
+            { true }, // field relative
+            { driverController.hid.leftTriggerAxis > 0.5 },
+            { driverController.leftBumper().asBoolean })
+
 
         if (ElevatorSubsystem.atElevatorMin) {
             println("Elevator good and can reset");
@@ -216,11 +241,9 @@ object RobotContainer {
 
         Trigger {
             ShooterSubsystem.isReadyToShoot
-        }.and(driverController.leftTrigger()
-            .or(operatorController.leftBumper())
-            .or(operatorController.rightBumper())
-            .or(operatorController.leftTrigger())
-            .or(operatorController.rightTrigger()))
+        }.and(ferryShot
+            .or(podiumShot)
+            .or(subwooferShot))
             .onTrue(
                 RepeatCommand(
                     ShooterSubsystem.shooterLEDCommand()

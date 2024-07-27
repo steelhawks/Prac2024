@@ -263,10 +263,10 @@ object Constants {
     }
 
     object RedTeamPoses {
-        val initialPose: Pose2d = Pose2d(Translation2d(1.225347, 7.652309), Rotation2d()) // Next to blue speaker
+        val INITIAL_POSE: Pose2d = Pose2d(Translation2d(1.225347, 7.652309), Rotation2d()) // Next to blue speaker
         val RED_ORIGIN: Pose2d = Pose2d(Translation2d(16.542, 8.014), Rotation2d.fromDegrees(180.0))
         val RED_SPEAKER_POSE: Pose2d = Pose2d(Translation2d(16.535595, 5.554168), Rotation2d()).relativeTo(RED_ORIGIN)
-        val redAmpPose: Pose2d = Pose2d(Translation2d(14.722884, 8.220855), Rotation2d()).relativeTo(RED_ORIGIN)
+        val RED_AMP_POSE: Pose2d = Pose2d(Translation2d(14.722884, 8.220855), Rotation2d()).relativeTo(RED_ORIGIN)
     }
 
     object StructureConstants {

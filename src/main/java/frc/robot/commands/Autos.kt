@@ -1,15 +1,14 @@
 package frc.robot.commands
 
 import com.pathplanner.lib.auto.AutoBuilder
+import com.pathplanner.lib.auto.NamedCommands
 import com.pathplanner.lib.path.PathPlannerPath
 import edu.wpi.first.wpilibj.DigitalInput
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
-import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.Commands
-import edu.wpi.first.wpilibj2.command.PrintCommand
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
+import edu.wpi.first.wpilibj2.command.*
+import frc.robot.commands.intake.IntakeCommand
 import frc.robot.commands.shooter.ManualShotCommand
-import frc.robot.subsystems.ExampleSubsystem
+import frc.robot.commands.shooter.SubwooferShot
+import frc.robot.subsystems.ShooterSubsystem
 
 object Autos
 {
@@ -56,14 +55,14 @@ object Autos
     private fun testAuto(): Command {
         return SequentialCommandGroup(
             ManualShotCommand().withTimeout(2.0),
-            TeleopDriveCommand({0.0}, {0.0}, {0.2}, { true }).withTimeout(5.0)
+            TeleopDriveCommand({0.0}, {0.0}, {0.2}, { true }, getFaceSpeaker = { false }, getFaceAmp = { false }).withTimeout(5.0)
         )
     }
 
     private fun testAutoShootThenMoveForward(): Command {
         return SequentialCommandGroup(
             ManualShotCommand().withTimeout(1.0),
-            TeleopDriveCommand({.2}, {0.0}, {0.0}, { true }).withTimeout(1.0)
+            TeleopDriveCommand({.2}, {0.0}, {0.0}, { true }, getFaceSpeaker = { false }, getFaceAmp = { false }).withTimeout(1.0)
         )
     }
 
