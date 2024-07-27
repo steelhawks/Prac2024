@@ -2,6 +2,7 @@ package frc.robot.commands
 
 import com.pathplanner.lib.auto.AutoBuilder
 import com.pathplanner.lib.auto.NamedCommands
+import com.pathplanner.lib.commands.PathPlannerAuto
 import com.pathplanner.lib.path.PathPlannerPath
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj2.command.*
@@ -107,7 +108,7 @@ object Autos
         AUTO_1("Fire and Rotate", testAuto()),
         AUTO_2("Fire and Move Forward", testAutoShootThenMoveForward()),
         AUTO_3("Path Planner Test", AutoBuilder.followPath(PathPlannerPath.fromPathFile("Test Path"))),
-        AUTO_4("Placeholder Auto 1", nothingAuto()),
+        AUTO_4("new auto pathplanner", PathPlannerAuto("test auto")),
         AUTO_5("Placeholder Auto 2", nothingAuto()),
         AUTO_6("Placeholder Auto 3", nothingAuto()),
         AUTO_7("Placeholder Auto 4", nothingAuto()),

@@ -121,7 +121,7 @@ object RobotContainer {
         }))
 
         slowModeToggle.whileTrue(InstantCommand({ SwerveSubsystem.toggleSpeedChange() })) // right trigger
-        reverseIntakeButton.whileTrue(IntakeReverseCommand()) // right bumper && modifier key (right dpad)
+//        reverseIntakeButton.whileTrue(IntakeReverseCommand()) // right bumper && modifier key (right dpad)
         intakeButton.whileTrue(IntakeCommand()) // right bumper
 
         resetHeading.onTrue(InstantCommand({ // b
@@ -173,6 +173,8 @@ object RobotContainer {
         podiumShot.whileTrue( // right bumper
             PodiumShot()
         )
+
+        operatorController.povDown().whileTrue(IntakeReverseCommand())
     }
 
     private fun configureDefaultCommands() {
