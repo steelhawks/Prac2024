@@ -13,11 +13,6 @@ import frc.robot.subsystems.ExampleSubsystem
 
 object Autos
 {
-//    private val autoModeChooser = SendableChooser<AutoMode>().apply {
-//        AutoMode.values().forEach { addOption(it.optionName, it) }
-//        setDefaultOption(AutoMode.default.optionName, AutoMode.default)
-//    }
-
     private val autonSelector: Array<DigitalInput> = arrayOf(
         DigitalInput(10),
         DigitalInput(11),
@@ -50,13 +45,13 @@ object Autos
         get() = AutoMode[getAutonSelector]
 
     val selectedAutonomousCommandName: String
-        get() = AutoMode.entries[getAutonSelector].toString()
+        get() = AutoMode.entries[getAutonSelector].optionName
 
-    /** Example static factory for an autonomous command.  */
-    private fun exampleAuto(): Command =
-        Commands.sequence(ExampleSubsystem.exampleMethodCommand(), ExampleCommand())
+    /** Auton Static Factories  */
 
-    private fun exampleAuto2() = PrintCommand("An example Auto Mode that just prints a value")
+    private fun nothingAuto(): Command {
+        return PrintCommand("This selection has no auto set")
+    }
 
     private fun testAuto(): Command {
         return SequentialCommandGroup(
@@ -83,12 +78,17 @@ object Autos
     @Suppress("unused")
     private enum class AutoMode(val optionName: String, val command: Command)
     {
-        CUSTOM_AUTO_1("Custom Auto Mode 1", exampleAuto()),
-        CUSTOM_AUTO_2("Custom Auto Mode 2", exampleAuto2()),
-        CUSTOM_AUTO_3("Custom Auto Mode 3", ExampleCommand()),
-        CUSTOM_AUTO_4("Custom Auto Mode 4", testAuto()),
-        CUSTOM_AUTO_5("Custom Auto Mode 5", testAutoShootThenMoveForward()),
-        PATHPLANNER_AUTO_1("Path Planner 1", AutoBuilder.followPath(PathPlannerPath.fromPathFile("Test Path")))
+        AUTO_1("Fire and Rotate", testAuto()),
+        AUTO_2("Fire and Move Forward", testAutoShootThenMoveForward()),
+        AUTO_3("Path Planner Test", AutoBuilder.followPath(PathPlannerPath.fromPathFile("Test Path"))),
+        AUTO_4("Placeholder Auto 1", nothingAuto()),
+        AUTO_5("Placeholder Auto 2", nothingAuto()),
+        AUTO_6("Placeholder Auto 3", nothingAuto()),
+        AUTO_7("Placeholder Auto 4", nothingAuto()),
+        AUTO_8("Placeholder Auto 5", nothingAuto()),
+        AUTO_9("Placeholder Auto 6", nothingAuto()),
+        AUTO_10("Placeholder Auto 7", nothingAuto()),
+        AUTO_11("Placeholder Auto 8", nothingAuto())
         ;
 
         companion object
@@ -108,7 +108,7 @@ object Autos
             }
 
             /** The default auto mode. */
-            val default = CUSTOM_AUTO_4
+            val default = AUTO_1
         }
     }
 }
