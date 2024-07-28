@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup
+import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.RepeatCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
@@ -23,6 +24,9 @@ import frc.robot.commands.intake.IntakeToArmCommand
 import frc.robot.commands.led.LEDNoteToArmCommand
 import frc.robot.commands.shooter.*
 import frc.robot.subsystems.*
+import frc.robot.utils.NetworkTables
+import frc.robot.utils.TriggerApp
+import kotlin.math.truncate
 
 
 /**
@@ -60,20 +64,20 @@ object RobotContainer {
 
     private val slowModeToggle = driverController.rightTrigger()
     private val intakeButton = driverController.rightBumper()
-    private val reverseIntakeButton = driverController.rightBumper().and(driverModifierKey)
     private val resetHeading = driverController.b()
     private val unlockElevatorControl = driverController.leftStick()
     private val elevatorUp = driverController.povUp()
     private val elevatorDown = driverController.povDown()
-    private val ferryShot = driverController.leftBumper()
+    private val ferryShot = driverController.leftBumper().or(TriggerApp("ferryShot"))
 
 
     // operator controller and triggers
     private val operatorController = CommandXboxController(OperatorConstants.OPERATOR_CONTROLLER_PORT)
 
-    private val fireNoteToAmp = operatorController.y()
-    private val subwooferShot = operatorController.leftBumper()
-    private val podiumShot = operatorController.rightBumper()
+    private val reverseIntakeButton = operatorController.povDown().or(TriggerApp("reverseIntake"))
+    private val fireNoteToAmp = operatorController.y().or(TriggerApp("fireNoteToAmp"))
+    private val subwooferShot = operatorController.leftBumper().or(TriggerApp("subwooferShot"))
+    private val podiumShot = operatorController.rightBumper().or(TriggerApp("podiumShot"))
     private val unlockShooterControl = operatorController.leftStick()
     private val unlockArmControl = operatorController.rightStick()
 
@@ -174,7 +178,7 @@ object RobotContainer {
             PodiumShot()
         )
 
-        operatorController.povDown().whileTrue(IntakeReverseCommand())
+        reverseIntakeButton.whileTrue(IntakeReverseCommand())
     }
 
     private fun configureDefaultCommands() {
@@ -185,7 +189,7 @@ object RobotContainer {
             { driverController.rightX },
             { true }, // field relative
             { driverController.hid.leftTriggerAxis > 0.5 },
-            { driverController.leftBumper().asBoolean })
+            { ferryShot.asBoolean })
 
 
         if (ElevatorSubsystem.atElevatorMin) {
@@ -248,7 +252,9 @@ object RobotContainer {
             .or(subwooferShot))
             .onTrue(
                 RepeatCommand(
-                    ShooterSubsystem.shooterLEDCommand()
+                    ShooterSubsystem.shooterLEDCommand().alongWith(
+//                        RepeatCommand(InstantCommand({ NetworkTables.isReadyToShoot.set(true) }))
+                    )
                 ).withTimeout(2.0)
                     .deadlineWith(Commands.run({
                         driverController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 1.0)
@@ -259,6 +265,7 @@ object RobotContainer {
             .onFalse(Commands.run({
                 driverController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 0.0)
                 operatorController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 0.0)
+//                InstantCommand({ NetworkTables.isReadyToShoot.set(false) })
             }))
     }
 

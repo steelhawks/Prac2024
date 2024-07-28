@@ -12,6 +12,9 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.robot.commands.Autos
 import frc.robot.subsystems.IntakeSubsystem
 import frc.robot.subsystems.LEDSubsystem
+import frc.robot.subsystems.ShooterSubsystem
+import frc.robot.utils.NetworkTables
+import frc.robot.utils.TriggerApp
 import org.littletonrobotics.junction.LogFileUtil
 import org.littletonrobotics.junction.LoggedRobot
 import org.littletonrobotics.junction.Logger
@@ -77,6 +80,7 @@ object Robot : LoggedRobot()
         RobotContainer.resetControllerRumble()
 
 //        FollowPathCommand.warmupCommand().schedule();
+        NetworkTables
     }
 
     /**
@@ -98,6 +102,11 @@ object Robot : LoggedRobot()
         SmartDashboard.putString("Note Status", IntakeSubsystem.noteStatus.name)
         SmartDashboard.putNumber("Auton Selected", Autos.getAutonSelector.toDouble())
         SmartDashboard.putString("Auton Name", Autos.selectedAutonomousCommandName)
+        SmartDashboard.putBoolean("nt4/shooting from app", TriggerApp("fireShooter").asBoolean)
+
+        NetworkTables.robotState.set(RobotContainer.robotState.name)
+        NetworkTables.noteStatus.set(IntakeSubsystem.noteStatus.name)
+        NetworkTables.isReadyToShoot.set(ShooterSubsystem.isReadyToShoot)
     }
 
     /** This method is called once each time the robot enters Disabled mode.  */
