@@ -180,8 +180,8 @@ object RobotContainer {
     private fun configureDefaultCommands() {
         ShooterSubsystem.defaultCommand = ShooterHomePositionCommand()
         SwerveSubsystem.defaultCommand = TeleopDriveCommand(
-            { driverController.leftY },
-            { driverController.leftX },
+            { -driverController.leftY },
+            { -driverController.leftX },
             { driverController.rightX },
             { true }, // field relative
             { driverController.hid.leftTriggerAxis > 0.5 },
