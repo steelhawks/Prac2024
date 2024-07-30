@@ -109,7 +109,7 @@ object Autos
         AUTO_2("Fire and Move Forward", testAutoShootThenMoveForward()),
         AUTO_3("Path Planner Test", AutoBuilder.followPath(PathPlannerPath.fromPathFile("Test Path"))),
         AUTO_4("new auto pathplanner", PathPlannerAuto("test auto")),
-        AUTO_5("Placeholder Auto 2", nothingAuto()),
+        AUTO_5("simple path test pathplanner", PathPlannerAuto("home auto")),
         AUTO_6("Placeholder Auto 3", nothingAuto()),
         AUTO_7("Placeholder Auto 4", nothingAuto()),
         AUTO_8("Placeholder Auto 5", nothingAuto()),
