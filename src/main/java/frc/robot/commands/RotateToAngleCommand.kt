@@ -7,7 +7,7 @@ import frc.lib.util.math.MathConstants
 import frc.robot.Constants
 import frc.robot.subsystems.SwerveSubsystem
 
-class RotateToAngleCommand(private val getRequestedAngle: () -> Double, private val getCurrentAngle: () -> Double, private val getButtonPressed: () -> Boolean) : Command() {
+class RotateToAngleCommand(private val getRequestedAngle: () -> Double, private val getButtonPressed: () -> Boolean = { true }) : Command() {
     private val swerveSubsystem = SwerveSubsystem
     private val alignPID = PIDController(
         Constants.Swerve.AUTO_ALIGN_KP,

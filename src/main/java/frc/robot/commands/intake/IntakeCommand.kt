@@ -8,7 +8,7 @@ import frc.robot.subsystems.IntakeSubsystem
 class IntakeCommand : Command() {
     private val intakeSubsystem = IntakeSubsystem
     private val feederSubsystem = FeederSubsystem
-    private var beamStartBroken = false
+    private var prevBeamBroken = false
 
     init {
         // each subsystem used by the command must be passed into the addRequirements() method
@@ -16,20 +16,20 @@ class IntakeCommand : Command() {
     }
 
     override fun initialize() {
-        beamStartBroken = IntakeSubsystem.intakeBeamBroken
+        prevBeamBroken = IntakeSubsystem.intakeBeamBroken
     }
 
     override fun execute() {
         intakeSubsystem.intake()
         intakeSubsystem.noteStatus = NoteStatus.INTAKING
 
-        if (beamStartBroken) {
+        if (prevBeamBroken) {
             feederSubsystem.feedToShooter()
         }
     }
 
     override fun isFinished(): Boolean {
-        if (beamStartBroken) {
+        if (prevBeamBroken) {
             return false
         }
 
@@ -39,14 +39,14 @@ class IntakeCommand : Command() {
     override fun end(interrupted: Boolean) {
         intakeSubsystem.stop()
 
-        if (beamStartBroken) {
+        if (prevBeamBroken) {
             intakeSubsystem.noteStatus = NoteStatus.IN_SHOOTER
             feederSubsystem.stopFeed()
         } else {
             intakeSubsystem.noteStatus = NoteStatus.NOTHING
         }
 
-        if (!beamStartBroken && IntakeSubsystem.intakeBeamBroken) {
+        if (!prevBeamBroken && IntakeSubsystem.intakeBeamBroken) {
             intakeSubsystem.noteStatus = NoteStatus.INTAKEN
         }
     }
