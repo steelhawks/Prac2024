@@ -28,7 +28,7 @@ class ManualElevatorControlCommand(private val isDown: () -> Boolean) : Command(
 
     override fun isFinished(): Boolean {
         // TODO: Make this return true when this Command no longer needs to run execute()
-        return false
+        return elevatorSubsystem.isEnabled
     }
 
     override fun end(interrupted: Boolean) {

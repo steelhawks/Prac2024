@@ -33,6 +33,8 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
         TalonFX(Constants.Shooter.BOTTOM_SHOOTER_MOTOR_ID, Constants.CANIVORE_NAME)
     private val m_topShooterMotor: TalonFX = TalonFX(Constants.Shooter.TOP_SHOOTER_MOTOR_ID, Constants.CANIVORE_NAME)
 
+    private val m_feederMotor: TalonFX = TalonFX(Constants.Shooter.FEEDER_MOTOR_ID, Constants.CANIVORE_NAME)
+
     private val m_canCoder = CANcoder(Constants.Shooter.CANCODER_ID, Constants.CANIVORE_NAME)
 
     val firing: Boolean
@@ -48,7 +50,7 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
                     (topMotorVelocity != null && topMotorVelocity > threshold)
         }
 
-    val canCoderVal
+    private val canCoderVal
         get() = m_canCoder.absolutePosition.valueAsDouble * 360 - 24.7
 
     private val bottomShooterPIDController: PIDController =
@@ -86,7 +88,7 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
             Constants.Shooter.PIVOT_KV
         )
 
-    var trigTargetAngle: Double = 0.0
+    private var trigTargetAngle: Double = 0.0
 
     init {
         topShooterPIDController.setTolerance(Constants.Shooter.SHOOTER_TOLERANCE)
@@ -102,6 +104,7 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
         m_pivotMotor.setNeutralMode(NeutralModeValue.Brake)
         m_bottomShooterMotor.setNeutralMode(NeutralModeValue.Coast)
         m_topShooterMotor.setNeutralMode(NeutralModeValue.Coast)
+        m_feederMotor.setNeutralMode(NeutralModeValue.Coast)
 
         m_pivotMotor.inverted = false
         m_pivotMotor.setPosition(0.0)
@@ -127,6 +130,18 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
 
     fun goDown() {
         setGoal(Constants.Shooter.DOWN_POSITION)
+    }
+
+    fun feedToShooter() {
+        m_feederMotor.set(10.0)
+    }
+
+    fun feedBackToIntake() {
+        m_feederMotor.set(-0.5)
+    }
+
+    fun stopFeed() {
+        m_feederMotor.stopMotor()
     }
 
     fun stopShooter() {
@@ -159,6 +174,7 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
         m_bottomShooterMotor.set(-Constants.Shooter.BOTTOM_SHOOTER_SPEED / 3)
     }
 
+    /** Runs LED Command when shooter is ready to shoot when [shooterBottomRPM], [shooterTopRPM], and [pivotAtSetpoint] are true */
     fun shooterLEDCommand(): Command {
         return LEDSubsystem.flashCommand(
             LEDSubsystem.LEDColor.PURPLE,

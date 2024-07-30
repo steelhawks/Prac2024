@@ -3,7 +3,7 @@ package frc.robot.commands.shooter
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.ShooterSubsystem
 
-class ShooterHomePositionCommand() : Command() {
+class ShooterHomePositionCommand : Command() {
     private val shooterSubsystem = ShooterSubsystem
 
 
