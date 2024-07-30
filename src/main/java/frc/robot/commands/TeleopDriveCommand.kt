@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.Command
+import frc.lib.util.math.MathConstants
 import frc.robot.Constants
 import frc.robot.RobotContainer
 import frc.robot.subsystems.SwerveSubsystem
@@ -26,12 +27,8 @@ class TeleopDriveCommand(
 
     override fun initialize() {}
 
-    private fun continuous180To360(angle: Double): Double {
-        return (angle + 360) % 360
-    }
-
     private fun getRotationSpeedFromPID(target: Pose2d): Double {
-        val robotHeading = continuous180To360(SwerveSubsystem.heading.degrees)
+        val robotHeading = MathConstants.continuous180To360(SwerveSubsystem.heading.degrees)
         val requestedAngle: Double =
             SwerveSubsystem.calculateTurnAngle(target, SwerveSubsystem.heading.degrees + 180)
         val setpoint = (robotHeading + requestedAngle) % 360
@@ -39,7 +36,7 @@ class TeleopDriveCommand(
         SwerveSubsystem.alignPID.setSetpoint(setpoint)
 
         return (if (SwerveSubsystem.isLowGear) 5 else 1) * SwerveSubsystem.alignPID
-            .calculate(continuous180To360(SwerveSubsystem.heading.degrees))
+            .calculate(MathConstants.continuous180To360(SwerveSubsystem.heading.degrees))
     }
 
     override fun execute() {

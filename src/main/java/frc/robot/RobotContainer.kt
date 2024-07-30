@@ -70,6 +70,7 @@ object RobotContainer {
     private val operatorController = CommandXboxController(OperatorConstants.OPERATOR_CONTROLLER_PORT)
 
     private val reverseIntakeButton = operatorController.povDown().or(DashboardTrigger("reverseIntake"))
+    private val manualIntakeButton = operatorController.povUp().or(DashboardTrigger("manualIntake"))
     private val fireNoteToAmp = operatorController.y().or(DashboardTrigger("fireNoteToAmp"))
     private val subwooferShot = operatorController.leftBumper().or(DashboardTrigger("subwooferShot"))
     private val podiumShot = operatorController.rightBumper().or(DashboardTrigger("podiumShot"))
@@ -174,6 +175,14 @@ object RobotContainer {
         )
 
         reverseIntakeButton.whileTrue(IntakeReverseCommand())
+        manualIntakeButton.whileTrue(
+            IntakeCommand()
+//            Commands.runEnd(
+//                IntakeSubsystem::intake,
+//                IntakeSubsystem::stop,
+//                IntakeSubsystem
+//            )
+        )
     }
 
     private fun configureDefaultCommands() {
