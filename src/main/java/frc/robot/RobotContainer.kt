@@ -1,12 +1,9 @@
 package frc.robot
 
-import com.pathplanner.lib.auto.NamedCommands
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup
-import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.RepeatCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
@@ -16,7 +13,6 @@ import frc.robot.commands.led.LEDIdleCommand
 import frc.robot.commands.led.LEDNoteIntakenCommand
 import frc.robot.commands.TeleopDriveCommand
 import frc.robot.commands.arm.ArmShootInAmpCommand
-import frc.robot.commands.arm.ArmShootCommand
 import frc.robot.commands.elevator.ManualElevatorControlCommand
 import frc.robot.commands.intake.IntakeCommand
 import frc.robot.commands.intake.IntakeReverseCommand
@@ -24,9 +20,7 @@ import frc.robot.commands.intake.IntakeToArmCommand
 import frc.robot.commands.led.LEDNoteToArmCommand
 import frc.robot.commands.shooter.*
 import frc.robot.subsystems.*
-import frc.robot.utils.NetworkTables
-import frc.robot.utils.TriggerApp
-import kotlin.math.truncate
+import frc.robot.utils.DashboardTrigger
 
 
 /**
@@ -68,16 +62,16 @@ object RobotContainer {
     private val unlockElevatorControl = driverController.leftStick()
     private val elevatorUp = driverController.povUp()
     private val elevatorDown = driverController.povDown()
-    private val ferryShot = driverController.leftBumper().or(TriggerApp("ferryShot"))
+    private val ferryShot = driverController.leftBumper().or(DashboardTrigger("ferryShot"))
 
 
     // operator controller and triggers
     private val operatorController = CommandXboxController(OperatorConstants.OPERATOR_CONTROLLER_PORT)
 
-    private val reverseIntakeButton = operatorController.povDown().or(TriggerApp("reverseIntake"))
-    private val fireNoteToAmp = operatorController.y().or(TriggerApp("fireNoteToAmp"))
-    private val subwooferShot = operatorController.leftBumper().or(TriggerApp("subwooferShot"))
-    private val podiumShot = operatorController.rightBumper().or(TriggerApp("podiumShot"))
+    private val reverseIntakeButton = operatorController.povDown().or(DashboardTrigger("reverseIntake"))
+    private val fireNoteToAmp = operatorController.y().or(DashboardTrigger("fireNoteToAmp"))
+    private val subwooferShot = operatorController.leftBumper().or(DashboardTrigger("subwooferShot"))
+    private val podiumShot = operatorController.rightBumper().or(DashboardTrigger("podiumShot"))
     private val unlockShooterControl = operatorController.leftStick()
     private val unlockArmControl = operatorController.rightStick()
 
