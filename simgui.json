@@ -13,6 +13,9 @@
         "double[]##v_/SmartDashboard/SwerveMod States": {
           "open": true
         },
+        "elevator": {
+          "open": true
+        },
         "open": true
       }
     }

@@ -17,6 +17,7 @@ import frc.robot.commands.elevator.ManualElevatorControlCommand
 import frc.robot.commands.intake.IntakeCommand
 import frc.robot.commands.intake.IntakeReverseCommand
 import frc.robot.commands.intake.IntakeToArmCommand
+import frc.robot.commands.led.LEDNoteInShooterCommand
 import frc.robot.commands.led.LEDNoteToArmCommand
 import frc.robot.commands.shooter.*
 import frc.robot.subsystems.*
@@ -230,6 +231,13 @@ object RobotContainer {
                 LEDNoteToArmCommand(LEDSubsystem.LEDColor.PURPLE)
             )
 
+        Trigger {
+            IntakeSubsystem.noteStatus == NoteStatus.IN_SHOOTER
+        }
+            .whileTrue(
+                LEDNoteInShooterCommand(LEDSubsystem.LEDColor.MAGENTA)
+            )
+
 //        Trigger {
 //            ShooterSubsystem.firing
 //        }
@@ -261,6 +269,13 @@ object RobotContainer {
                 operatorController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 0.0)
 //                InstantCommand({ NetworkTables.isReadyToShoot.set(false) })
             }))
+
+        Trigger {
+            ElevatorSubsystem.atElevatorMin
+        }.or(ElevatorSubsystem::atElevatorMax)
+            .onTrue(
+                ElevatorSubsystem.elevatorLEDCommand()
+            )
     }
 
     fun resetControllerRumble() {

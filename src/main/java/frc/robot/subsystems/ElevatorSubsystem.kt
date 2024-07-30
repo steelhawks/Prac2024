@@ -88,7 +88,7 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
     }
 
     fun getHomeCommand(): Command {
-        return Commands.runOnce({this::disable})
+        return Commands.runOnce(this::disable)
             .andThen({
                 Commands.run({
                     controlElevator(true)
@@ -109,6 +109,15 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
 
     private fun resetCANCoder() {
         canCoder.setPosition(0.0)
+    }
+
+    /** Runs LED Command when elevator is at minimum or maximum when [atElevatorMin] or [atElevatorMax] is true */
+    fun elevatorLEDCommand(): Command {
+        return LEDSubsystem.flashCommand(
+            LEDSubsystem.LEDColor.PINK,
+            .2,
+            2.0
+        )
     }
 
     val atElevatorMax: Boolean

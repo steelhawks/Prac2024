@@ -40,6 +40,8 @@ object LEDSubsystem : SubsystemBase() {
         WHITE(255, 255, 255),
         CYAN(0, 255, 255),
         ORANGE(252, 144, 3),
+        MAGENTA(255, 0, 255),
+        PINK(255, 20, 147),
         OFF(0, 0, 0);
     }
 
