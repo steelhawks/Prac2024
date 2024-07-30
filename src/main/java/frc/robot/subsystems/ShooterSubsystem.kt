@@ -33,6 +33,8 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
         TalonFX(Constants.Shooter.BOTTOM_SHOOTER_MOTOR_ID, Constants.CANIVORE_NAME)
     private val m_topShooterMotor: TalonFX = TalonFX(Constants.Shooter.TOP_SHOOTER_MOTOR_ID, Constants.CANIVORE_NAME)
 
+    private val m_feederMotor: TalonFX = TalonFX(Constants.Shooter.FEEDER_MOTOR_ID, Constants.CANIVORE_NAME)
+
     private val m_canCoder = CANcoder(Constants.Shooter.CANCODER_ID, Constants.CANIVORE_NAME)
 
     val firing: Boolean
@@ -102,6 +104,7 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
         m_pivotMotor.setNeutralMode(NeutralModeValue.Brake)
         m_bottomShooterMotor.setNeutralMode(NeutralModeValue.Coast)
         m_topShooterMotor.setNeutralMode(NeutralModeValue.Coast)
+        m_feederMotor.setNeutralMode(NeutralModeValue.Coast)
 
         m_pivotMotor.inverted = false
         m_pivotMotor.setPosition(0.0)
@@ -127,6 +130,18 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
 
     fun goDown() {
         setGoal(Constants.Shooter.DOWN_POSITION)
+    }
+
+    fun feedToShooter() {
+        m_feederMotor.set(10.0)
+    }
+
+    fun feedBackToIntake() {
+        m_feederMotor.set(-0.5)
+    }
+
+    fun stopFeed() {
+        m_feederMotor.stopMotor()
     }
 
     fun stopShooter() {

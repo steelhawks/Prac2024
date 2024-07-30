@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.*
 import frc.robot.commands.intake.IntakeCommand
 import frc.robot.commands.shooter.ManualShotCommand
 import frc.robot.commands.shooter.SubwooferShot
-import frc.robot.subsystems.FeederSubsystem
 import frc.robot.subsystems.IntakeSubsystem
 import frc.robot.subsystems.ShooterSubsystem
 

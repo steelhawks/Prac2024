@@ -3,18 +3,16 @@ package frc.robot.commands.intake
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.NoteStatus
 import frc.robot.subsystems.ArmSubsystem
-import frc.robot.subsystems.FeederSubsystem
 import frc.robot.subsystems.IntakeSubsystem
 import frc.robot.subsystems.ShooterSubsystem
 
 class IntakeReverseCommand : Command() {
     private val intakeSubsystem = IntakeSubsystem
-    private val feederSubsystem = FeederSubsystem
     private val shooterSubsystem = ShooterSubsystem
     private val armSubsystem = ArmSubsystem
 
     init {
-        addRequirements(intakeSubsystem, feederSubsystem, shooterSubsystem, armSubsystem)
+        addRequirements(intakeSubsystem, shooterSubsystem, armSubsystem)
     }
 
     override fun initialize() {}
@@ -23,7 +21,7 @@ class IntakeReverseCommand : Command() {
         intakeSubsystem.intakeReverse()
 
         if (intakeSubsystem.noteStatus == NoteStatus.IN_SHOOTER) {
-            feederSubsystem.feedBackToIntake()
+            shooterSubsystem.feedBackToIntake()
             shooterSubsystem.reverseToIntake()
         }
 
@@ -39,7 +37,7 @@ class IntakeReverseCommand : Command() {
 
     override fun end(interrupted: Boolean) {
         intakeSubsystem.stop()
-        feederSubsystem.stopFeed()
+        shooterSubsystem.stopFeed()
         shooterSubsystem.stopShooter()
         armSubsystem.stopShooter()
     }

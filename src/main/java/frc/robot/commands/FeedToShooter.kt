@@ -1,21 +1,15 @@
 package frc.robot.commands
 
 import edu.wpi.first.wpilibj2.command.Command
-import frc.robot.subsystems.FeederSubsystem
+import frc.robot.subsystems.ShooterSubsystem
 
 class FeedToShooter : Command() {
-    private val feederSubsystem = FeederSubsystem
-
-
-    init {
-        // each subsystem used by the command must be passed into the addRequirements() method
-        addRequirements(feederSubsystem)
-    }
+    private val shooterSubsystem = ShooterSubsystem
 
     override fun initialize() {}
 
     override fun execute() {
-        feederSubsystem.feedToShooter()
+        shooterSubsystem.feedToShooter()
     }
 
     override fun isFinished(): Boolean {
@@ -24,6 +18,6 @@ class FeedToShooter : Command() {
     }
 
     override fun end(interrupted: Boolean) {
-        feederSubsystem.stopFeed()
+        shooterSubsystem.stopFeed()
     }
 }

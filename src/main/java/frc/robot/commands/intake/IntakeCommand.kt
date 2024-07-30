@@ -2,17 +2,17 @@ package frc.robot.commands.intake
 
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.NoteStatus
-import frc.robot.subsystems.FeederSubsystem
 import frc.robot.subsystems.IntakeSubsystem
+import frc.robot.subsystems.ShooterSubsystem
 
 class IntakeCommand : Command() {
     private val intakeSubsystem = IntakeSubsystem
-    private val feederSubsystem = FeederSubsystem
+    private val shooterSubsystem = ShooterSubsystem
     private var prevBeamBroken = false
 
     init {
         // each subsystem used by the command must be passed into the addRequirements() method
-        addRequirements(intakeSubsystem, feederSubsystem)
+        addRequirements(intakeSubsystem)
     }
 
     override fun initialize() {
@@ -24,7 +24,7 @@ class IntakeCommand : Command() {
         intakeSubsystem.noteStatus = NoteStatus.INTAKING
 
         if (prevBeamBroken) {
-            feederSubsystem.feedToShooter()
+            shooterSubsystem.feedToShooter()
         }
     }
 
@@ -41,7 +41,7 @@ class IntakeCommand : Command() {
 
         if (prevBeamBroken) {
             intakeSubsystem.noteStatus = NoteStatus.IN_SHOOTER
-            feederSubsystem.stopFeed()
+            shooterSubsystem.stopFeed()
         } else {
             intakeSubsystem.noteStatus = NoteStatus.NOTHING
         }
