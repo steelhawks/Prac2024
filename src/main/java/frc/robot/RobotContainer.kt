@@ -2,9 +2,11 @@ package frc.robot
 
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.RepeatCommand
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
@@ -201,7 +203,13 @@ object RobotContainer {
             ArmSubsystem.goHome()
         } else {
             DriverStation.reportWarning("ELEVATOR IS NOT RESET... Resetting to Home Now", false)
-            ArmSubsystem.goToDangle()
+            /** DO NOT UNCOMMENT THIS UNTIL THE ELEVATOR IS FIXED!!!!!!! */
+//            Commands.runOnce(ArmSubsystem::goToDangle)
+//                .andThen(
+//                    WaitUntilCommand { ArmSubsystem.armInPosition(ArmSubsystem.Position.DANGLE) },
+//                    Commands.runOnce(ElevatorSubsystem::getHomeCommand)
+//                )
+//                .schedule()
         }
     }
 
