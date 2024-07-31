@@ -28,15 +28,15 @@ class TeleopDriveCommand(
     override fun initialize() {}
 
     private fun getRotationSpeedFromPID(target: Pose2d): Double {
-        val robotHeading = MathConstants.continuous180To360(SwerveSubsystem.heading.degrees)
+        val robotHeading = MathConstants.continuous180To360(swerveSubsystem.heading.degrees)
         val requestedAngle: Double =
-            SwerveSubsystem.calculateTurnAngle(target, SwerveSubsystem.heading.degrees + 180)
+            swerveSubsystem.calculateTurnAngle(target, swerveSubsystem.heading.degrees + 180)
         val setpoint = (robotHeading + requestedAngle) % 360
 
-        SwerveSubsystem.alignPID.setSetpoint(setpoint)
+        swerveSubsystem.alignPID.setSetpoint(setpoint)
 
-        return (if (SwerveSubsystem.isLowGear) 5 else 1) * SwerveSubsystem.alignPID
-            .calculate(MathConstants.continuous180To360(SwerveSubsystem.heading.degrees))
+        return (if (swerveSubsystem.isLowGear) 5 else 1) * swerveSubsystem.alignPID
+            .calculate(MathConstants.continuous180To360(swerveSubsystem.heading.degrees))
     }
 
     override fun execute() {

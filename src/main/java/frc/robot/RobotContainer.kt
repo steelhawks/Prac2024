@@ -24,6 +24,7 @@ import frc.robot.commands.led.LEDNoteToArmCommand
 import frc.robot.commands.shooter.*
 import frc.robot.subsystems.*
 import frc.robot.utils.DashboardTrigger
+import kotlin.math.truncate
 
 
 /**
@@ -51,6 +52,8 @@ object RobotContainer {
     private var armManual = ManualMode.LOCKED
 
     lateinit var robotState: RobotState
+    var useVision: Boolean = true
+        private set
 
     var alliance: DriverStation.Alliance? = null
         private set
@@ -66,6 +69,7 @@ object RobotContainer {
     private val elevatorUp = driverController.povUp()
     private val elevatorDown = driverController.povDown()
     private val ferryShot = driverController.leftBumper().or(DashboardTrigger("ferryShot"))
+    private val visionAlign = driverController.povLeft().or(DashboardTrigger("visionAlign"))
 
 
     // operator controller and triggers
@@ -121,6 +125,9 @@ object RobotContainer {
                 ManualMode.UNLOCKED
             }
         }))
+
+        visionAlign.onTrue(
+            InstantCommand({ useVision = !useVision }))
 
         slowModeToggle.whileTrue(InstantCommand({ SwerveSubsystem.toggleSpeedChange() })) // right trigger
 //        reverseIntakeButton.whileTrue(IntakeReverseCommand()) // right bumper && modifier key (right dpad)
