@@ -23,7 +23,8 @@ open class RampShooter(private val topRPM: Double, private val bottomRPM: Double
 
     override fun isFinished(): Boolean {
         // TODO: Make this return true when this Command no longer needs to run execute()
-        return shooterSubsystem.isReadyToShoot && IntakeSubsystem.noteStatus == NoteStatus.IN_SHOOTER // might be a stretch but check if it works else just leave false honestly
+//        return shooterSubsystem.isReadyToShoot && IntakeSubsystem.noteStatus == NoteStatus.IN_SHOOTER // might be a stretch but check if it works else just leave false honestly
+        return false
     }
 
     override fun end(interrupted: Boolean) {
