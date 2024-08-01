@@ -16,6 +16,7 @@ import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
@@ -27,6 +28,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.lib.util.Limelight
+import frc.lib.util.LimelightHelpers
 import frc.lib.util.OdometryImpl
 import frc.lib.util.math.Conversions
 import frc.lib.util.math.Conversions.rotationsToMeters
@@ -35,7 +37,9 @@ import frc.robot.CTREConfigs
 import frc.robot.Constants
 import frc.robot.Constants.PoseConfig
 import frc.robot.RobotContainer
+import frc.robot.commands.Autos
 import frc.robot.utils.SwerveModuleConstants
+import org.littletonrobotics.junction.Logger
 import kotlin.math.atan
 import kotlin.math.sqrt
 
@@ -324,6 +328,26 @@ object SwerveSubsystem : SubsystemBase() {
         poseEstimator?.resetPosition(gyroYaw, modulePositions, zeroPose)
     }
 
+    private fun driveRobotRelative(chassisSpeeds: ChassisSpeeds?) {
+        val swerveModuleStates: Array<SwerveModuleState> =
+            Constants.Swerve.SWERVE_KINEMATICS.toSwerveModuleStates(chassisSpeeds)
+
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.MAX_SPEED)
+
+        for (mod in m_swerveModules) {
+            mod.setDesiredState(swerveModuleStates[mod.swerveModuleNumber], false)
+        }
+    }
+
+    private fun addVisionToPose(limelight: Limelight) {
+        if (poseEstimator == null || limelight == null) return
+
+        val visionMeasurement = odometryImpl.getVisionMeasurement(limelight)
+        if (visionMeasurement != null) {
+            poseEstimator?.addVisionMeasurement(visionMeasurement, limelight.limelightLatency)
+        }
+    }
+
     val isLowGear
         get() = speedMultiplier == 0.2
 
@@ -363,17 +387,6 @@ object SwerveSubsystem : SubsystemBase() {
 //            )
         }
 
-    private fun driveRobotRelative(chassisSpeeds: ChassisSpeeds?) {
-        val swerveModuleStates: Array<SwerveModuleState> =
-            Constants.Swerve.SWERVE_KINEMATICS.toSwerveModuleStates(chassisSpeeds)
-
-        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.MAX_SPEED)
-
-        for (mod in m_swerveModules) {
-            mod.setDesiredState(swerveModuleStates[mod.swerveModuleNumber], false)
-        }
-    }
-
     override fun periodic() {
         if (poseEstimator != null)
             poseEstimator?.update(gyroYaw, modulePositions)
@@ -384,8 +397,16 @@ object SwerveSubsystem : SubsystemBase() {
             module.periodic()
         }
 
+        if ((RobotContainer.robotState != RobotContainer.RobotState.AUTON || Autos.selectedAutonomousUseVision) && RobotContainer.useVision) {
+            addVisionToPose(limelightShooter)
+            addVisionToPose(limelightArm)
+        }
+
         field.robotPose = getPose()
         simField.robotPose = getRelativePose()
+
+        Logger.recordOutput("odometry/robot", getPose())
+        Logger.recordOutput("odometry/robot3d", Pose3d(getPose()))
 
         SmartDashboard.putData("Real Field", field)
         SmartDashboard.putData("Simulator Field", simField)

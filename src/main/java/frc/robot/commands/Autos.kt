@@ -70,6 +70,9 @@ object Autos
     val selectedAutonomousCommand: Command
         get() = AutoMode[getAutonSelector]
 
+    val selectedAutonomousUseVision: Boolean
+        get() = AutoMode.entries[getAutonSelector].useVision
+
     val selectedAutonomousCommandName: String
         get() = AutoMode.entries[getAutonSelector].optionName
 
@@ -102,19 +105,19 @@ object Autos
      * @param command The [Command] to run for this mode.
      */
     @Suppress("unused")
-    private enum class AutoMode(val optionName: String, val command: Command)
+    private enum class AutoMode(val optionName: String, val command: Command, val useVision: Boolean)
     {
-        AUTO_1("Fire and Rotate", testAuto()),
-        AUTO_2("Fire and Move Forward", testAutoShootThenMoveForward()),
-        AUTO_3("Path Planner Test", AutoBuilder.followPath(PathPlannerPath.fromPathFile("Test Path"))),
-        AUTO_4("new auto pathplanner", PathPlannerAuto("test auto")),
-        AUTO_5("simple path test pathplanner", PathPlannerAuto("home auto")),
-        AUTO_6("Placeholder Auto 3", nothingAuto()),
-        AUTO_7("Placeholder Auto 4", nothingAuto()),
-        AUTO_8("Placeholder Auto 5", nothingAuto()),
-        AUTO_9("Placeholder Auto 6", nothingAuto()),
-        AUTO_10("Placeholder Auto 7", nothingAuto()),
-        AUTO_11("Placeholder Auto 8", nothingAuto())
+        AUTO_1("Fire and Rotate", testAuto(), false),
+        AUTO_2("Fire and Move Forward", testAutoShootThenMoveForward(), false),
+        AUTO_3("Path Planner Test", AutoBuilder.followPath(PathPlannerPath.fromPathFile("Test Path")), false),
+        AUTO_4("new auto pathplanner", PathPlannerAuto("test auto"), false),
+        AUTO_5("simple path test pathplanner", PathPlannerAuto("home auto"), true),
+        AUTO_6("Placeholder Auto 3", nothingAuto(), false),
+        AUTO_7("Placeholder Auto 4", nothingAuto(), false),
+        AUTO_8("Placeholder Auto 5", nothingAuto(), false),
+        AUTO_9("Placeholder Auto 6", nothingAuto(), false),
+        AUTO_10("Placeholder Auto 7", nothingAuto(), false),
+        AUTO_11("Placeholder Auto 8", nothingAuto(), false)
         ;
 
         companion object

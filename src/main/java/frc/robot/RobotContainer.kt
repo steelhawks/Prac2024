@@ -2,9 +2,11 @@ package frc.robot
 
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.RepeatCommand
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
@@ -22,6 +24,7 @@ import frc.robot.commands.led.LEDNoteToArmCommand
 import frc.robot.commands.shooter.*
 import frc.robot.subsystems.*
 import frc.robot.utils.DashboardTrigger
+import kotlin.math.truncate
 
 
 /**
@@ -49,6 +52,8 @@ object RobotContainer {
     private var armManual = ManualMode.LOCKED
 
     lateinit var robotState: RobotState
+    var useVision: Boolean = true
+        private set
 
     var alliance: DriverStation.Alliance? = null
         private set
@@ -64,6 +69,7 @@ object RobotContainer {
     private val elevatorUp = driverController.povUp()
     private val elevatorDown = driverController.povDown()
     private val ferryShot = driverController.leftBumper().or(DashboardTrigger("ferryShot"))
+    private val visionAlign = driverController.povLeft().or(DashboardTrigger("visionAlign"))
 
 
     // operator controller and triggers
@@ -119,6 +125,9 @@ object RobotContainer {
                 ManualMode.UNLOCKED
             }
         }))
+
+        visionAlign.onTrue(
+            InstantCommand({ useVision = !useVision }))
 
         slowModeToggle.whileTrue(InstantCommand({ SwerveSubsystem.toggleSpeedChange() })) // right trigger
 //        reverseIntakeButton.whileTrue(IntakeReverseCommand()) // right bumper && modifier key (right dpad)
@@ -201,7 +210,13 @@ object RobotContainer {
             ArmSubsystem.goHome()
         } else {
             DriverStation.reportWarning("ELEVATOR IS NOT RESET... Resetting to Home Now", false)
-            ArmSubsystem.goToDangle()
+            /** DO NOT UNCOMMENT THIS UNTIL THE ELEVATOR IS FIXED!!!!!!! */
+//            Commands.runOnce(ArmSubsystem::goToDangle)
+//                .andThen(
+//                    WaitUntilCommand { ArmSubsystem.armInPosition(ArmSubsystem.Position.DANGLE) },
+//                    Commands.runOnce(ElevatorSubsystem::getHomeCommand)
+//                )
+//                .schedule()
         }
     }
 

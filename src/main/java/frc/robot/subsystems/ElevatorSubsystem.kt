@@ -95,6 +95,8 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
                 }, this)
             }).until(this::atElevatorMin)
             .andThen(Commands.runOnce(this::stopElevator))
+            .andThen(Commands.runOnce(this::resetCANCoder))
+            .andThen(Commands.runOnce({ setGoal(ElevatorLevel.HOME.rotations) }))
             .andThen(Commands.runOnce(this::enable))
     }
 
