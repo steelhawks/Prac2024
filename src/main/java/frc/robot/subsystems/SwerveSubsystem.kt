@@ -225,7 +225,7 @@ object SwerveSubsystem : SubsystemBase() {
 
     fun initializePoseEstimator() {
         DriverStation.reportWarning("Initializing pose estimator", false)
-        var origin: Pose2d? = Pose2d()
+        val origin: Pose2d?
 
         if (RobotContainer.alliance == DriverStation.Alliance.Blue) {
             origin = Constants.BlueTeamPoses.BLUE_ORIGIN

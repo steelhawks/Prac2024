@@ -17,6 +17,7 @@ import frc.robot.commands.TeleopDriveCommand
 import frc.robot.commands.arm.ArmShootInAmpCommand
 import frc.robot.commands.elevator.ManualElevatorControlCommand
 import frc.robot.commands.intake.IntakeCommand
+import frc.robot.commands.intake.IntakeFromPlayer
 import frc.robot.commands.intake.IntakeReverseCommand
 import frc.robot.commands.intake.IntakeToArmCommand
 import frc.robot.commands.led.LEDNoteInShooterCommand
@@ -77,6 +78,9 @@ object RobotContainer {
 
     private val reverseIntakeButton = operatorController.povDown().or(DashboardTrigger("reverseIntake"))
     private val manualIntakeButton = operatorController.povUp().or(DashboardTrigger("manualIntake"))
+
+    private val intakeFromHumanButton = operatorController.a().or(DashboardTrigger("intakeFromHuman"))
+
     private val fireNoteToAmp = operatorController.y().or(DashboardTrigger("fireNoteToAmp"))
     private val subwooferShot = operatorController.leftBumper().or(DashboardTrigger("subwooferShot"))
     private val podiumShot = operatorController.rightBumper().or(DashboardTrigger("podiumShot"))
@@ -191,6 +195,8 @@ object RobotContainer {
 //                IntakeSubsystem
 //            )
         )
+
+        intakeFromHumanButton.whileTrue(IntakeFromPlayer())
     }
 
     private fun configureDefaultCommands() {
