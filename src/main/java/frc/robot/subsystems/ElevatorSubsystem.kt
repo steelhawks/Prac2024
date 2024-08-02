@@ -113,6 +113,10 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
         canCoder.setPosition(0.0)
     }
 
+    fun elevatorInPosition(pos: ElevatorLevel): Boolean {
+        return measurement == pos.rotations
+    }
+
     /** Runs LED Command when elevator is at minimum or maximum when [atElevatorMin] or [atElevatorMax] is true */
     fun elevatorLEDCommand(): Command {
         return LEDSubsystem.flashCommand(
@@ -158,5 +162,7 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
 
         SmartDashboard.putBoolean("elevator/lower limit hit", atElevatorMin)
         SmartDashboard.putNumber("elevator/rotations", measurement)
+
+        SmartDashboard.putBoolean("elevator/at position", elevatorInPosition(ElevatorLevel.HOME))
     }
 }

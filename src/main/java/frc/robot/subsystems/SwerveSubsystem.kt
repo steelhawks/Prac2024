@@ -40,6 +40,7 @@ import frc.robot.RobotContainer
 import frc.robot.commands.Autos
 import frc.robot.utils.SwerveModuleConstants
 import org.littletonrobotics.junction.Logger
+import kotlin.math.IEEErem
 import kotlin.math.atan
 import kotlin.math.sqrt
 
@@ -340,7 +341,7 @@ object SwerveSubsystem : SubsystemBase() {
     }
 
     private fun addVisionToPose(limelight: Limelight) {
-        if (poseEstimator == null || limelight == null) return
+        if (poseEstimator == null) return
 
         val visionMeasurement = odometryImpl.getVisionMeasurement(limelight)
         if (visionMeasurement != null) {
@@ -436,7 +437,8 @@ object SwerveSubsystem : SubsystemBase() {
         SmartDashboard.putNumberArray("Simulator SwerveModule States", simulatorLoggingState)
         SmartDashboard.putNumberArray("Real Robot SwerveModule States", realRobotMotorLoggingState)
         SmartDashboard.putNumber("Gyro", gyroYaw.degrees)
-        SmartDashboard.putNumber("Heading", Math.IEEEremainder(heading.degrees, 360.0)) // clamp to 360m
+        SmartDashboard.putNumber("Heading", heading.degrees.IEEErem(360.0)) // clamp to 360m
+        SmartDashboard.putBoolean("swerve/using vision pose", RobotContainer.useVision)
 
 //        SmartDashboard.putData("Poses", getPose())
     }

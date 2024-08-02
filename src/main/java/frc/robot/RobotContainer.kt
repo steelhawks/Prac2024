@@ -133,9 +133,8 @@ object RobotContainer {
 //        reverseIntakeButton.whileTrue(IntakeReverseCommand()) // right bumper && modifier key (right dpad)
         intakeButton.whileTrue(IntakeCommand()) // right bumper
 
-        resetHeading.onTrue(InstantCommand({ // b
-            SwerveSubsystem.zeroHeading()
-        }))
+        resetHeading.onTrue(
+            Commands.runOnce(SwerveSubsystem::zeroHeading))
 
         elevatorUp // dpad up
             .or(elevatorDown) // dpad down
@@ -166,7 +165,7 @@ object RobotContainer {
             .and { IntakeSubsystem.noteStatus != NoteStatus.ARM }
             .and { ElevatorSubsystem.atElevatorMin }
             .onTrue(
-                IntakeToArmCommand().withTimeout(2.0)
+                IntakeToArmCommand().withTimeout(5.0)
             )
 
         fireNoteToAmp // triangle || y
