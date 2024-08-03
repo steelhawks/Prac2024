@@ -16,10 +16,13 @@ class IntakeFromPlayer : ParallelCommandGroup(
         IntakeSubsystem.intakeReverse()
     }).until(IntakeSubsystem::intakeBeamBroken)
         .andThen(SequentialCommandGroup(
-            WaitCommand(0.2),
+            WaitCommand(0.04),
             Commands.runOnce({
                 ShooterSubsystem.stopFeed()
                 IntakeSubsystem.stop()
             })
+                .andThen(
+                    IntakeCommand()
+                ).until(IntakeSubsystem::intakeBeamBroken)
         ))
 )

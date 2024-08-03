@@ -24,23 +24,23 @@
   "Window": {
     "###FMS": {
       "Collapsed": "0",
-      "Pos": "5,484",
+      "Pos": "3,557",
       "Size": "169,184"
     },
     "###Joysticks": {
       "Collapsed": "0",
-      "Pos": "220,471",
-      "Size": "796,251"
+      "Pos": "217,644",
+      "Size": "796,73"
     },
     "###NetworkTables": {
-      "Collapsed": "0",
-      "Pos": "200,213",
+      "Collapsed": "1",
+      "Pos": "211,274",
       "Size": "823,366"
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
-      "Pos": "225,16",
-      "Size": "828,500"
+      "Pos": "180,18",
+      "Size": "828,255"
     },
     "###Other Devices": {
       "Collapsed": "0",

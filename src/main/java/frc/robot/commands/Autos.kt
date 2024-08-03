@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj2.command.*
 import frc.robot.commands.intake.IntakeCommand
 import frc.robot.commands.shooter.ManualShotCommand
+import frc.robot.commands.shooter.PodiumShot
 import frc.robot.commands.shooter.SubwooferShot
 import frc.robot.subsystems.IntakeSubsystem
 import frc.robot.subsystems.ShooterSubsystem
@@ -34,6 +35,42 @@ object Autos
                         )
                     ),
                     SubwooferShot()
+                )
+            )
+        )
+
+        NamedCommands.registerCommand("podium shoot",
+            ParallelRaceGroup(
+                WaitCommand(4.0),
+                ParallelDeadlineGroup(
+                    SequentialCommandGroup(
+                        WaitUntilCommand(ShooterSubsystem::isReadyToShoot),
+                        ParallelDeadlineGroup(
+                            WaitCommand(.3),
+                            ParallelCommandGroup(
+                                FeedToShooter(),
+                                ForkCommand(IntakeSubsystem.IntakeDirection.TO_INTAKE)
+                            )
+                        )
+                    ),
+                    PodiumShot()
+                )
+            ))
+
+        NamedCommands.registerCommand("ramp from anywhere",
+            ParallelRaceGroup(
+
+            ))
+
+        NamedCommands.registerCommand("shoot from anywhere",
+            SequentialCommandGroup(
+                WaitUntilCommand(ShooterSubsystem::isReadyToShoot),
+                ParallelDeadlineGroup(
+                    WaitCommand(.3),
+                    ParallelCommandGroup(
+                        FeedToShooter(),
+                        ForkCommand(IntakeSubsystem.IntakeDirection.TO_INTAKE)
+                    )
                 )
             )
         )
@@ -112,12 +149,12 @@ object Autos
         AUTO_3("Path Planner Test", AutoBuilder.followPath(PathPlannerPath.fromPathFile("Test Path")), false),
         AUTO_4("new auto pathplanner", PathPlannerAuto("test auto"), false),
         AUTO_5("simple path test pathplanner", PathPlannerAuto("home auto"), true),
-        AUTO_6("Placeholder Auto 3", nothingAuto(), false),
-        AUTO_7("Placeholder Auto 4", nothingAuto(), false),
-        AUTO_8("Placeholder Auto 5", nothingAuto(), false),
-        AUTO_9("Placeholder Auto 6", nothingAuto(), false),
-        AUTO_10("Placeholder Auto 7", nothingAuto(), false),
-        AUTO_11("Placeholder Auto 8", nothingAuto(), false)
+        AUTO_6("far 4 note (NOT TESTED)", PathPlannerAuto("far 4 noter"), true),
+        AUTO_7("Placeholder Auto 1", nothingAuto(), false),
+        AUTO_8("Placeholder Auto 2", nothingAuto(), false),
+        AUTO_9("Placeholder Auto 3", nothingAuto(), false),
+        AUTO_10("Placeholder Auto 4", nothingAuto(), false),
+        AUTO_11("Placeholder Auto 5", nothingAuto(), false)
         ;
 
         companion object

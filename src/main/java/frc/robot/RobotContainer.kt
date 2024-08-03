@@ -197,6 +197,10 @@ object RobotContainer {
         )
 
         intakeFromHumanButton.whileTrue(IntakeFromPlayer())
+            .onFalse(Commands.runOnce({
+                IntakeSubsystem.stop()
+                ShooterSubsystem.stopFeed()
+            }))
     }
 
     private fun configureDefaultCommands() {
