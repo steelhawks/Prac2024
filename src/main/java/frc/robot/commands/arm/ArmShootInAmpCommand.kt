@@ -24,7 +24,7 @@ class ArmShootInAmpCommand : Command() {
     override fun initialize() {
         noteShot = false
         armSubsystem.goToAmpFirePosition()
-//        elevatorSubsystem.getAmpCommand()
+        Commands.runOnce(elevatorSubsystem::getAmpCommand)
         timer.reset()
         timer.stop()
     }

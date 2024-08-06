@@ -2,11 +2,10 @@ package frc.robot
 
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID
-import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.RepeatCommand
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
@@ -25,7 +24,6 @@ import frc.robot.commands.led.LEDNoteToArmCommand
 import frc.robot.commands.shooter.*
 import frc.robot.subsystems.*
 import frc.robot.utils.DashboardTrigger
-import kotlin.math.truncate
 
 
 /**
@@ -66,7 +64,7 @@ object RobotContainer {
     private val slowModeToggle = driverController.rightTrigger()
     private val intakeButton = driverController.rightBumper()
     private val resetHeading = driverController.b()
-    private val unlockElevatorControl = driverController.leftStick()
+    private val toggleElevatorControl = driverController.leftStick()
     private val elevatorUp = driverController.povUp()
     private val elevatorDown = driverController.povDown()
     private val ferryShot = driverController.leftBumper().or(DashboardTrigger("ferryShot"))
@@ -122,13 +120,14 @@ object RobotContainer {
      * controllers or [Flight joysticks][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureDriverBindings() {
-        unlockElevatorControl.onTrue(InstantCommand({ // left stick BUTTON
-            elevatorManual = if (elevatorManual == ManualMode.UNLOCKED) {
-                ManualMode.LOCKED
-            } else {
-                ManualMode.UNLOCKED
-            }
-        }))
+        toggleElevatorControl.onTrue(SequentialCommandGroup(
+            InstantCommand({ elevatorManual = if (elevatorManual == ManualMode.UNLOCKED) ManualMode.LOCKED else ManualMode.UNLOCKED }),
+            ElevatorSubsystem.getHomeCommand()
+                .until(ElevatorSubsystem::atElevatorMin)
+                    .andThen(
+                        ElevatorSubsystem::stopElevator
+                    )
+        ))
 
         visionAlign.onTrue(
             InstantCommand({ useVision = !useVision }))
@@ -225,7 +224,6 @@ object RobotContainer {
 //                    WaitUntilCommand { ArmSubsystem.armInPosition(ArmSubsystem.Position.DANGLE) },
 //                    Commands.runOnce(ElevatorSubsystem::getHomeCommand)
 //                )
-//                .schedule()
         }
     }
 

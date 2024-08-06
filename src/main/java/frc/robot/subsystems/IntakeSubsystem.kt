@@ -1,6 +1,5 @@
 package frc.robot.subsystems
 
-import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj.DigitalInput
@@ -19,7 +18,6 @@ object IntakeSubsystem : SubsystemBase() {
     private val intakeBeam = DigitalInput(Constants.Intake.BEAM_BREAKER_INTAKE)
     private val armBeam = DigitalInput(Constants.Intake.BEAM_BREAKER_ARM)
 
-//    private val prevBeamBroken = false
     var noteStatus: NoteStatus = NoteStatus.NOTHING
 
     enum class IntakeDirection {
@@ -101,9 +99,5 @@ object IntakeSubsystem : SubsystemBase() {
     override fun periodic() {
         SmartDashboard.putBoolean("intake/intake beam", intakeBeamBroken)
         SmartDashboard.putBoolean("intake/arm beam", armBeamBroken)
-
-//        while (intakeBeamBroken) { // dangerous code
-//            LEDSubsystem.setColor(LEDSubsystem.LEDColor.GREEN)
-//        }
     }
 }

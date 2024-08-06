@@ -2,7 +2,6 @@ package frc.robot.subsystems
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration
 import com.ctre.phoenix6.configs.MagnetSensorConfigs
-import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.CANcoder
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.NeutralModeValue
@@ -68,36 +67,36 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
         elevatorRight.inverted = true
     }
 
-
     // manual control by straight calling this doesnt work because of the pid
     // to make this work make a command that disables the pid controller then uses this.
     fun controlElevator(isDown: Boolean) {
-        var speed = Constants.Elevator.MANUAL_ELEVATOR_SPEED
-
-        if (atElevatorMin || atElevatorMax) {
-            stopElevator()
-            return
-        }
-
-        if (!isDown) {
+        println("Running control elevator")
+        var speed: Double = Constants.Elevator.MANUAL_ELEVATOR_SPEED
+        if (isDown) {
+            if (atElevatorMin) {
+                stopElevator()
+                return
+            }
+        } else {
+            if (atElevatorMax) {
+                stopElevator()
+                return
+            }
             speed = -speed
         }
-
         elevatorLeft.set(speed)
         elevatorRight.set(speed)
     }
 
     fun getHomeCommand(): Command {
-        return Commands.runOnce(this::disable)
-            .andThen({
-                Commands.run({
-                    controlElevator(true)
-                }, this)
-            }).until(this::atElevatorMin)
-            .andThen(Commands.runOnce(this::stopElevator))
-            .andThen(Commands.runOnce(this::resetCANCoder))
-            .andThen(Commands.runOnce({ setGoal(ElevatorLevel.HOME.rotations) }))
-            .andThen(Commands.runOnce(this::enable))
+        return Commands.sequence(
+            Commands.runOnce(this::disable)
+                .andThen(
+                    Commands.run({
+                        controlElevator(true)
+                    }, this).until(this::atElevatorMin)
+                ).andThen(Commands.runOnce(this::stopElevator))
+        )
     }
 
     fun goHome() {
@@ -114,7 +113,7 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
     }
 
     fun elevatorInPosition(pos: ElevatorLevel): Boolean {
-        return measurement == pos.rotations
+        return Math.abs(measurement - pos.rotations) <= Constants.Elevator.TOLERANCE * 5
     }
 
     /** Runs LED Command when elevator is at minimum or maximum when [atElevatorMin] or [atElevatorMax] is true */
@@ -151,8 +150,11 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
 
     override fun getMeasurement(): Double = canCoder.position.value
 
-    fun getAmpCommand() {
-        setGoal(ElevatorLevel.AMP.rotations)
+    fun getAmpCommand(): Command {
+        return InstantCommand({
+            setGoal(ElevatorLevel.AMP.rotations)
+            enable()
+        })
     }
 
     override fun periodic() {
@@ -163,6 +165,6 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
         SmartDashboard.putBoolean("elevator/lower limit hit", atElevatorMin)
         SmartDashboard.putNumber("elevator/rotations", measurement)
 
-        SmartDashboard.putBoolean("elevator/at position", elevatorInPosition(ElevatorLevel.HOME))
+        SmartDashboard.putBoolean("elevator/at position", elevatorInPosition(ElevatorLevel.AMP))
     }
 }
