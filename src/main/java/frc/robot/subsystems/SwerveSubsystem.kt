@@ -152,7 +152,6 @@ object SwerveSubsystem : SubsystemBase() {
     var gyro: Pigeon2 = Pigeon2(Constants.Swerve.PIGEON_ID, Constants.PIGEON_CAN_NAME)
 
     private val field = Field2d()
-    private val simField = Field2d()
 
 
     val alignPID: PIDController = PIDController(
@@ -379,13 +378,6 @@ object SwerveSubsystem : SubsystemBase() {
     private val robotRelativeSpeeds: ChassisSpeeds
         get() {
             return Constants.Swerve.SWERVE_KINEMATICS.toChassisSpeeds(*moduleStates) // use * spread operator to spread the array of swerve states
-            // from the module states getter instead of just passing an array
-//            return Constants.Swerve.SWERVE_KINEMATICS.toChassisSpeeds(
-//                m_swerveModules[0].currentState,
-//                m_swerveModules[1].currentState,
-//                m_swerveModules[2].currentState,
-//                m_swerveModules[3].currentState
-//            )
         }
 
     override fun periodic() {
@@ -398,30 +390,17 @@ object SwerveSubsystem : SubsystemBase() {
             module.periodic()
         }
 
-        if ((RobotContainer.robotState != RobotContainer.RobotState.AUTON || Autos.selectedAutonomousUseVision) && RobotContainer.useVision) {
-            addVisionToPose(limelightShooter)
-            addVisionToPose(limelightArm)
-        }
+//        if ((RobotContainer.robotState != RobotContainer.RobotState.AUTON || Autos.selectedAutonomousUseVision) && RobotContainer.useVision) {
+//            addVisionToPose(limelightShooter)
+//            addVisionToPose(limelightArm)
+//        }
 
         field.robotPose = getPose()
-        simField.robotPose = getRelativePose()
 
         Logger.recordOutput("odometry/robot", getPose())
         Logger.recordOutput("odometry/robot3d", Pose3d(getPose()))
 
         SmartDashboard.putData("Real Field", field)
-        SmartDashboard.putData("Simulator Field", simField)
-
-        val simulatorLoggingState = doubleArrayOf(
-            m_swerveModules[0].desiredState.angle.degrees,
-            m_swerveModules[0].desiredState.speedMetersPerSecond,
-            m_swerveModules[1].desiredState.angle.degrees,
-            m_swerveModules[1].desiredState.speedMetersPerSecond,
-            m_swerveModules[2].desiredState.angle.degrees,
-            m_swerveModules[2].desiredState.speedMetersPerSecond,
-            m_swerveModules[3].desiredState.angle.degrees,
-            m_swerveModules[3].desiredState.speedMetersPerSecond
-        )
 
         val realRobotMotorLoggingState = doubleArrayOf(
             m_swerveModules[0].currentState.angle.degrees,
@@ -434,7 +413,6 @@ object SwerveSubsystem : SubsystemBase() {
             m_swerveModules[3].currentState.speedMetersPerSecond,
         )
 
-        SmartDashboard.putNumberArray("Simulator SwerveModule States", simulatorLoggingState)
         SmartDashboard.putNumberArray("Real Robot SwerveModule States", realRobotMotorLoggingState)
         SmartDashboard.putNumber("Gyro", gyroYaw.degrees)
         SmartDashboard.putNumber("Heading", heading.degrees.IEEErem(360.0)) // clamp to 360m
