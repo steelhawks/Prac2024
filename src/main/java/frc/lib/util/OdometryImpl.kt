@@ -19,7 +19,7 @@ class OdometryImpl
 /** Creates a new OdometryImpl.  */
 {
     fun getDistance(target: Pose2d): Double {
-        return SwerveSubsystem.getRelativePose().getTranslation().getDistance(target.getTranslation())
+        return SwerveSubsystem.getRelativePose().translation.getDistance(target.translation)
     }
 
     fun getPivotAngle(alliance: DriverStation.Alliance): Double {

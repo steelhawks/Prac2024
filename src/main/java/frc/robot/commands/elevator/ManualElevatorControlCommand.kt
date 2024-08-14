@@ -19,7 +19,7 @@ class ManualElevatorControlCommand(private val isDown: () -> Boolean) : Command(
     }
 
     override fun execute() {
-        if (!armSubsystem.inDanglePosition)
+        if (!armSubsystem.armInPosition(ArmSubsystem.Position.DANGLE))
             return
 
         val down = isDown()

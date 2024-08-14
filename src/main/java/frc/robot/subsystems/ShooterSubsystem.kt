@@ -12,7 +12,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem
-import frc.lib.util.COTSTalonFXSwerveConstants
 import frc.robot.Constants
 import kotlin.math.abs
 
@@ -125,11 +124,6 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
 
     fun goHome() {
         setGoal(Constants.Shooter.HOME_POSITION)
-//        setGoal(Constants.Shooter.DOWN_POSITION)
-    }
-
-    fun goDown() {
-        setGoal(Constants.Shooter.DOWN_POSITION)
     }
 
     fun feedToShooter() {
@@ -200,7 +194,6 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
 
     val isReadyToShoot: Boolean
         get() = topShooterAtSetpoint && bottomShooterAtSetpoint && pivotAtSetpoint
-
 
     override fun periodic() {
         if (m_enabled) {

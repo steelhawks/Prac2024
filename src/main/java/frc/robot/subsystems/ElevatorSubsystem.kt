@@ -70,23 +70,36 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
     // manual control by straight calling this doesnt work because of the pid
     // to make this work make a command that disables the pid controller then uses this.
     fun controlElevator(isDown: Boolean) {
-        println("Running control elevator")
-        var speed: Double = Constants.Elevator.MANUAL_ELEVATOR_SPEED
-        if (isDown) {
-            if (atElevatorMin) {
-                stopElevator()
-                return
-            }
-        } else {
-            if (atElevatorMax) {
-                stopElevator()
-                return
-            }
-            speed = -speed
+        if ((isDown && atElevatorMin) || (!isDown && atElevatorMax)) {
+            stopElevator()
+            return
         }
+
+        val speed = if (isDown) Constants.Elevator.MANUAL_ELEVATOR_SPEED
+        else -Constants.Elevator.MANUAL_ELEVATOR_SPEED
+
         elevatorLeft.set(speed)
         elevatorRight.set(speed)
     }
+
+//    fun controlElevator(isDown: Boolean) {
+//        println("Running control elevator")
+//        var speed: Double = Constants.Elevator.MANUAL_ELEVATOR_SPEED
+//        if (isDown) {
+//            if (atElevatorMin) {
+//                stopElevator()
+//                return
+//            }
+//        } else {
+//            if (atElevatorMax) {
+//                stopElevator()
+//                return
+//            }
+//            speed = -speed
+//        }
+//        elevatorLeft.set(speed)
+//        elevatorRight.set(speed)
+//    }
 
     fun getHomeCommand(): Command {
         return Commands.sequence(
@@ -113,6 +126,10 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
     }
 
     fun elevatorInPosition(pos: ElevatorLevel): Boolean {
+        if (pos == ElevatorLevel.HOME && atElevatorMin) {
+            return true
+        }
+
         return Math.abs(measurement - pos.rotations) <= Constants.Elevator.TOLERANCE * 5
     }
 

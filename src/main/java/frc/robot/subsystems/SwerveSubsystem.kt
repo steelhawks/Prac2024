@@ -145,11 +145,11 @@ class SwerveModule(val swerveModuleNumber: Int, private val constants: SwerveMod
 
 object SwerveSubsystem : SubsystemBase() {
     var poseEstimator: SwerveDrivePoseEstimator? = null
-    private val odometryImpl: OdometryImpl
+    val odometryImpl: OdometryImpl
 
     var limelightShooter: Limelight
     var limelightArm: Limelight
-    var gyro: Pigeon2 = Pigeon2(Constants.Swerve.PIGEON_ID, Constants.PIGEON_CAN_NAME)
+    private var gyro: Pigeon2 = Pigeon2(Constants.Swerve.PIGEON_ID, Constants.PIGEON_CAN_NAME)
 
     private val field = Field2d()
 
@@ -390,10 +390,10 @@ object SwerveSubsystem : SubsystemBase() {
             module.periodic()
         }
 
-//        if ((RobotContainer.robotState != RobotContainer.RobotState.AUTON || Autos.selectedAutonomousUseVision) && RobotContainer.useVision) {
-//            addVisionToPose(limelightShooter)
-//            addVisionToPose(limelightArm)
-//        }
+        if ((RobotContainer.robotState != RobotContainer.RobotState.AUTON || Autos.selectedAutonomousUseVision) && RobotContainer.useVision) {
+            addVisionToPose(limelightShooter)
+            addVisionToPose(limelightArm)
+        }
 
         field.robotPose = getPose()
 

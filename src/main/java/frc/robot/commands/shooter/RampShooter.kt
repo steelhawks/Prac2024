@@ -18,13 +18,13 @@ open class RampShooter(private val topRPM: Double, private val bottomRPM: Double
 
     override fun execute() {
         shooterSubsystem.rampShooter(topRPM, bottomRPM)
+        // add angle clamp later so it cant go past its physical angle
         shooterSubsystem.setGoal(angle)
     }
 
     override fun isFinished(): Boolean {
         // TODO: Make this return true when this Command no longer needs to run execute()
-//        return shooterSubsystem.isReadyToShoot && IntakeSubsystem.noteStatus == NoteStatus.IN_SHOOTER // might be a stretch but check if it works else just leave false honestly
-        return false
+       return false
     }
 
     override fun end(interrupted: Boolean) {

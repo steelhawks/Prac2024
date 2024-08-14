@@ -8,6 +8,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem
+import frc.lib.util.math.MathConstants
 import frc.robot.Constants
 import kotlin.math.abs
 
@@ -86,16 +87,15 @@ object ArmSubsystem : ProfiledPIDSubsystem(
     }
 
     override fun getMeasurement(): Double {
-        val preConversion: Double = convert360To180(((canCoderPositionDegrees)) % 360) * Math.PI / 180
+        val preConversion: Double = MathConstants.convert360To180(((canCoderPositionDegrees)) % 360) * Math.PI / 180
         return preConversion + 3.425 - Math.PI
-    }
-
-    private fun convert360To180(angle: Double): Double {
-        return (angle + 180) % 360 - 180
     }
 
     private val canCoderPositionDegrees: Double
         get() = ((m_canCoder.absolutePosition.valueAsDouble * 360 + 360) - 63) % 360
+
+    val shooterMotorDegrees: Double
+        get() = m_shootMotor.position.value * 360
 
     override fun periodic() {
         if (m_enabled) {
@@ -118,12 +118,6 @@ object ArmSubsystem : ProfiledPIDSubsystem(
     fun stopArm() {
         m_pivotMotor.stopMotor()
     }
-
-    val inAmpFirePosition
-        get() = abs(measurement - Position.AMP_SHOOT.rotations) <= Constants.AmpArm.PIVOT_TOLERANCE * 5
-
-    val inDanglePosition
-        get() = abs(measurement - Position.DANGLE.rotations) <= Constants.AmpArm.PIVOT_TOLERANCE * 5
 
     fun armInPosition(pos: Position): Boolean {
         return abs(measurement - pos.rotations) <= Constants.AmpArm.PIVOT_TOLERANCE * 5

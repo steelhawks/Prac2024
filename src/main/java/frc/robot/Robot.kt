@@ -118,7 +118,6 @@ object Robot : LoggedRobot()
 
     override fun disabledPeriodic()
     {
-//        LEDSubsystem.bounceWave(LEDSubsystem.LEDColor.RED)
         LEDSubsystem.rainbow()
     }
 

@@ -2,10 +2,7 @@ package frc.robot
 
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID
-import edu.wpi.first.wpilibj2.command.Commands
-import edu.wpi.first.wpilibj2.command.InstantCommand
-import edu.wpi.first.wpilibj2.command.RepeatCommand
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
+import edu.wpi.first.wpilibj2.command.*
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
@@ -85,6 +82,10 @@ object RobotContainer {
     private val unlockShooterControl = operatorController.leftStick()
     private val unlockArmControl = operatorController.rightStick()
 
+    private val elevatorAndArmHomeButton = operatorController.x()
+
+    private val rampAnywhereButton = operatorController.rightTrigger()
+
 
     // this thread should run ONCE
     private val valueGetter = Thread {
@@ -122,11 +123,14 @@ object RobotContainer {
     private fun configureDriverBindings() {
         toggleElevatorControl.onTrue(SequentialCommandGroup(
             InstantCommand({ elevatorManual = if (elevatorManual == ManualMode.UNLOCKED) ManualMode.LOCKED else ManualMode.UNLOCKED }),
-            ElevatorSubsystem.getHomeCommand()
-                .until(ElevatorSubsystem::atElevatorMin)
+            ConditionalCommand(
+                ElevatorSubsystem.getHomeCommand()
+                    .until(ElevatorSubsystem::atElevatorMin)
                     .andThen(
                         ElevatorSubsystem::stopElevator
-                    )
+                    ),
+                InstantCommand()
+            ) { !ElevatorSubsystem.atElevatorMin }
         ))
 
         visionAlign.onTrue(
@@ -164,18 +168,56 @@ object RobotContainer {
             }
         }))
 
-        fireNoteToAmp // triangle || y
+        fireNoteToAmp // triangle || y // intake to arm
             .and { IntakeSubsystem.noteStatus != NoteStatus.ARM }
             .and { ElevatorSubsystem.atElevatorMin }
             .onTrue(
                 IntakeToArmCommand().withTimeout(5.0)
             )
 
-        fireNoteToAmp // triangle || y
+        fireNoteToAmp // go to shooting position
             .and { IntakeSubsystem.noteStatus == NoteStatus.ARM }
             .onTrue(
-                ArmShootInAmpCommand()
+                SequentialCommandGroup(
+                    Commands.runOnce(ArmSubsystem::goToAmpFirePosition),
+                    WaitUntilCommand { ArmSubsystem.armInPosition(ArmSubsystem.Position.AMP_SHOOT) },
+                    ElevatorSubsystem.getAmpCommand()
+                )
             )
+
+        fireNoteToAmp // shoot note
+            .and { ArmSubsystem.armInPosition(ArmSubsystem.Position.AMP_SHOOT) }
+            .and { ElevatorSubsystem.elevatorInPosition(ElevatorSubsystem.ElevatorLevel.AMP) }
+            .onTrue(
+                ParallelCommandGroup(
+                    SequentialCommandGroup(
+                        WaitCommand(.2),
+                        ArmShootInAmpCommand(),
+                    ),
+                    LEDSubsystem.flashCommand(LEDSubsystem.LEDColor.ORANGE, 0.2, 2.0)
+                )
+            )
+
+        elevatorAndArmHomeButton
+            .and { ElevatorSubsystem.elevatorInPosition(ElevatorSubsystem.ElevatorLevel.AMP) }
+            .onTrue(
+                SequentialCommandGroup(
+                    InstantCommand({ ArmSubsystem.goToDangle() }),
+                    WaitCommand(.2),
+                    ElevatorSubsystem.getHomeCommand(),
+                    ConditionalCommand(InstantCommand({ ArmSubsystem.goHome() }), InstantCommand(), ElevatorSubsystem::atElevatorMin)
+                )
+            )
+
+        rampAnywhereButton.whileTrue(
+            ParallelCommandGroup(
+                RampShooter(
+                    2000.0,
+                    2000.0,
+                    SwerveSubsystem.odometryImpl.getPivotAngle(alliance!!)
+                )
+            )
+        )
 
         subwooferShot.whileTrue( // left bumper
             SubwooferShot()
@@ -219,11 +261,11 @@ object RobotContainer {
         } else {
             DriverStation.reportWarning("ELEVATOR IS NOT RESET... Resetting to Home Now", false)
             /** DO NOT UNCOMMENT THIS UNTIL THE ELEVATOR IS FIXED!!!!!!! */
-//            Commands.runOnce(ArmSubsystem::goToDangle)
-//                .andThen(
-//                    WaitUntilCommand { ArmSubsystem.armInPosition(ArmSubsystem.Position.DANGLE) },
-//                    Commands.runOnce(ElevatorSubsystem::getHomeCommand)
-//                )
+            Commands.runOnce(ArmSubsystem::goToDangle)
+                .andThen(
+                    WaitUntilCommand { ArmSubsystem.armInPosition(ArmSubsystem.Position.DANGLE) },
+                    Commands.runOnce(ElevatorSubsystem::getHomeCommand)
+                )
         }
     }
 

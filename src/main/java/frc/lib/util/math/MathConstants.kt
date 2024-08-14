@@ -10,4 +10,8 @@ object MathConstants {
     fun continuous180To360(angle: Double): Double {
         return (angle + 360) % 360
     }
+
+    fun convert360To180(angle: Double): Double {
+        return (angle + 180) % 360 - 180
+    }
 }

@@ -10,13 +10,13 @@ import frc.robot.subsystems.IntakeSubsystem
 import frc.robot.subsystems.ShooterSubsystem
 
 class IntakeFromPlayer : ParallelCommandGroup(
-    RampShooter(-250.0, -250.0, 1.02),
+    RampShooter(-250.0, -250.0, .95),
     Commands.run({
         ShooterSubsystem.feedBackToIntake()
         IntakeSubsystem.intakeReverse()
     }).until(IntakeSubsystem::intakeBeamBroken)
         .andThen(SequentialCommandGroup(
-            WaitCommand(0.04),
+            WaitCommand(0.05),
             Commands.runOnce({
                 ShooterSubsystem.stopFeed()
                 IntakeSubsystem.stop()
