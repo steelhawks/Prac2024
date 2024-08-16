@@ -12,7 +12,7 @@ class ForkCommand(private val dir: IntakeSubsystem.IntakeDirection) : Command() 
     }
 
     override fun execute() {
-        intakeSubsystem.fork(dir);
+        intakeSubsystem.fork(dir)
     }
 
     override fun isFinished(): Boolean {

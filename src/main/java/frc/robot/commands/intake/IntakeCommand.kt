@@ -23,9 +23,9 @@ class IntakeCommand : Command() {
         intakeSubsystem.intake()
         intakeSubsystem.noteStatus = NoteStatus.INTAKING
 
-        if (prevBeamBroken) {
-            shooterSubsystem.feedToShooter()
-        }
+//        if (prevBeamBroken) {
+//            shooterSubsystem.feedToShooter()
+//        }
     }
 
     override fun isFinished(): Boolean {
@@ -41,7 +41,7 @@ class IntakeCommand : Command() {
 
         if (prevBeamBroken) {
             intakeSubsystem.noteStatus = NoteStatus.IN_SHOOTER
-            shooterSubsystem.stopFeed()
+//            shooterSubsystem.stopFeed()
         } else {
             intakeSubsystem.noteStatus = NoteStatus.NOTHING
         }
