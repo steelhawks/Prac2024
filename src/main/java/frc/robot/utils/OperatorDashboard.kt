@@ -13,6 +13,7 @@ object OperatorDashboard {
     var robotState: StringPublisher = status.getStringTopic("robotState").publish()
     var noteStatus: StringPublisher = status.getStringTopic("noteStatus").publish()
     var isReadyToShoot: BooleanPublisher = status.getBooleanTopic("isReadyToShoot").publish()
+    var elevatorLevel: StringPublisher = status.getStringTopic("elevatorLevel").publish()
 
     init {
         try {

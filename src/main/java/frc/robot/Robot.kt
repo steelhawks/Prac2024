@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.util.WPILibVersion
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.robot.commands.Autos
+import frc.robot.subsystems.ElevatorSubsystem
 import frc.robot.subsystems.IntakeSubsystem
 import frc.robot.subsystems.LEDSubsystem
 import frc.robot.subsystems.ShooterSubsystem
@@ -103,6 +104,17 @@ object Robot : LoggedRobot()
         SmartDashboard.putNumber("Auton Selected", Autos.getAutonSelector.toDouble())
         SmartDashboard.putString("Auton Name", Autos.selectedAutonomousCommandName)
         SmartDashboard.putBoolean("nt4/shooting from app", DashboardTrigger("fireShooter").asBoolean)
+        OperatorDashboard.elevatorLevel.set(
+            if (ElevatorSubsystem.atElevatorMax) {
+                "Home"
+            } else if (ElevatorSubsystem.elevatorInPosition(ElevatorSubsystem.ElevatorLevel.CLIMB)) {
+                "Climb"
+            } else if (ElevatorSubsystem.elevatorInPosition(ElevatorSubsystem.ElevatorLevel.AMP)) {
+                "AMP"
+            } else {
+                ""
+            }
+        )
 
         OperatorDashboard.robotState.set(RobotContainer.robotState.name)
         OperatorDashboard.noteStatus.set(IntakeSubsystem.noteStatus.name)

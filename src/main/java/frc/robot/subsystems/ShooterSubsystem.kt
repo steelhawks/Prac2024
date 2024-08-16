@@ -10,9 +10,9 @@ import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem
+import edu.wpi.first.wpilibj2.command.*
 import frc.robot.Constants
+import frc.robot.commands.ForkCommand
 import kotlin.math.abs
 
 object ShooterSubsystem : ProfiledPIDSubsystem(
@@ -184,7 +184,7 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
         get() = m_bottomShooterMotor.velocity.value * 60
 
     private val pivotAtSetpoint: Boolean
-        get() = abs(measurement - controller.goal.position) <= Constants.Shooter.PIVOT_TOLERANCE * 1.5
+        get() = if (controller.goal.position == 1.02) true else abs(measurement - controller.goal.position) <= Constants.Shooter.PIVOT_TOLERANCE * 1.5
 
     private val topShooterAtSetpoint: Boolean
         get() = abs((shooterTopRPM - topShooterPIDController.setpoint)) <= Constants.Shooter.SHOOTER_TOLERANCE * 1.5

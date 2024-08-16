@@ -7,6 +7,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
 import frc.robot.commands.Autos
+import frc.robot.commands.FeedToShooter
+import frc.robot.commands.ForkCommand
 import frc.robot.commands.led.LEDIdleCommand
 import frc.robot.commands.led.LEDNoteIntakenCommand
 import frc.robot.commands.TeleopDriveCommand
@@ -140,6 +142,7 @@ object RobotContainer {
 
         slowModeToggle.whileTrue(InstantCommand({ SwerveSubsystem.toggleSpeedChange() })) // right trigger
 //        reverseIntakeButton.whileTrue(IntakeReverseCommand()) // right bumper && modifier key (right dpad)
+
         intakeButton.whileTrue(IntakeCommand()) // right bumper
 
         resetHeading.onTrue(
@@ -228,12 +231,11 @@ object RobotContainer {
 
         reverseIntakeButton.whileTrue(IntakeReverseCommand())
         manualIntakeButton.whileTrue(
-            IntakeCommand()
-//            Commands.runEnd(
-//                IntakeSubsystem::intake,
-//                IntakeSubsystem::stop,
-//                IntakeSubsystem
-//            )
+            Commands.runEnd(
+                IntakeSubsystem::intake,
+                IntakeSubsystem::stop,
+                IntakeSubsystem
+            )
         )
 
         intakeFromHumanButton.whileTrue(IntakeFromPlayer())
@@ -259,7 +261,6 @@ object RobotContainer {
             ArmSubsystem.goHome()
         } else {
             DriverStation.reportWarning("ELEVATOR IS NOT RESET... Resetting to Home Now", false)
-            /** DO NOT UNCOMMENT THIS UNTIL THE ELEVATOR IS FIXED!!!!!!! */
             Commands.runOnce(ArmSubsystem::goToDangle)
                 .andThen(
                     WaitUntilCommand { ArmSubsystem.armInPosition(ArmSubsystem.Position.DANGLE) },
@@ -310,14 +311,23 @@ object RobotContainer {
                 LEDNoteInShooterCommand(LEDSubsystem.LEDColor.MAGENTA)
             )
 
-//        Trigger {
-//            ShooterSubsystem.firing
-//        }
-//            .whileTrue(
-//                RepeatCommand(
-//                    ShooterSubsystem.shooterLEDCommand()
-//                )
-//            )
+        ferryShot
+            .or(podiumShot).or(subwooferShot)
+            .whileTrue(
+                FeedToShooter()
+            ).onFalse(
+                Commands.runOnce({
+                    ShooterSubsystem.stopFeed()
+                })
+            )
+
+        Trigger {
+            ShooterSubsystem.firing
+        }.and { ShooterSubsystem.isReadyToShoot }
+            .and(ferryShot.or(podiumShot).or(subwooferShot))
+            .onTrue(
+                ForkCommand(IntakeSubsystem.IntakeDirection.TO_SHOOTER).withTimeout(1.0)
+            )
 
         Trigger {
             ShooterSubsystem.isReadyToShoot
