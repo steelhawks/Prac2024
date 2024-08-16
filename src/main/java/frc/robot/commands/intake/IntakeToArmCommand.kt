@@ -2,6 +2,7 @@ package frc.robot.commands.intake
 
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.NoteStatus
+import frc.robot.RobotContainer
 import frc.robot.subsystems.ArmSubsystem
 import frc.robot.subsystems.IntakeSubsystem
 
@@ -48,5 +49,11 @@ class IntakeToArmCommand : Command() {
             intakeSubsystem.noteStatus = NoteStatus.ARM
         else
             intakeSubsystem.noteStatus = NoteStatus.INTAKEN
+
+        if (interrupted) {
+            RobotContainer.intakeToArmInterrupted = true
+        } else {
+            RobotContainer.intakeToArmInterrupted = false
+        }
     }
 }

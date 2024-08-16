@@ -56,7 +56,7 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
             DriverStation.reportWarning("ELEVATOR IS NOT AT MINIMUM... DO NOT MOVE", false)
         }
 
-        enable()
+//        enable()
     }
 
     private fun configureMotors() {
@@ -82,38 +82,35 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
         elevatorRight.set(speed)
     }
 
-//    fun controlElevator(isDown: Boolean) {
-//        println("Running control elevator")
-//        var speed: Double = Constants.Elevator.MANUAL_ELEVATOR_SPEED
-//        if (isDown) {
-//            if (atElevatorMin) {
-//                stopElevator()
-//                return
-//            }
-//        } else {
-//            if (atElevatorMax) {
-//                stopElevator()
-//                return
-//            }
-//            speed = -speed
-//        }
-//        elevatorLeft.set(speed)
-//        elevatorRight.set(speed)
-//    }
-
     fun getHomeCommand(): Command {
         return Commands.sequence(
-            Commands.runOnce(this::disable)
+            Commands.runOnce({
+                disable()
+                ArmSubsystem.goToDangle()
+            })
                 .andThen(
                     Commands.run({
                         controlElevator(true)
-                    }, this).until(this::atElevatorMin)
-                ).andThen(Commands.runOnce(this::stopElevator))
+                    }, this).until(this::atElevatorMin).withTimeout(5.0)
+                ).andThen(Commands.runOnce({
+                    stopElevator()
+                    ArmSubsystem.goHome()
+                }))
         )
     }
 
-    fun goHome() {
-        setGoal(ElevatorLevel.HOME.rotations)
+    fun getAmpCommand(): Command {
+        return InstantCommand({
+            setGoal(ElevatorLevel.AMP.rotations)
+            enable()
+        })
+    }
+
+    fun getClimbCommand(): Command {
+        return InstantCommand({
+            setGoal(ElevatorLevel.CLIMB.rotations)
+            enable()
+        })
     }
 
     fun stopElevator() {
@@ -167,21 +164,13 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
 
     override fun getMeasurement(): Double = canCoder.position.value
 
-    fun getAmpCommand(): Command {
-        return InstantCommand({
-            setGoal(ElevatorLevel.AMP.rotations)
-            enable()
-        })
-    }
-
     override fun periodic() {
         if (m_enabled) {
             useOutput(m_controller.calculate(measurement), m_controller.setpoint)
         }
 
+        SmartDashboard.putBoolean("elevator/at amp level", elevatorInPosition(ElevatorLevel.AMP))
         SmartDashboard.putBoolean("elevator/lower limit hit", atElevatorMin)
         SmartDashboard.putNumber("elevator/rotations", measurement)
-
-        SmartDashboard.putBoolean("elevator/at position", elevatorInPosition(ElevatorLevel.AMP))
     }
 }

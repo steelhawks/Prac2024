@@ -127,7 +127,7 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
     }
 
     fun feedToShooter() {
-        m_feederMotor.set(1.0)
+        m_feederMotor.set(10.0)
     }
 
     fun feedBackToIntake() {

@@ -35,6 +35,8 @@ import frc.robot.utils.DashboardTrigger
  * directly reference the (single instance of the) object.
  */
 object RobotContainer {
+    var intakeToArmInterrupted: Boolean = false
+
     enum class RobotState {
         DISABLED, TELEOP, AUTON, TEST
     }
@@ -173,16 +175,13 @@ object RobotContainer {
             .and { ElevatorSubsystem.atElevatorMin }
             .onTrue(
                 IntakeToArmCommand().withTimeout(5.0)
-            )
-
-        fireNoteToAmp // go to shooting position
-            .and { IntakeSubsystem.noteStatus == NoteStatus.ARM }
-            .onTrue(
-                SequentialCommandGroup(
-                    Commands.runOnce(ArmSubsystem::goToAmpFirePosition),
-                    WaitUntilCommand { ArmSubsystem.armInPosition(ArmSubsystem.Position.AMP_SHOOT) },
-                    ElevatorSubsystem.getAmpCommand()
-                )
+                    .andThen(
+                        SequentialCommandGroup(
+                            Commands.runOnce(ArmSubsystem::goToAmpFirePosition),
+                            WaitCommand(.5),
+                            ElevatorSubsystem.getAmpCommand(),
+                        ).unless { intakeToArmInterrupted }
+                    )
             )
 
         fireNoteToAmp // shoot note
@@ -209,15 +208,15 @@ object RobotContainer {
                 )
             )
 
-        rampAnywhereButton.whileTrue(
-            ParallelCommandGroup(
-                RampShooter(
-                    2000.0,
-                    2000.0,
-                    SwerveSubsystem.odometryImpl.getPivotAngle(alliance!!)
-                )
-            )
-        )
+//        rampAnywhereButton.whileTrue(
+//            ParallelCommandGroup(
+//                RampShooter(
+//                    2000.0,
+//                    2000.0,
+//                    SwerveSubsystem.odometryImpl.getPivotAngle(alliance!!)
+//                )
+//            )
+//        )
 
         subwooferShot.whileTrue( // left bumper
             SubwooferShot()
