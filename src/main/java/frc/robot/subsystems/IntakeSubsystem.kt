@@ -19,6 +19,7 @@ object IntakeSubsystem : SubsystemBase() {
     private val armBeam = DigitalInput(Constants.Intake.BEAM_BREAKER_ARM)
 
     var noteStatus: NoteStatus = NoteStatus.NOTHING
+    var intakeToArmInterrupted: Boolean = false
 
     enum class IntakeDirection {
         TO_SHOOTER,

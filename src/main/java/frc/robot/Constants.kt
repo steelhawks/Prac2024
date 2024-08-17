@@ -25,6 +25,15 @@ object Constants {
     object OperatorConstants {
         const val DRIVER_CONTROLLER_PORT = 0
         const val OPERATOR_CONTROLLER_PORT = 1
+
+        const val OPERATOR_LEFT_STICK_BUTTON_ID = 11
+        const val OPERATOR_RIGHT_STICK_BUTTON_ID = 12
+
+        const val OPERATOR_LEFT_STICK_AXIS = 1
+        const val OPERATOR_RIGHT_STICK_AXIS = 1
+
+        const val OPERATOR_LEFT_TRIGGER_ID = 7
+        const val OPERATOR_RIGHT_TRIGGER_ID = 8
     }
 
     object LED {

@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.ArmSubsystem
 import frc.robot.subsystems.ElevatorSubsystem
 
-class ManualElevatorControlCommand(private val isDown: () -> Boolean) : Command() {
+class ManualElevatorControlCommand(private val isDown: () -> Boolean?) : Command() {
     private val elevatorSubsystem = ElevatorSubsystem
     private val armSubsystem = ArmSubsystem
 
@@ -23,7 +23,11 @@ class ManualElevatorControlCommand(private val isDown: () -> Boolean) : Command(
             return
 
         val down = isDown()
-        elevatorSubsystem.controlElevator(down)
+        if (down != null) {
+            elevatorSubsystem.controlElevator(down)
+        } else {
+            elevatorSubsystem.stopElevator()
+        }
     }
 
     override fun isFinished(): Boolean {

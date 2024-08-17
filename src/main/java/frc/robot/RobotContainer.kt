@@ -9,8 +9,6 @@ import frc.robot.Constants.OperatorConstants
 import frc.robot.commands.Autos
 import frc.robot.commands.FeedToShooter
 import frc.robot.commands.ForkCommand
-import frc.robot.commands.led.LEDIdleCommand
-import frc.robot.commands.led.LEDNoteIntakenCommand
 import frc.robot.commands.TeleopDriveCommand
 import frc.robot.commands.arm.ArmShootInAmpCommand
 import frc.robot.commands.elevator.ManualElevatorControlCommand
@@ -18,11 +16,15 @@ import frc.robot.commands.intake.IntakeCommand
 import frc.robot.commands.intake.IntakeFromPlayer
 import frc.robot.commands.intake.IntakeReverseCommand
 import frc.robot.commands.intake.IntakeToArmCommand
+import frc.robot.commands.led.LEDIdleCommand
 import frc.robot.commands.led.LEDNoteInShooterCommand
+import frc.robot.commands.led.LEDNoteIntakenCommand
 import frc.robot.commands.led.LEDNoteToArmCommand
 import frc.robot.commands.shooter.*
 import frc.robot.subsystems.*
 import frc.robot.utils.DashboardTrigger
+import kotlin.math.abs
+import kotlin.math.sign
 
 
 /**
@@ -37,8 +39,6 @@ import frc.robot.utils.DashboardTrigger
  * directly reference the (single instance of the) object.
  */
 object RobotContainer {
-    var intakeToArmInterrupted: Boolean = false
-
     enum class RobotState {
         DISABLED, TELEOP, AUTON, TEST
     }
@@ -47,9 +47,9 @@ object RobotContainer {
         LOCKED, UNLOCKED
     }
 
-    private var elevatorManual = ManualMode.LOCKED
-    private var shooterManual = ManualMode.LOCKED
-    private var armManual = ManualMode.LOCKED
+    var elevatorManual = ManualMode.LOCKED
+    var shooterManual = ManualMode.LOCKED
+    var armManual = ManualMode.LOCKED
 
     lateinit var robotState: RobotState
     var useVision: Boolean = true
@@ -65,9 +65,7 @@ object RobotContainer {
     private val slowModeToggle = driverController.rightTrigger()
     private val intakeButton = driverController.rightBumper()
     private val resetHeading = driverController.b()
-    private val toggleElevatorControl = driverController.leftStick()
-    private val elevatorUp = driverController.povUp()
-    private val elevatorDown = driverController.povDown()
+    private val unlockShooterControl = driverController.leftStick()
     private val ferryShot = driverController.leftBumper().or(DashboardTrigger("ferryShot"))
     private val visionAlign = driverController.povLeft().or(DashboardTrigger("visionAlign"))
 
@@ -77,18 +75,14 @@ object RobotContainer {
 
     private val reverseIntakeButton = operatorController.povDown().or(DashboardTrigger("reverseIntake"))
     private val manualIntakeButton = operatorController.povUp().or(DashboardTrigger("manualIntake"))
-
     private val intakeFromHumanButton = operatorController.a().or(DashboardTrigger("intakeFromHuman"))
-
-    private val fireNoteToAmp = operatorController.y().or(DashboardTrigger("fireNoteToAmp"))
+    private val fireNoteToAmp = operatorController.y().or(DashboardTrigger("noteToAmp"))
     private val subwooferShot = operatorController.leftBumper().or(DashboardTrigger("subwooferShot"))
     private val podiumShot = operatorController.rightBumper().or(DashboardTrigger("podiumShot"))
-    private val unlockShooterControl = operatorController.leftStick()
-    private val unlockArmControl = operatorController.rightStick()
-
+    private val unlockElevatorControl = operatorController.button(OperatorConstants.OPERATOR_LEFT_STICK_BUTTON_ID)
+    private val unlockArmControl = operatorController.button(OperatorConstants.OPERATOR_RIGHT_STICK_BUTTON_ID)
+    private val rampAnywhereButton = operatorController.button(OperatorConstants.OPERATOR_LEFT_TRIGGER_ID)
     private val elevatorAndArmHomeButton = operatorController.x()
-
-    private val rampAnywhereButton = operatorController.rightTrigger()
 
 
     // this thread should run ONCE
@@ -104,7 +98,7 @@ object RobotContainer {
 
         LEDSubsystem.defaultCommand =
             LEDIdleCommand(if (alliance == DriverStation.Alliance.Red) LEDSubsystem.LEDColor.RED else LEDSubsystem.LEDColor.BLUE)
-        configureTriggers() // configure triggers here so all threads are up to date when this is called
+        configureTriggers() // configure triggers here so all threads are up-to-date when this is called
         DriverStation.reportWarning("Current alliance is $alliance", false)
     }
 
@@ -125,38 +119,6 @@ object RobotContainer {
      * controllers or [Flight joysticks][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureDriverBindings() {
-        toggleElevatorControl.onTrue(SequentialCommandGroup(
-            InstantCommand({ elevatorManual = if (elevatorManual == ManualMode.UNLOCKED) ManualMode.LOCKED else ManualMode.UNLOCKED }),
-            ConditionalCommand(
-                ElevatorSubsystem.getHomeCommand()
-                    .until(ElevatorSubsystem::atElevatorMin)
-                    .andThen(
-                        ElevatorSubsystem::stopElevator
-                    ),
-                InstantCommand()
-            ) { !ElevatorSubsystem.atElevatorMin }
-        ))
-
-        visionAlign.onTrue(
-            InstantCommand({ useVision = !useVision }))
-
-        slowModeToggle.whileTrue(InstantCommand({ SwerveSubsystem.toggleSpeedChange() })) // right trigger
-//        reverseIntakeButton.whileTrue(IntakeReverseCommand()) // right bumper && modifier key (right dpad)
-
-        intakeButton.whileTrue(IntakeCommand()) // right bumper
-
-        resetHeading.onTrue(
-            Commands.runOnce(SwerveSubsystem::zeroHeading))
-
-        elevatorUp // dpad up
-            .or(elevatorDown) // dpad down
-            .and { elevatorManual == ManualMode.UNLOCKED }
-            .whileTrue(ManualElevatorControlCommand { driverController.hid.pov == 180 })
-
-        ferryShot.whileTrue(FerryShot()) // left bumper
-    }
-
-    private fun configureOperatorBindings() {
         unlockShooterControl.onTrue(InstantCommand({ // left stick BUTTOn
             shooterManual = if (shooterManual == ManualMode.UNLOCKED) {
                 ManualMode.LOCKED
@@ -164,6 +126,49 @@ object RobotContainer {
                 ManualMode.UNLOCKED
             }
         }))
+
+        visionAlign.onTrue(
+            InstantCommand({ useVision = !useVision })
+        )
+
+        slowModeToggle.whileTrue(InstantCommand({ SwerveSubsystem.toggleSpeedChange() })) // right trigger
+        intakeButton.whileTrue(IntakeCommand()) // right bumper
+        ferryShot.whileTrue(FerryShot()) // left bumper
+
+        resetHeading.onTrue(
+            Commands.runOnce(SwerveSubsystem::zeroHeading)
+        )
+    }
+
+    private fun configureOperatorBindings() {
+        unlockElevatorControl.onTrue(ConditionalCommand(
+            InstantCommand({
+                elevatorManual = ManualMode.UNLOCKED
+                ElevatorSubsystem.defaultCommand =
+                    ManualElevatorControlCommand {
+                        if (abs(operatorController.getRawAxis(OperatorConstants.OPERATOR_LEFT_STICK_AXIS)) < Constants.Deadbands.CLIMB_DEADBAND) {
+                            null
+                        } else {
+                            operatorController.getRawAxis(OperatorConstants.OPERATOR_LEFT_STICK_AXIS).sign > 0
+                        }
+                    }
+            }),
+            SequentialCommandGroup(
+                InstantCommand({
+                    elevatorManual = ManualMode.LOCKED
+                    ElevatorSubsystem.defaultCommand.cancel()
+                    ElevatorSubsystem.removeDefaultCommand()
+                }),
+                ConditionalCommand(
+                    ElevatorSubsystem.getHomeCommand()
+                        .until(ElevatorSubsystem::atElevatorMin)
+                        .andThen(
+                            ElevatorSubsystem::stopElevator
+                        ),
+                    Commands.runOnce({ ArmSubsystem.goHome() })
+                ) { !ElevatorSubsystem.atElevatorMin }
+            )
+        ) { elevatorManual == ManualMode.LOCKED })
 
         unlockArmControl.onTrue(InstantCommand({ // right stick BUTTON
             armManual = if (armManual == ManualMode.UNLOCKED) {
@@ -174,7 +179,6 @@ object RobotContainer {
         }))
 
         fireNoteToAmp // triangle || y // intake to arm
-            .and { IntakeSubsystem.noteStatus != NoteStatus.ARM }
             .and { ElevatorSubsystem.atElevatorMin }
             .onTrue(
                 IntakeToArmCommand().withTimeout(5.0)
@@ -183,7 +187,7 @@ object RobotContainer {
                             Commands.runOnce(ArmSubsystem::goToAmpFirePosition),
                             WaitCommand(.5),
                             ElevatorSubsystem.getAmpCommand(),
-                        ).unless { intakeToArmInterrupted }
+                        ).unless { IntakeSubsystem.intakeToArmInterrupted }
                     )
             )
 
@@ -207,19 +211,23 @@ object RobotContainer {
                     InstantCommand({ ArmSubsystem.goToDangle() }),
                     WaitCommand(.2),
                     ElevatorSubsystem.getHomeCommand(),
-                    ConditionalCommand(InstantCommand({ ArmSubsystem.goHome() }), InstantCommand(), ElevatorSubsystem::atElevatorMin)
+                    ConditionalCommand(
+                        InstantCommand({ ArmSubsystem.goHome() }),
+                        InstantCommand(),
+                        ElevatorSubsystem::atElevatorMin
+                    )
                 )
             )
 
-//        rampAnywhereButton.whileTrue(
-//            ParallelCommandGroup(
-//                RampShooter(
-//                    2000.0,
-//                    2000.0,
-//                    SwerveSubsystem.odometryImpl.getPivotAngle(alliance!!)
-//                )
-//            )
-//        )
+        rampAnywhereButton.whileTrue(
+            ParallelCommandGroup(
+                RampShooter(
+                    2000.0,
+                    2000.0,
+                    SwerveSubsystem.odometryImpl.getPivotAngle(if (alliance == null) DriverStation.Alliance.Red else alliance!!) // fix later
+                )
+            )
+        )
 
         subwooferShot.whileTrue( // left bumper
             SubwooferShot()
@@ -331,20 +339,23 @@ object RobotContainer {
 
         Trigger {
             ShooterSubsystem.isReadyToShoot
-        }.and(ferryShot
-            .or(podiumShot)
-            .or(subwooferShot))
+        }.and(
+            ferryShot
+                .or(podiumShot)
+                .or(subwooferShot)
+        )
             .onTrue(
                 RepeatCommand(
                     ShooterSubsystem.shooterLEDCommand().alongWith(
 //                        RepeatCommand(InstantCommand({ NetworkTables.isReadyToShoot.set(true) }))
                     )
                 ).withTimeout(2.0)
-                    .deadlineWith(Commands.run({
-                        driverController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 1.0)
-                        operatorController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 1.0)
-                    })
-                )
+                    .deadlineWith(
+                        Commands.run({
+                            driverController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 1.0)
+                            operatorController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 1.0)
+                        })
+                    )
             )
             .onFalse(Commands.run({
                 driverController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 0.0)

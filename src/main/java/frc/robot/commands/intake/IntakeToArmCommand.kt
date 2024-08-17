@@ -51,9 +51,9 @@ class IntakeToArmCommand : Command() {
             intakeSubsystem.noteStatus = NoteStatus.INTAKEN
 
         if (interrupted) {
-            RobotContainer.intakeToArmInterrupted = true
+            intakeSubsystem.intakeToArmInterrupted = true
         } else {
-            RobotContainer.intakeToArmInterrupted = false
+            intakeSubsystem.intakeToArmInterrupted = false
         }
     }
 }

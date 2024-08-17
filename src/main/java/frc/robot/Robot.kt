@@ -100,6 +100,10 @@ object Robot : LoggedRobot()
         CommandScheduler.getInstance().run()
 
 
+        SmartDashboard.putBoolean("elevator/is elevator unlocked", RobotContainer.elevatorManual == RobotContainer.ManualMode.UNLOCKED)
+        SmartDashboard.putBoolean("shooter/is shooter unlocked", RobotContainer.shooterManual == RobotContainer.ManualMode.UNLOCKED)
+        SmartDashboard.putBoolean("arm/is arm unlocked", RobotContainer.armManual == RobotContainer.ManualMode.UNLOCKED)
+
         SmartDashboard.putString("Note Status", IntakeSubsystem.noteStatus.name)
         SmartDashboard.putNumber("Auton Selected", Autos.getAutonSelector.toDouble())
         SmartDashboard.putString("Auton Name", Autos.selectedAutonomousCommandName)
