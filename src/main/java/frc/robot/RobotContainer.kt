@@ -219,6 +219,7 @@ object RobotContainer {
                 )
             )
 
+        // to fixx you should move to valueGetter
         rampAnywhereButton.whileTrue(
             ParallelCommandGroup(
                 RampShooter(

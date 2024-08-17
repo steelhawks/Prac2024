@@ -6,7 +6,7 @@ import java.net.InetAddress
 object OperatorDashboard {
     private var ntInstance: NetworkTableInstance = NetworkTableInstance.getDefault()
 
-    private val controls: NetworkTable = ntInstance.getTable("controls")
+//    private val controls: NetworkTable = ntInstance.getTable("controls")
     private val status: NetworkTable = ntInstance.getTable("status")
 
     // state values to send to client these SHOULD be updated in robot periodic

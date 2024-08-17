@@ -183,6 +183,9 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
     private val shooterBottomRPM: Double
         get() = m_bottomShooterMotor.velocity.value * 60
 
+    // quick and dirty fix for subwoofer shot not setting to true
+    // to fix maybe add a wait timer for it to actually get to this position
+    // or maybe the time it takes for the shooters rpms to reach its time is enough time
     private val pivotAtSetpoint: Boolean
         get() = if (controller.goal.position == 1.02) true else abs(measurement - controller.goal.position) <= Constants.Shooter.PIVOT_TOLERANCE * 1.5
 
