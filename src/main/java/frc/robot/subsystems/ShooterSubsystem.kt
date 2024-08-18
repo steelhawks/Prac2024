@@ -12,8 +12,9 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.*
 import frc.robot.Constants
-import frc.robot.commands.ForkCommand
+import java.beans.beancontext.BeanContextServiceAvailableEvent
 import kotlin.math.abs
+import kotlin.math.cos
 
 object ShooterSubsystem : ProfiledPIDSubsystem(
     ProfiledPIDController(
@@ -166,6 +167,19 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
     fun reverseToIntake() {
         m_topShooterMotor.set(-Constants.Shooter.TOP_SHOOTER_SPEED / 3)
         m_bottomShooterMotor.set(-Constants.Shooter.BOTTOM_SHOOTER_SPEED / 3)
+    }
+
+    fun controlShooter(isPivotingDown: Boolean?) {
+        var voltage = cos(measurement) * Constants.Shooter.PIVOT_KG
+
+        if (isPivotingDown == null) {
+            m_pivotMotor.setVoltage(voltage)
+            return
+        }
+
+        val adjustment = Constants.Shooter.PIVOT_KS + Constants.Shooter.MANUAL_PIVOT_VOLTAGE
+        voltage += if (isPivotingDown) -adjustment else adjustment
+        m_pivotMotor.setVoltage(voltage)
     }
 
     /** Runs LED Command when shooter is ready to shoot when [shooterBottomRPM], [shooterTopRPM], and [pivotAtSetpoint] are true */

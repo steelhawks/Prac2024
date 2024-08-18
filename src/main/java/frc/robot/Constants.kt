@@ -30,7 +30,7 @@ object Constants {
         const val OPERATOR_RIGHT_STICK_BUTTON_ID = 12
 
         const val OPERATOR_LEFT_STICK_AXIS = 1
-        const val OPERATOR_RIGHT_STICK_AXIS = 1
+        const val OPERATOR_RIGHT_STICK_AXIS = 5
 
         const val OPERATOR_LEFT_TRIGGER_ID = 7
         const val OPERATOR_RIGHT_TRIGGER_ID = 8
@@ -205,6 +205,8 @@ object Constants {
         const val PIVOT_KP: Double = 5.0
         const val PIVOT_KI: Double = 0.0
         const val PIVOT_KD: Double = 0.0
+
+        const val MANUAL_PIVOT_VOLTAGE: Double = 0.75
 
         const val PIVOT_TOLERANCE: Double = 0.01
 

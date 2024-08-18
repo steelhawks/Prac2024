@@ -65,7 +65,6 @@ object RobotContainer {
     private val slowModeToggle = driverController.rightTrigger()
     private val intakeButton = driverController.rightBumper()
     private val resetHeading = driverController.b()
-    private val unlockShooterControl = driverController.leftStick()
     private val ferryShot = driverController.leftBumper().or(DashboardTrigger("ferryShot"))
     private val visionAlign = driverController.povLeft().or(DashboardTrigger("visionAlign"))
 
@@ -81,8 +80,10 @@ object RobotContainer {
     private val podiumShot = operatorController.rightBumper().or(DashboardTrigger("podiumShot"))
     private val elevatorAndArmHomeButton = operatorController.x().or(DashboardTrigger("elevatorHome"))
     private val unlockElevatorControl = operatorController.button(OperatorConstants.OPERATOR_LEFT_STICK_BUTTON_ID)
-    private val unlockArmControl = operatorController.button(OperatorConstants.OPERATOR_RIGHT_STICK_BUTTON_ID)
     private val rampAnywhereButton = operatorController.button(OperatorConstants.OPERATOR_LEFT_TRIGGER_ID)
+
+    private val unlockShooterControl = operatorController.button(OperatorConstants.OPERATOR_RIGHT_STICK_BUTTON_ID)
+    //    private val unlockArmControl = operatorController.button(OperatorConstants.OPERATOR_RIGHT_STICK_BUTTON_ID)
 
 
     // this thread should run ONCE
@@ -119,13 +120,13 @@ object RobotContainer {
      * controllers or [Flight joysticks][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureDriverBindings() {
-        unlockShooterControl.onTrue(InstantCommand({ // left stick BUTTOn
-            shooterManual = if (shooterManual == ManualMode.UNLOCKED) {
-                ManualMode.LOCKED
-            } else {
-                ManualMode.UNLOCKED
-            }
-        }))
+//        unlockShooterControl.onTrue(InstantCommand({ // left stick BUTTOn
+//            shooterManual = if (shooterManual == ManualMode.UNLOCKED) {
+//                ManualMode.LOCKED
+//            } else {
+//                ManualMode.UNLOCKED
+//            }
+//        }))
 
         visionAlign.onTrue(
             InstantCommand({ useVision = !useVision })
@@ -170,13 +171,36 @@ object RobotContainer {
             )
         ) { elevatorManual == ManualMode.LOCKED })
 
-        unlockArmControl.onTrue(InstantCommand({ // right stick BUTTON
-            armManual = if (armManual == ManualMode.UNLOCKED) {
-                ManualMode.LOCKED
-            } else {
-                ManualMode.UNLOCKED
-            }
-        }))
+        unlockShooterControl.onTrue(ConditionalCommand(
+            InstantCommand({
+                shooterManual = ManualMode.UNLOCKED
+                ShooterSubsystem.disable()
+                ShooterSubsystem.defaultCommand.cancel()
+                ShooterSubsystem.defaultCommand =
+                    ManualShooterPivotCommand {
+                        if (abs(operatorController.getRawAxis(OperatorConstants.OPERATOR_RIGHT_STICK_AXIS)) < Constants.Deadbands.SHOOTER_DEADBAND) {
+                            null
+                        } else {
+                            operatorController.getRawAxis(OperatorConstants.OPERATOR_RIGHT_STICK_AXIS).sign > 0
+                        }
+                    }
+            }),
+            InstantCommand({
+                shooterManual = ManualMode.LOCKED
+                ShooterSubsystem.enable()
+                ShooterSubsystem.defaultCommand.cancel()
+                ShooterSubsystem.defaultCommand =
+                    ShooterHomePositionCommand()
+            })
+        ) { shooterManual == ManualMode.LOCKED })
+
+//        unlockArmControl.onTrue(InstantCommand({ // right stick BUTTON
+//            armManual = if (armManual == ManualMode.UNLOCKED) {
+//                ManualMode.LOCKED
+//            } else {
+//                ManualMode.UNLOCKED
+//            }
+//        }))
 
         fireNoteToAmp // triangle || y // intake to arm
             .and { ElevatorSubsystem.atElevatorMin }
