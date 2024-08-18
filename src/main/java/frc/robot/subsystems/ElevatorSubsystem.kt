@@ -118,7 +118,7 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
         elevatorRight.stopMotor()
     }
 
-    private fun resetCANCoder() {
+    fun resetCANCoder() {
         canCoder.setPosition(0.0)
     }
 

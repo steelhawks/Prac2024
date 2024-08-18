@@ -99,30 +99,9 @@ object Robot : LoggedRobot()
         // block in order for anything in the Command-based framework to work.
         CommandScheduler.getInstance().run()
 
-
-        SmartDashboard.putBoolean("elevator/is elevator unlocked", RobotContainer.elevatorManual == RobotContainer.ManualMode.UNLOCKED)
-        SmartDashboard.putBoolean("shooter/is shooter unlocked", RobotContainer.shooterManual == RobotContainer.ManualMode.UNLOCKED)
-        SmartDashboard.putBoolean("arm/is arm unlocked", RobotContainer.armManual == RobotContainer.ManualMode.UNLOCKED)
-
         SmartDashboard.putString("Note Status", IntakeSubsystem.noteStatus.name)
         SmartDashboard.putNumber("Auton Selected", Autos.getAutonSelector.toDouble())
         SmartDashboard.putString("Auton Name", Autos.selectedAutonomousCommandName)
-        SmartDashboard.putBoolean("nt4/shooting from app", DashboardTrigger("fireShooter").asBoolean)
-        OperatorDashboard.elevatorLevel.set(
-            if (ElevatorSubsystem.atElevatorMax) {
-                "Home"
-            } else if (ElevatorSubsystem.elevatorInPosition(ElevatorSubsystem.ElevatorLevel.CLIMB)) {
-                "Climb"
-            } else if (ElevatorSubsystem.elevatorInPosition(ElevatorSubsystem.ElevatorLevel.AMP)) {
-                "AMP"
-            } else {
-                ""
-            }
-        )
-
-        OperatorDashboard.robotState.set(RobotContainer.robotState.name)
-        OperatorDashboard.noteStatus.set(IntakeSubsystem.noteStatus.name)
-        OperatorDashboard.isReadyToShoot.set(ShooterSubsystem.isReadyToShoot)
     }
 
     /** This method is called once each time the robot enters Disabled mode.  */

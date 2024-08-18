@@ -60,7 +60,7 @@ object RobotContainer {
 
     // driver controller and triggers
     private val driverController = CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT)
-    private val driverModifierKey = driverController.povRight()
+    private val autoShootToggle = driverController.povRight()
 
     private val slowModeToggle = driverController.rightTrigger()
     private val intakeButton = driverController.rightBumper()
@@ -120,13 +120,13 @@ object RobotContainer {
      * controllers or [Flight joysticks][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureDriverBindings() {
-//        unlockShooterControl.onTrue(InstantCommand({ // left stick BUTTOn
-//            shooterManual = if (shooterManual == ManualMode.UNLOCKED) {
-//                ManualMode.LOCKED
-//            } else {
-//                ManualMode.UNLOCKED
-//            }
-//        }))
+        autoShootToggle.onTrue(InstantCommand({ ShooterSubsystem.autoShootingEnabled = !ShooterSubsystem.autoShootingEnabled})
+            .andThen(
+                ConditionalCommand(
+                    LEDSubsystem.flashCommand(LEDSubsystem.LEDColor.WHITE, 0.2, 2.0),
+                    LEDSubsystem.flashCommand(LEDSubsystem.LEDColor.CYAN, 0.2, 2.0)
+                ) { ShooterSubsystem.autoShootingEnabled }
+            ))
 
         visionAlign.onTrue(
             InstantCommand({ useVision = !useVision })
@@ -298,6 +298,9 @@ object RobotContainer {
                 .andThen(
                     WaitUntilCommand { ArmSubsystem.armInPosition(ArmSubsystem.Position.DANGLE) },
                     Commands.runOnce(ElevatorSubsystem::getHomeCommand)
+                        .andThen(
+                            ElevatorSubsystem::resetCANCoder
+                        )
                 )
         }
     }
@@ -357,6 +360,7 @@ object RobotContainer {
         Trigger {
             ShooterSubsystem.firing
         }.and { ShooterSubsystem.isReadyToShoot }
+            .and { ShooterSubsystem.autoShootingEnabled }
             .and(ferryShot.or(podiumShot).or(subwooferShot))
             .onTrue(
                 ForkCommand(IntakeSubsystem.IntakeDirection.TO_SHOOTER).withTimeout(1.0)

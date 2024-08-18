@@ -37,6 +37,8 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
 
     private val m_canCoder = CANcoder(Constants.Shooter.CANCODER_ID, Constants.CANIVORE_NAME)
 
+    var autoShootingEnabled = true
+
     val firing: Boolean
         get() {
             val threshold = 10.0
