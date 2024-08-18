@@ -79,10 +79,10 @@ object RobotContainer {
     private val fireNoteToAmp = operatorController.y().or(DashboardTrigger("noteToAmp"))
     private val subwooferShot = operatorController.leftBumper().or(DashboardTrigger("subwooferShot"))
     private val podiumShot = operatorController.rightBumper().or(DashboardTrigger("podiumShot"))
+    private val elevatorAndArmHomeButton = operatorController.x().or(DashboardTrigger("elevatorHome"))
     private val unlockElevatorControl = operatorController.button(OperatorConstants.OPERATOR_LEFT_STICK_BUTTON_ID)
     private val unlockArmControl = operatorController.button(OperatorConstants.OPERATOR_RIGHT_STICK_BUTTON_ID)
     private val rampAnywhereButton = operatorController.button(OperatorConstants.OPERATOR_LEFT_TRIGGER_ID)
-    private val elevatorAndArmHomeButton = operatorController.x()
 
 
     // this thread should run ONCE

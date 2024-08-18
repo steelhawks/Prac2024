@@ -94,8 +94,8 @@ object ArmSubsystem : ProfiledPIDSubsystem(
     private val canCoderPositionDegrees: Double
         get() = ((m_canCoder.absolutePosition.valueAsDouble * 360 + 360) - 63) % 360
 
-    val shooterMotorDegrees: Double
-        get() = m_shootMotor.position.value * 360
+    val shooterMotorRotations: Double
+        get() = m_shootMotor.position.value
 
     override fun periodic() {
         if (m_enabled) {

@@ -10,16 +10,15 @@ class ArmShootInAmpCommand : Command() {
     private val armSubsystem = ArmSubsystem
     private val elevatorSubsystem = ElevatorSubsystem
 
-    // instead of time change to rotations
-    private var startDegrees = 0.0
-    private val degreesToStop = 415
+    private var startRotations = 0.0
+    private val rotationsToStop = 20
 
     init {
         addRequirements(armSubsystem, elevatorSubsystem)
     }
 
     override fun initialize() {
-        startDegrees = armSubsystem.shooterMotorDegrees
+        startRotations = armSubsystem.shooterMotorRotations
     }
 
     override fun execute() {
@@ -29,7 +28,7 @@ class ArmShootInAmpCommand : Command() {
     }
 
     override fun isFinished(): Boolean {
-        return (armSubsystem.shooterMotorDegrees - startDegrees) >= degreesToStop
+        return (armSubsystem.shooterMotorRotations - startRotations) >= rotationsToStop
     }
 
     override fun end(interrupted: Boolean) {
