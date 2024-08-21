@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.*
 import frc.robot.Constants
+import kotlin.math.abs
 
 object ElevatorSubsystem : ProfiledPIDSubsystem(
     ProfiledPIDController(
@@ -83,7 +84,7 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
     }
 
     fun getHomeCommand(): Command {
-        return Commands.sequence(
+        return SequentialCommandGroup(
             Commands.runOnce({
                 disable()
                 ArmSubsystem.goToDangle()
@@ -127,7 +128,7 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
             return true
         }
 
-        return Math.abs(measurement - pos.rotations) <= Constants.Elevator.TOLERANCE * 5
+        return abs(measurement - pos.rotations) <= Constants.Elevator.TOLERANCE * 5
     }
 
     /** Runs LED Command when elevator is at minimum or maximum when [atElevatorMin] or [atElevatorMax] is true */

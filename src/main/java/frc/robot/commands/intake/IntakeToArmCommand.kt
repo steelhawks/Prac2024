@@ -2,7 +2,6 @@ package frc.robot.commands.intake
 
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.NoteStatus
-import frc.robot.RobotContainer
 import frc.robot.subsystems.ArmSubsystem
 import frc.robot.subsystems.IntakeSubsystem
 
@@ -13,7 +12,6 @@ class IntakeToArmCommand : Command() {
     private var prevBeamBroken = false
 
     init {
-        // each subsystem used by the command must be passed into the addRequirements() method
         addRequirements(armSubsystem, intakeSubsystem)
     }
 

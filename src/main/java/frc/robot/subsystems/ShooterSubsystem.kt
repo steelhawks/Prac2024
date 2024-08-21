@@ -125,10 +125,7 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
         return canCoderVal * Math.PI / 180 + 3.05
     }
 
-    fun goHome() {
-        setGoal(Constants.Shooter.HOME_POSITION)
-    }
-
+    /** Feeder */
     fun feedToShooter() {
         m_feederMotor.set(10.0)
     }
@@ -139,6 +136,11 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
 
     fun stopFeed() {
         m_feederMotor.stopMotor()
+    }
+
+    /** Shooter */
+    fun goHome() {
+        setGoal(Constants.Shooter.HOME_POSITION)
     }
 
     fun stopShooter() {

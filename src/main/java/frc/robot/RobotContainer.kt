@@ -25,6 +25,7 @@ import frc.robot.subsystems.*
 import frc.robot.utils.DashboardTrigger
 import kotlin.math.abs
 import kotlin.math.sign
+import kotlinx.coroutines.*
 
 
 /**
@@ -47,8 +48,8 @@ object RobotContainer {
         LOCKED, UNLOCKED
     }
 
-    var elevatorManual = ManualMode.LOCKED
-    var shooterManual = ManualMode.LOCKED
+    private var elevatorManual = ManualMode.LOCKED
+    private var shooterManual = ManualMode.LOCKED
     var armManual = ManualMode.LOCKED
 
     lateinit var robotState: RobotState
@@ -81,13 +82,12 @@ object RobotContainer {
     private val elevatorAndArmHomeButton = operatorController.x().or(DashboardTrigger("elevatorHome"))
     private val unlockElevatorControl = operatorController.button(OperatorConstants.OPERATOR_LEFT_STICK_BUTTON_ID)
     private val rampAnywhereButton = operatorController.button(OperatorConstants.OPERATOR_LEFT_TRIGGER_ID)
-
     private val unlockShooterControl = operatorController.button(OperatorConstants.OPERATOR_RIGHT_STICK_BUTTON_ID)
     //    private val unlockArmControl = operatorController.button(OperatorConstants.OPERATOR_RIGHT_STICK_BUTTON_ID)
 
 
     // this thread should run ONCE
-    private val valueGetter = Thread {
+    private val postDSConnectionTasks = Thread {
         while (!DriverStation.isDSAttached()) {
             DriverStation.reportWarning("Attaching DS...", false)
         }
@@ -103,9 +103,27 @@ object RobotContainer {
         DriverStation.reportWarning("Current alliance is $alliance", false)
     }
 
-    init {
-        valueGetter.start()
+    private val initializeDSRequiredTasks = runBlocking {
+        launch {
+            while (!DriverStation.isDSAttached()) {
+                DriverStation.reportWarning("Attaching DS...", false)
+            }
+            DriverStation.reportWarning("DS Attached", false)
 
+            alliance = DriverStation.getAlliance().get()
+
+            SwerveSubsystem.initializePoseEstimator() // configure pose on thread
+
+            LEDSubsystem.defaultCommand =
+                LEDIdleCommand(if (alliance == DriverStation.Alliance.Red) LEDSubsystem.LEDColor.RED else LEDSubsystem.LEDColor.BLUE)
+            configureTriggers() // configure triggers here so all threads are up-to-date when this is called
+            DriverStation.reportWarning("Current alliance is $alliance", false)
+        }
+    }
+
+    init {
+        postDSConnectionTasks.start()
+//        initializeDSRequiredTasks.start()
         configureDefaultCommands()
         configureDriverBindings()
         configureOperatorBindings()
@@ -288,7 +306,7 @@ object RobotContainer {
             { driverController.hid.leftTriggerAxis > 0.5 },
             { ferryShot.asBoolean })
 
-
+        // doesnt work???
         if (ElevatorSubsystem.atElevatorMin) {
             println("Elevator good and can reset");
             ArmSubsystem.goHome()
@@ -375,21 +393,16 @@ object RobotContainer {
         )
             .onTrue(
                 RepeatCommand(
-                    ShooterSubsystem.shooterLEDCommand().alongWith(
-//                        RepeatCommand(InstantCommand({ NetworkTables.isReadyToShoot.set(true) }))
-                    )
+                    ShooterSubsystem.shooterLEDCommand()
                 ).withTimeout(2.0)
                     .deadlineWith(
                         Commands.run({
-                            driverController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 1.0)
                             operatorController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 1.0)
                         })
                     )
             )
             .onFalse(Commands.run({
-                driverController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 0.0)
                 operatorController.hid.setRumble(GenericHID.RumbleType.kBothRumble, 0.0)
-//                InstantCommand({ NetworkTables.isReadyToShoot.set(false) })
             }))
 
         Trigger {
