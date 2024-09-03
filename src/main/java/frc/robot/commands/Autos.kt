@@ -15,9 +15,13 @@ import frc.robot.subsystems.ShooterSubsystem
 
 object Autos
 {
+    init {
+        configureNamedCommands()
+    }
+
     /** The commands used by PathPlanner */
 
-    fun configureNamedCommands() {
+    private fun configureNamedCommands() {
         NamedCommands.registerCommand("intake", IntakeCommand())
 
         NamedCommands.registerCommand("subwoofer shot",

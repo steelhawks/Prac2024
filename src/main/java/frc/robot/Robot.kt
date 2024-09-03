@@ -49,6 +49,8 @@ object Robot : LoggedRobot()
      */
     override fun robotInit()
     {
+        Autos
+
         Logger.recordMetadata("Crescendo", "Hawk Rider Off-season")
         if (isReal()) {
             Logger.addDataReceiver(NT4Publisher())
@@ -79,8 +81,6 @@ object Robot : LoggedRobot()
         // button bindings, and put our autonomous chooser on the dashboard.
         DriverStation.silenceJoystickConnectionWarning(true)
         RobotContainer.resetControllerRumble()
-        Autos.configureNamedCommands()
-
 //        FollowPathCommand.warmupCommand().schedule();
         OperatorDashboard
     }

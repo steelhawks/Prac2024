@@ -276,7 +276,7 @@ object RobotContainer {
 
         intakeFromHumanButton.whileTrue(
             IntakeFromHuman()
-        )
+        ).onTrue(LEDSubsystem.flashCommand(LEDSubsystem.LEDColor.GREEN, .2, 2.0))
             .onFalse(Commands.runOnce({
                 IntakeSubsystem.stop()
                 ShooterSubsystem.stopFeed()

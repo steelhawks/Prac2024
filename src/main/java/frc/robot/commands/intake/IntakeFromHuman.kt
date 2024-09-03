@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
 import edu.wpi.first.wpilibj2.command.WaitCommand
 import frc.robot.commands.shooter.RampShooter
 import frc.robot.subsystems.IntakeSubsystem
-import frc.robot.subsystems.LEDSubsystem
 import frc.robot.subsystems.ShooterSubsystem
 
 class IntakeFromHuman : ParallelCommandGroup(
@@ -19,14 +18,11 @@ class IntakeFromHuman : ParallelCommandGroup(
         .until(IntakeSubsystem::intakeBeamBroken)
         .andThen(
             SequentialCommandGroup(
-                WaitCommand(0.05),
+                WaitCommand(0.2),
                 Commands.runOnce({
                     ShooterSubsystem.stopFeed()
                     IntakeSubsystem.stop()
-                })
-                    .andThen(
-                        IntakeCommand()
-                    ).until(IntakeSubsystem::intakeBeamBroken)
+                }).andThen(IntakeCommand())
             )
         ),
 )
