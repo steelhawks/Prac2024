@@ -41,7 +41,7 @@ object ArmSubsystem : ProfiledPIDSubsystem(
         INTAKING,
     }
 
-    val status = ArmStatus.NOTHING
+    var status = ArmStatus.NOTHING
 
     private val m_feedForward = ArmFeedforward(
         Constants.AmpArm.PIVOT_KS,

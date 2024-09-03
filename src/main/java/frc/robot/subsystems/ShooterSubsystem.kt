@@ -113,16 +113,17 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
     }
 
     override fun useOutput(output: Double, setpoint: TrapezoidProfile.State?) {
-        val feedForward = setpoint?.let { pivotFeedForward.calculate(it.position, setpoint.velocity) }
-        m_pivotMotor.setVoltage(output + feedForward!!)
-
-        SmartDashboard.putNumber("shooter/feedforward", feedForward)
-        SmartDashboard.putNumber("shooter/setpoint position", setpoint.position)
-        SmartDashboard.putNumber("shooter/setpoint velocity", setpoint.velocity)
+        setpoint?.let {
+            val feedForward = pivotFeedForward.calculate(it.position, it.velocity)
+            m_pivotMotor.setVoltage(output + feedForward)
+            SmartDashboard.putNumber("shooter/feedforward", feedForward)
+            SmartDashboard.putNumber("shooter/setpoint position", it.position)
+            SmartDashboard.putNumber("shooter/setpoint velocity", it.velocity)
+        }
     }
 
     override fun getMeasurement(): Double {
-        return canCoderVal * Math.PI / 180 + 3.05
+        return (canCoderVal * Math.PI / 180) + 3.05
     }
 
     /** Feeder */
@@ -216,19 +217,27 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
     val isReadyToShoot: Boolean
         get() = topShooterAtSetpoint && bottomShooterAtSetpoint && pivotAtSetpoint
 
+
+    private var counter = 0;
     override fun periodic() {
         if (m_enabled) {
             useOutput(m_controller.calculate(measurement), m_controller.setpoint)
         }
 
-        SmartDashboard.putNumber("shooter/goal", controller.goal.position)
-        SmartDashboard.putNumber("shooter/pivot angle", measurement)
-        SmartDashboard.putNumber("shooter/pivot voltage", m_pivotMotor.motorVoltage.valueAsDouble)
+        counter = (counter + 1) % 1000 // reset to avoid overflow
 
-        SmartDashboard.putBoolean("shooter/is moving", firing)
-        SmartDashboard.putBoolean("shooter/is ready to shoot", isReadyToShoot)
-        SmartDashboard.putBoolean("shooter/at pivot setpoint", pivotAtSetpoint)
-        SmartDashboard.putBoolean("shooter/top shooter at setpoint", topShooterAtSetpoint)
-        SmartDashboard.putBoolean("shooter/bottom shooter at setpoint", bottomShooterAtSetpoint)
+        if (counter % 20 == 0) { // runs this every 20 cycles
+            if (firing || isReadyToShoot) {
+                SmartDashboard.putNumber("shooter/goal", controller.goal.position)
+                SmartDashboard.putNumber("shooter/pivot angle", measurement)
+                SmartDashboard.putNumber("shooter/pivot voltage", m_pivotMotor.motorVoltage.valueAsDouble)
+            }
+
+            SmartDashboard.putBoolean("shooter/is moving", firing)
+            SmartDashboard.putBoolean("shooter/is ready to shoot", isReadyToShoot)
+            SmartDashboard.putBoolean("shooter/at pivot setpoint", pivotAtSetpoint)
+            SmartDashboard.putBoolean("shooter/top shooter at setpoint", topShooterAtSetpoint)
+            SmartDashboard.putBoolean("shooter/bottom shooter at setpoint", bottomShooterAtSetpoint)
+        }
     }
 }

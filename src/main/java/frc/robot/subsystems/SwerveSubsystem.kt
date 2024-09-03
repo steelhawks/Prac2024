@@ -128,17 +128,22 @@ class SwerveModule(val swerveModuleNumber: Int, private val constants: SwerveMod
         angleMotor.setPosition(absolutePosition)
     }
 
+    private var counter = 0
     fun periodic() {
         currentState = SwerveModuleState(
             Conversions.RPSToMPS(driveMotor.velocity.value, Constants.Swerve.WHEEL_CIRCUMFERENCE),
             Rotation2d.fromRotations(angleMotor.position.value)
         )
 
-        SmartDashboard.putNumber(
-            "Speed",
-            Conversions.RPSToMPS(driveMotor.velocity.value, Constants.Swerve.WHEEL_CIRCUMFERENCE)
-        )
-        SmartDashboard.putNumber("Angle", Rotation2d.fromRotations(angleMotor.position.value).degrees)
+        counter = (counter + 1) % 1000
+
+        if (counter % 20 == 0) { // every 20 cycles
+            SmartDashboard.putNumber(
+                "Speed",
+                Conversions.RPSToMPS(driveMotor.velocity.value, Constants.Swerve.WHEEL_CIRCUMFERENCE)
+            )
+            SmartDashboard.putNumber("Angle", Rotation2d.fromRotations(angleMotor.position.value).degrees)
+        }
     }
 }
 
@@ -380,45 +385,49 @@ object SwerveSubsystem : SubsystemBase() {
             return Constants.Swerve.SWERVE_KINEMATICS.toChassisSpeeds(*moduleStates) // use * spread operator to spread the array of swerve states
         }
 
+
+    private var counter = 0
     override fun periodic() {
-        if (poseEstimator != null)
+        // Update pose estimator if it exists
+        if (poseEstimator != null) {
             poseEstimator?.update(gyroYaw, modulePositions)
-
-        odometryImpl.periodic()
-
-        for (module in m_swerveModules) {
-            module.periodic()
         }
 
-        if ((RobotContainer.robotState != RobotContainer.RobotState.AUTON || Autos.selectedAutonomousUseVision) && RobotContainer.useVision) {
-            addVisionToPose(limelightShooter)
-            addVisionToPose(limelightArm)
+        // Only update odometry periodically (e.g., every 5 cycles)
+        if (counter % 5 == 0) {
+            odometryImpl.periodic()
         }
 
-        field.robotPose = getPose()
+        // Update each swerve module (consider reducing frequency if needed)
+        if (counter % 4 == 0) { // every two cycles
+            for (module in m_swerveModules) {
+                module.periodic()
+            }
+        }
 
-        Logger.recordOutput("odometry/robot", getPose())
-        Logger.recordOutput("odometry/robot3d", Pose3d(getPose()))
+//        if (shouldUseVision()) {
+//            addVisionToPose(limelightShooter)
+//            addVisionToPose(limelightArm)
+//        }
 
-        SmartDashboard.putData("Real Field", field)
+        // Update field display on SmartDashboard periodically (e.g., every 10 cycles)
+//        if (counter % 10 == 0) {
+//            field.robotPose = getPose()
+//            SmartDashboard.putData("Real Field", field)
+//        }
 
-        val realRobotMotorLoggingState = doubleArrayOf(
-            m_swerveModules[0].currentState.angle.degrees,
-            m_swerveModules[0].currentState.speedMetersPerSecond,
-            m_swerveModules[1].currentState.angle.degrees,
-            m_swerveModules[1].currentState.speedMetersPerSecond,
-            m_swerveModules[2].currentState.angle.degrees,
-            m_swerveModules[2].currentState.speedMetersPerSecond,
-            m_swerveModules[3].currentState.angle.degrees,
-            m_swerveModules[3].currentState.speedMetersPerSecond,
-        )
+        // Log to the logger periodically (e.g., every 10 cycles)
+//        if (counter % 10 == 0) {
+//            Logger.recordOutput("odometry/robot", getPose())
+//            Logger.recordOutput("odometry/robot3d", Pose3d(getPose()))
+//        }
 
-        SmartDashboard.putNumberArray("Real Robot SwerveModule States", realRobotMotorLoggingState)
-        SmartDashboard.putNumber("Gyro", gyroYaw.degrees)
-        SmartDashboard.putNumber("Heading", heading.degrees.IEEErem(360.0)) // clamp to 360m
-        SmartDashboard.putBoolean("swerve/using vision pose", RobotContainer.useVision)
+        // Increment the counter (reset to avoid overflow)
+        counter = (counter + 1) % 1000
+    }
 
-//        SmartDashboard.putData("Poses", getPose())
+    private fun shouldUseVision(): Boolean {
+        return (RobotContainer.robotState != RobotContainer.RobotState.AUTON || Autos.selectedAutonomousUseVision) && RobotContainer.useVision
     }
 
     fun stop() {

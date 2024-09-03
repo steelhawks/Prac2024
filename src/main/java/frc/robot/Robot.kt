@@ -79,6 +79,7 @@ object Robot : LoggedRobot()
         // button bindings, and put our autonomous chooser on the dashboard.
         DriverStation.silenceJoystickConnectionWarning(true)
         RobotContainer.resetControllerRumble()
+        Autos.configureNamedCommands()
 
 //        FollowPathCommand.warmupCommand().schedule();
         OperatorDashboard
@@ -91,6 +92,7 @@ object Robot : LoggedRobot()
      * This runs after the mode specific periodic methods, but before LiveWindow and
      * SmartDashboard integrated updating.
      */
+    private var counter = 0;
     override fun robotPeriodic()
     {
         // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
@@ -98,10 +100,13 @@ object Robot : LoggedRobot()
         // and running subsystem periodic() methods.  This must be called from the robot's periodic
         // block in order for anything in the Command-based framework to work.
         CommandScheduler.getInstance().run()
+        counter = (counter + 1) % 1000
 
-        SmartDashboard.putString("Note Status", IntakeSubsystem.noteStatus.name)
-        SmartDashboard.putNumber("Auton Selected", Autos.getAutonSelector.toDouble())
-        SmartDashboard.putString("Auton Name", Autos.selectedAutonomousCommandName)
+        if (counter % 20 == 0) {
+            SmartDashboard.putString("Note Status", IntakeSubsystem.noteStatus.name)
+            SmartDashboard.putNumber("Auton Selected", Autos.getAutonSelector.toDouble())
+            SmartDashboard.putString("Auton Name", Autos.selectedAutonomousCommandName)
+        }
     }
 
     /** This method is called once each time the robot enters Disabled mode.  */

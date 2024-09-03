@@ -13,7 +13,7 @@ import frc.robot.commands.TeleopDriveCommand
 import frc.robot.commands.arm.ArmShootInAmpCommand
 import frc.robot.commands.elevator.ManualElevatorControlCommand
 import frc.robot.commands.intake.IntakeCommand
-import frc.robot.commands.intake.IntakeFromPlayer
+import frc.robot.commands.intake.IntakeFromHuman
 import frc.robot.commands.intake.IntakeReverseCommand
 import frc.robot.commands.intake.IntakeToArmCommand
 import frc.robot.commands.led.LEDIdleCommand
@@ -87,22 +87,6 @@ object RobotContainer {
 
 
     // this thread should run ONCE
-    private val postDSConnectionTasks = Thread {
-        while (!DriverStation.isDSAttached()) {
-            DriverStation.reportWarning("Attaching DS...", false)
-        }
-        DriverStation.reportWarning("DS Attached", false)
-
-        alliance = DriverStation.getAlliance().get()
-
-        SwerveSubsystem.initializePoseEstimator() // configure pose on thread
-
-        LEDSubsystem.defaultCommand =
-            LEDIdleCommand(if (alliance == DriverStation.Alliance.Red) LEDSubsystem.LEDColor.RED else LEDSubsystem.LEDColor.BLUE)
-        configureTriggers() // configure triggers here so all threads are up-to-date when this is called
-        DriverStation.reportWarning("Current alliance is $alliance", false)
-    }
-
     private val initializeDSRequiredTasks = runBlocking {
         launch {
             while (!DriverStation.isDSAttached()) {
@@ -122,12 +106,11 @@ object RobotContainer {
     }
 
     init {
-        postDSConnectionTasks.start()
+        initializeDSRequiredTasks.start()
 //        initializeDSRequiredTasks.start()
         configureDefaultCommands()
         configureDriverBindings()
         configureOperatorBindings()
-        Autos.configureNamedCommands()
     }
 
     /**
@@ -138,7 +121,9 @@ object RobotContainer {
      * controllers or [Flight joysticks][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureDriverBindings() {
-        autoShootToggle.onTrue(InstantCommand({ ShooterSubsystem.autoShootingEnabled = !ShooterSubsystem.autoShootingEnabled})
+        autoShootToggle.onTrue(InstantCommand({
+            ShooterSubsystem.autoShootingEnabled = !ShooterSubsystem.autoShootingEnabled
+        })
             .andThen(
                 ConditionalCommand(
                     LEDSubsystem.flashCommand(LEDSubsystem.LEDColor.WHITE, 0.2, 2.0),
@@ -289,7 +274,9 @@ object RobotContainer {
             )
         )
 
-        intakeFromHumanButton.whileTrue(IntakeFromPlayer())
+        intakeFromHumanButton.whileTrue(
+            IntakeFromHuman()
+        )
             .onFalse(Commands.runOnce({
                 IntakeSubsystem.stop()
                 ShooterSubsystem.stopFeed()
@@ -304,23 +291,23 @@ object RobotContainer {
             { driverController.rightX },
             { true }, // field relative
             { driverController.hid.leftTriggerAxis > 0.5 },
-            { ferryShot.asBoolean })
+            { driverController.hid.leftBumper }) // ferryShot.asBoolean
 
         // doesnt work???
-        if (ElevatorSubsystem.atElevatorMin) {
-            println("Elevator good and can reset");
-            ArmSubsystem.goHome()
-        } else {
-            DriverStation.reportWarning("ELEVATOR IS NOT RESET... Resetting to Home Now", false)
-            Commands.runOnce(ArmSubsystem::goToDangle)
-                .andThen(
-                    WaitUntilCommand { ArmSubsystem.armInPosition(ArmSubsystem.Position.DANGLE) },
-                    Commands.runOnce(ElevatorSubsystem::getHomeCommand)
-                        .andThen(
-                            ElevatorSubsystem::resetCANCoder
-                        )
-                )
-        }
+//        if (ElevatorSubsystem.atElevatorMin) {
+//            println("Elevator good and can reset");
+//            ArmSubsystem.goHome()
+//        } else {
+//            DriverStation.reportWarning("ELEVATOR IS NOT RESET... Resetting to Home Now", false)
+//            Commands.runOnce(ArmSubsystem::goToDangle)
+//                .andThen(
+//                    WaitUntilCommand { ArmSubsystem.armInPosition(ArmSubsystem.Position.DANGLE) },
+//                    Commands.runOnce(ElevatorSubsystem::getHomeCommand)
+//                        .andThen(
+//                            ElevatorSubsystem::resetCANCoder
+//                        )
+//                )
+//        }
     }
 
     private fun configureTriggers() {
