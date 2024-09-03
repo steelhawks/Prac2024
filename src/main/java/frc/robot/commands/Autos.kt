@@ -149,11 +149,11 @@ object Autos
     private enum class AutoMode(val optionName: String, val command: Command, val useVision: Boolean)
     {
         AUTO_1("Fire and Rotate", testAuto(), false),
-        AUTO_2("Fire and Move Forward", testAutoShootThenMoveForward(), false),
-        AUTO_3("Path Planner Test", AutoBuilder.followPath(PathPlannerPath.fromPathFile("Test Path")), false),
-        AUTO_4("new auto pathplanner", PathPlannerAuto("test auto"), false),
-        AUTO_5("simple path test pathplanner", PathPlannerAuto("home auto"), true),
-        AUTO_6("far 4 note (NOT TESTED)", PathPlannerAuto("far 4 noter"), true),
+        AUTO_2("Fire and Move Forward", nothingAuto(),false),
+        AUTO_3("Path Planner Test", nothingAuto(), false),
+        AUTO_4("new auto pathplanner", nothingAuto(),false),
+        AUTO_5("simple path test pathplanner", nothingAuto(),true),
+        AUTO_6("far 4 note (NOT TESTED)", nothingAuto(), true),
         AUTO_7("Placeholder Auto 1", nothingAuto(), false),
         AUTO_8("Placeholder Auto 2", nothingAuto(), false),
         AUTO_9("Placeholder Auto 3", nothingAuto(), false),
