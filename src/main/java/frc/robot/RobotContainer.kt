@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj2.command.*
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
-import frc.robot.commands.Autos
 import frc.robot.commands.FeedToShooter
 import frc.robot.commands.ForkCommand
 import frc.robot.commands.TeleopDriveCommand
@@ -22,10 +21,11 @@ import frc.robot.commands.led.LEDNoteIntakenCommand
 import frc.robot.commands.led.LEDNoteToArmCommand
 import frc.robot.commands.shooter.*
 import frc.robot.subsystems.*
+import frc.robot.subsystems.LEDSubsystem.LEDColor
 import frc.robot.utils.DashboardTrigger
+import kotlinx.coroutines.*
 import kotlin.math.abs
 import kotlin.math.sign
-import kotlinx.coroutines.*
 
 
 /**
@@ -87,22 +87,40 @@ object RobotContainer {
 
 
     // this thread should run ONCE
-    private val initializeDSRequiredTasks = runBlocking {
-        launch {
-            while (!DriverStation.isDSAttached()) {
-                DriverStation.reportWarning("Attaching DS...", false)
-            }
-            DriverStation.reportWarning("DS Attached", false)
-
-            alliance = DriverStation.getAlliance().get()
-
-            SwerveSubsystem.initializePoseEstimator() // configure pose on thread
-
-            LEDSubsystem.defaultCommand =
-                LEDIdleCommand(if (alliance == DriverStation.Alliance.Red) LEDSubsystem.LEDColor.RED else LEDSubsystem.LEDColor.BLUE)
-            configureTriggers() // configure triggers here so all threads are up-to-date when this is called
-            DriverStation.reportWarning("Current alliance is $alliance", false)
+//    private val initializeDSRequiredTasks = runBlocking {
+//        launch {
+//            while (!DriverStation.isDSAttached()) {
+//                DriverStation.reportWarning("Attaching DS...", false)
+//            }
+//            DriverStation.reportWarning("DS Attached", false)
+//
+//            alliance = DriverStation.getAlliance().get()
+//
+//            SwerveSubsystem.initializePoseEstimator() // configure pose on thread
+//
+//            LEDSubsystem.defaultCommand =
+//                LEDIdleCommand(if (alliance == DriverStation.Alliance.Red) LEDSubsystem.LEDColor.RED else LEDSubsystem.LEDColor.BLUE)
+//            configureTriggers() // configure triggers here so all threads are up-to-date when this is called
+//            DriverStation.reportWarning("Current alliance is $alliance", false)
+//        }
+//    }
+    private val initializeDSRequiredTasks: Thread = Thread {
+        while (!DriverStation.isDSAttached()) {
+            DriverStation.reportWarning("attaching DS...", false)
         }
+        DriverStation.reportWarning("DS attached", false)
+
+        // try {
+        //     Thread.sleep(1000);
+        // } catch (Exception e) {}
+        alliance = DriverStation.getAlliance().get()
+        DriverStation.silenceJoystickConnectionWarning(true)
+
+
+        // s_Swerve.poseEstimatorInitializer.start();
+        SwerveSubsystem.initializePoseEstimator()
+        LEDSubsystem.defaultCommand =
+            LEDIdleCommand(if (alliance == DriverStation.Alliance.Red) LEDColor.RED else LEDColor.BLUE)
     }
 
     init {
