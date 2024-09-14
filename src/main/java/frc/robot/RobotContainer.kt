@@ -115,9 +115,8 @@ object RobotContainer {
         // } catch (Exception e) {}
         alliance = DriverStation.getAlliance().get()
         DriverStation.silenceJoystickConnectionWarning(true)
-
-
-        // s_Swerve.poseEstimatorInitializer.start();
+        
+        configureTriggers() // configure triggers here so all threads are up-to-date when this is called
         SwerveSubsystem.initializePoseEstimator()
         LEDSubsystem.defaultCommand =
             LEDIdleCommand(if (alliance == DriverStation.Alliance.Red) LEDColor.RED else LEDColor.BLUE)
