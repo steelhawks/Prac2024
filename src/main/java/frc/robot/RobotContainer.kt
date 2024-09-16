@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
 import frc.robot.commands.FeedToShooter
 import frc.robot.commands.ForkCommand
+import frc.robot.commands.RotateToAngleCommand
 import frc.robot.commands.TeleopDriveCommand
 import frc.robot.commands.arm.ArmShootInAmpCommand
 import frc.robot.commands.elevator.ManualElevatorControlCommand
@@ -87,44 +88,34 @@ object RobotContainer {
 
 
     // this thread should run ONCE
-//    private val initializeDSRequiredTasks = runBlocking {
-//        launch {
-//            while (!DriverStation.isDSAttached()) {
-//                DriverStation.reportWarning("Attaching DS...", false)
-//            }
-//            DriverStation.reportWarning("DS Attached", false)
-//
-//            alliance = DriverStation.getAlliance().get()
-//
-//            SwerveSubsystem.initializePoseEstimator() // configure pose on thread
-//
-//            LEDSubsystem.defaultCommand =
-//                LEDIdleCommand(if (alliance == DriverStation.Alliance.Red) LEDSubsystem.LEDColor.RED else LEDSubsystem.LEDColor.BLUE)
-//            configureTriggers() // configure triggers here so all threads are up-to-date when this is called
-//            DriverStation.reportWarning("Current alliance is $alliance", false)
-//        }
-//    }
     private val initializeDSRequiredTasks: Thread = Thread {
         while (!DriverStation.isDSAttached()) {
             DriverStation.reportWarning("attaching DS...", false)
         }
         DriverStation.reportWarning("DS attached", false)
 
-        // try {
-        //     Thread.sleep(1000);
-        // } catch (Exception e) {}
         alliance = DriverStation.getAlliance().get()
         DriverStation.silenceJoystickConnectionWarning(true)
-        
+
         configureTriggers() // configure triggers here so all threads are up-to-date when this is called
         SwerveSubsystem.initializePoseEstimator()
         LEDSubsystem.defaultCommand =
             LEDIdleCommand(if (alliance == DriverStation.Alliance.Red) LEDColor.RED else LEDColor.BLUE)
+
+        // keep here so we can be sure that alliance is not null
+        rampAnywhereButton.whileTrue(
+            ParallelCommandGroup(
+                RampShooter(
+                    2000.0,
+                    2000.0,
+                    SwerveSubsystem.odometryImpl.getPivotAngle(alliance!!)
+                ),
+            )
+        )
     }
 
     init {
         initializeDSRequiredTasks.start()
-//        initializeDSRequiredTasks.start()
         configureDefaultCommands()
         configureDriverBindings()
         configureOperatorBindings()
@@ -263,17 +254,6 @@ object RobotContainer {
                 )
             )
 
-        // to fixx you should move to valueGetter
-        rampAnywhereButton.whileTrue(
-            ParallelCommandGroup(
-                RampShooter(
-                    2000.0,
-                    2000.0,
-                    SwerveSubsystem.odometryImpl.getPivotAngle(if (alliance == null) DriverStation.Alliance.Red else alliance!!) // fix later
-                )
-            )
-        )
-
         subwooferShot.whileTrue( // left bumper
             SubwooferShot()
         )
@@ -307,7 +287,7 @@ object RobotContainer {
             { -driverController.leftX },
             { driverController.rightX },
             { true }, // field relative
-            { driverController.hid.leftTriggerAxis > 0.5 },
+            { driverController.hid.leftTriggerAxis > 0.5 || rampAnywhereButton.asBoolean }, // experimental code to face shooter while ramping "|| rampAnywhereButton.asBoolean"
             { driverController.hid.leftBumper }) // ferryShot.asBoolean
 
         // doesnt work???
