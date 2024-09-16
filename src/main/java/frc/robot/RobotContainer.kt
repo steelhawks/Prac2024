@@ -115,7 +115,7 @@ object RobotContainer {
         // } catch (Exception e) {}
         alliance = DriverStation.getAlliance().get()
         DriverStation.silenceJoystickConnectionWarning(true)
-        
+
         configureTriggers() // configure triggers here so all threads are up-to-date when this is called
         SwerveSubsystem.initializePoseEstimator()
         LEDSubsystem.defaultCommand =

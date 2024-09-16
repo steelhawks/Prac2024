@@ -1,9 +1,7 @@
 package frc.robot.commands
 
-import com.pathplanner.lib.auto.AutoBuilder
 import com.pathplanner.lib.auto.NamedCommands
 import com.pathplanner.lib.commands.PathPlannerAuto
-import com.pathplanner.lib.path.PathPlannerPath
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj2.command.*
 import frc.robot.commands.intake.IntakeCommand
@@ -34,7 +32,6 @@ object Autos
                             WaitCommand(.3),
                             ParallelCommandGroup(
                                 FeedToShooter(),
-                                ForkCommand(IntakeSubsystem.IntakeDirection.TO_INTAKE)
                             )
                         )
                     ),
@@ -53,7 +50,7 @@ object Autos
                             WaitCommand(.3),
                             ParallelCommandGroup(
                                 FeedToShooter(),
-                                ForkCommand(IntakeSubsystem.IntakeDirection.TO_INTAKE)
+                                ForkCommand(IntakeSubsystem.IntakeDirection.TO_SHOOTER)
                             )
                         )
                     ),
@@ -73,7 +70,7 @@ object Autos
                     WaitCommand(.3),
                     ParallelCommandGroup(
                         FeedToShooter(),
-                        ForkCommand(IntakeSubsystem.IntakeDirection.TO_INTAKE)
+                        ForkCommand(IntakeSubsystem.IntakeDirection.TO_SHOOTER)
                     )
                 )
             )
@@ -139,26 +136,27 @@ object Autos
 
     /**
      * An enumeration of the available autonomous modes. It provides an easy
-     * way to manage all our autonomous modes. The [autoModeChooser] iterates
+     * way to manage all our autonomous modes. The [autonSelector] iterates
      * over its values, adding each value to the chooser.
      *
-     * @param optionName The name for the [autoModeChooser] option.
+     * @param optionName The name for the PathPlanner Auto option.
      * @param command The [Command] to run for this mode.
+     * @param useVision The boolean to use vision or not.
      */
     @Suppress("unused")
     private enum class AutoMode(val optionName: String, val command: Command, val useVision: Boolean)
     {
-        AUTO_1("Fire and Rotate", testAuto(), false),
-        AUTO_2("Fire and Move Forward", nothingAuto(),false),
-        AUTO_3("Path Planner Test", nothingAuto(), false),
-        AUTO_4("new auto pathplanner", nothingAuto(),false),
-        AUTO_5("simple path test pathplanner", nothingAuto(),true),
-        AUTO_6("far 4 note (NOT TESTED)", nothingAuto(), true),
-        AUTO_7("Placeholder Auto 1", nothingAuto(), false),
-        AUTO_8("Placeholder Auto 2", nothingAuto(), false),
-        AUTO_9("Placeholder Auto 3", nothingAuto(), false),
-        AUTO_10("Placeholder Auto 4", nothingAuto(), false),
-        AUTO_11("Placeholder Auto 5", nothingAuto(), false)
+        AUTO_1("4 piece", PathPlannerAuto(AUTO_1.optionName), false),
+        AUTO_2("3 note center bottom", PathPlannerAuto(AUTO_2.optionName),false),
+        AUTO_3("4 piece reverse", PathPlannerAuto(AUTO_3.optionName), false),
+        AUTO_4("2 note center bottom", PathPlannerAuto(AUTO_4.optionName), true),
+        AUTO_5("5 piece top", PathPlannerAuto(AUTO_5.optionName),false),
+        AUTO_6("5 piece top 2", PathPlannerAuto(AUTO_6.optionName), true),
+        AUTO_7("6 piece", PathPlannerAuto(AUTO_7.optionName), true),
+        AUTO_8("3 note center top", PathPlannerAuto(AUTO_8.optionName), true),
+        AUTO_9("Amp-Side 4 Piece", PathPlannerAuto(AUTO_9.optionName), false),
+        AUTO_10("4 piece heitman", PathPlannerAuto(AUTO_10.optionName), false),
+        AUTO_11("nothing", nothingAuto(), false)
         ;
 
         companion object
@@ -178,7 +176,7 @@ object Autos
             }
 
             /** The default auto mode. */
-            val default = AUTO_1
+            val default = AUTO_11
         }
     }
 }
