@@ -10,6 +10,12 @@
   "NetworkTables": {
     "transitory": {
       "SmartDashboard": {
+        "Real Field": {
+          "double[]##v_/SmartDashboard/Real Field/Robot": {
+            "open": true
+          },
+          "open": true
+        },
         "double[]##v_/SmartDashboard/SwerveMod States": {
           "open": true
         },

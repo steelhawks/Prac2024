@@ -411,10 +411,10 @@ object SwerveSubsystem : SubsystemBase() {
 //        }
 
         // Update field display on SmartDashboard periodically (e.g., every 10 cycles)
-//        if (counter % 10 == 0) {
-//            field.robotPose = getPose()
-//            SmartDashboard.putData("Real Field", field)
-//        }
+        if (counter % 10 == 0) {
+            field.robotPose = getPose()
+            SmartDashboard.putData("Real Field", field)
+        }
 
         // Log to the logger periodically (e.g., every 10 cycles)
 //        if (counter % 10 == 0) {
