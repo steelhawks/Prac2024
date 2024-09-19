@@ -16,7 +16,6 @@ import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
 import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
@@ -28,7 +27,6 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.lib.util.Limelight
-import frc.lib.util.LimelightHelpers
 import frc.lib.util.OdometryImpl
 import frc.lib.util.math.Conversions
 import frc.lib.util.math.Conversions.rotationsToMeters
@@ -39,8 +37,6 @@ import frc.robot.Constants.PoseConfig
 import frc.robot.RobotContainer
 import frc.robot.commands.Autos
 import frc.robot.utils.SwerveModuleConstants
-import org.littletonrobotics.junction.Logger
-import kotlin.math.IEEErem
 import kotlin.math.atan
 import kotlin.math.sqrt
 
@@ -405,10 +401,10 @@ object SwerveSubsystem : SubsystemBase() {
             }
         }
 
-//        if (shouldUseVision()) {
-//            addVisionToPose(limelightShooter)
-//            addVisionToPose(limelightArm)
-//        }
+        if (useVision) {
+            addVisionToPose(limelightShooter)
+            addVisionToPose(limelightArm)
+        }
 
         // Update field display on SmartDashboard periodically (e.g., every 10 cycles)
         if (counter % 10 == 0) {
@@ -426,9 +422,8 @@ object SwerveSubsystem : SubsystemBase() {
         counter = (counter + 1) % 1000
     }
 
-    private fun shouldUseVision(): Boolean {
-        return (RobotContainer.robotState != RobotContainer.RobotState.AUTON || Autos.selectedAutonomousUseVision) && RobotContainer.useVision
-    }
+    private val useVision: Boolean
+        get() = (RobotContainer.robotState != RobotContainer.RobotState.AUTON || Autos.selectedAutonomousUseVision) && RobotContainer.useVision
 
     fun stop() {
         drive(MathConstants.TRANSLATION2D_ZERO, MathConstants.ROTATION_ZERO, fieldRelative = true, isOpenLoop = true)

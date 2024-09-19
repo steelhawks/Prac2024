@@ -140,6 +140,8 @@ object Robot : LoggedRobot()
         // autonomous to continue until interrupted by another command, remove this line or comment it out.
         RobotContainer.robotState = RobotContainer.RobotState.TELEOP
         autonomousCommand.cancel()
+
+        RobotContainer.resetElevatorOnStart()
     }
 
     /** This method is called periodically during operator control.  */

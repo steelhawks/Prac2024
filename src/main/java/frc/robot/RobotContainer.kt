@@ -25,6 +25,7 @@ import frc.robot.subsystems.*
 import frc.robot.subsystems.LEDSubsystem.LEDColor
 import frc.robot.utils.DashboardTrigger
 import kotlinx.coroutines.*
+import java.sql.Driver
 import kotlin.math.abs
 import kotlin.math.sign
 
@@ -307,6 +308,23 @@ object RobotContainer {
 //        }
     }
 
+    fun resetElevatorOnStart() { // PLEASE TEST AND BE MINDFUL OF FIRST
+        if (ElevatorSubsystem.atElevatorMin) {
+            DriverStation.reportWarning("Elevator good and can reset", false)
+            ArmSubsystem.goHome()
+        } else {
+            DriverStation.reportWarning("ELEVATOR IS NOT RESET... Resetting to Home Now", false)
+            Commands.runOnce(ArmSubsystem::goToDangle)
+                .andThen(
+                    WaitUntilCommand { ArmSubsystem.armInPosition(ArmSubsystem.Position.DANGLE) },
+                    Commands.runOnce(ElevatorSubsystem::getHomeCommand)
+                        .andThen(
+                            ElevatorSubsystem::resetCANCoder
+                        )
+                )
+        }
+    }
+
     private fun configureTriggers() {
         Trigger {
             IntakeSubsystem.intakeBeamBroken
@@ -350,7 +368,7 @@ object RobotContainer {
             )
 
         ferryShot
-            .or(podiumShot).or(subwooferShot)
+            .or(podiumShot).or(subwooferShot).or(rampAnywhereButton)
             .whileTrue(
                 FeedToShooter()
             ).onFalse(
