@@ -135,44 +135,31 @@ object Autos
     }
 
     /**
-     * An enumeration of the available autonomous modes. It provides an easy
-     * way to manage all our autonomous modes. The [autonSelector] iterates
-     * over its values, adding each value to the chooser.
+     * An enumeration of the available autonomous modes.
      *
      * @param optionName The name for the PathPlanner Auto option.
-     * @param command The [Command] to run for this mode.
      * @param useVision The boolean to use vision or not.
      */
-    @Suppress("unused")
-    private enum class AutoMode(val optionName: String, val command: Command, val useVision: Boolean)
-    {
-        AUTO_1("4 piece", PathPlannerAuto(AUTO_1.optionName), false),
-        AUTO_2("3 note center bottom", PathPlannerAuto(AUTO_2.optionName),false),
-        AUTO_3("4 piece reverse", PathPlannerAuto(AUTO_3.optionName), false),
-        AUTO_4("2 note center bottom", PathPlannerAuto(AUTO_4.optionName), true),
-        AUTO_5("5 piece top", PathPlannerAuto(AUTO_5.optionName),false),
-        AUTO_6("5 piece top 2", PathPlannerAuto(AUTO_6.optionName), true),
-        AUTO_7("6 piece", PathPlannerAuto(AUTO_7.optionName), true),
-        AUTO_8("3 note center top", PathPlannerAuto(AUTO_8.optionName), true),
-        AUTO_9("Amp-Side 4 Piece", PathPlannerAuto(AUTO_9.optionName), false),
-        AUTO_10("4 piece heitman", PathPlannerAuto(AUTO_10.optionName), false),
-        AUTO_11("nothing", nothingAuto(), false)
-        ;
+    private enum class AutoMode(val optionName: String, val useVision: Boolean) {
+        AUTO_1("4 piece", false),
+        AUTO_2("3 note center bottom", false),
+        AUTO_3("4 piece reverse", false),
+        AUTO_4("2 note center bottom", true),
+        AUTO_5("5 piece top", false),
+        AUTO_6("5 piece top 2", true),
+        AUTO_7("6 piece", true),
+        AUTO_8("3 note center top", true),
+        AUTO_9("Amp-Side 4 Piece", false),
+        AUTO_10("4 piece heitman", false),
+        AUTO_11("nothing", false);
 
-        companion object
-        {
+        val command: Command by lazy {
+            if (this == AUTO_11) nothingAuto() else PathPlannerAuto(optionName)
+        }
+
+        companion object {
             operator fun get(autonSelector: Int): Command {
-                var i = 0
-                for (autoMode in entries) {
-                    if (i != autonSelector) {
-                        i++
-                        continue
-                    } else {
-                        return autoMode.command
-                    }
-                }
-
-                return defaultAutonomousCommand
+                return entries.getOrNull(autonSelector)?.command ?: defaultAutonomousCommand
             }
 
             /** The default auto mode. */

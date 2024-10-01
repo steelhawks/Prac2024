@@ -155,7 +155,7 @@ object LEDSubsystem : SubsystemBase() {
         _currentColor = LEDColor.OFF
         LEDStrip.setData(LEDBuffer)
 
-        rainbowStart += 1
+        rainbowStart += 3 // was 1 for normal
         rainbowStart %= 180
     }
 

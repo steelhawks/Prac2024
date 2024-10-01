@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants.OperatorConstants
 import frc.robot.commands.FeedToShooter
 import frc.robot.commands.ForkCommand
-import frc.robot.commands.RotateToAngleCommand
 import frc.robot.commands.TeleopDriveCommand
 import frc.robot.commands.arm.ArmShootInAmpCommand
 import frc.robot.commands.elevator.ManualElevatorControlCommand
@@ -24,8 +23,6 @@ import frc.robot.commands.shooter.*
 import frc.robot.subsystems.*
 import frc.robot.subsystems.LEDSubsystem.LEDColor
 import frc.robot.utils.DashboardTrigger
-import kotlinx.coroutines.*
-import java.sql.Driver
 import kotlin.math.abs
 import kotlin.math.sign
 
@@ -82,8 +79,8 @@ object RobotContainer {
     private val subwooferShot = operatorController.leftBumper().or(DashboardTrigger("subwooferShot"))
     private val podiumShot = operatorController.rightBumper().or(DashboardTrigger("podiumShot"))
     private val elevatorAndArmHomeButton = operatorController.x().or(DashboardTrigger("elevatorHome"))
+    private val anywhereShot = operatorController.button(OperatorConstants.OPERATOR_LEFT_TRIGGER_ID).or(DashboardTrigger("anywhereShot"))
     private val unlockElevatorControl = operatorController.button(OperatorConstants.OPERATOR_LEFT_STICK_BUTTON_ID)
-    private val rampAnywhereButton = operatorController.button(OperatorConstants.OPERATOR_LEFT_TRIGGER_ID)
     private val unlockShooterControl = operatorController.button(OperatorConstants.OPERATOR_RIGHT_STICK_BUTTON_ID)
     //    private val unlockArmControl = operatorController.button(OperatorConstants.OPERATOR_RIGHT_STICK_BUTTON_ID)
 
@@ -104,7 +101,7 @@ object RobotContainer {
             LEDIdleCommand(if (alliance == DriverStation.Alliance.Red) LEDColor.RED else LEDColor.BLUE)
 
         // keep here so we can be sure that alliance is not null
-        rampAnywhereButton.whileTrue(
+        anywhereShot.whileTrue(
             ParallelCommandGroup(
                 RampShooter(
                     2000.0,
@@ -288,7 +285,7 @@ object RobotContainer {
             { -driverController.leftX },
             { driverController.rightX },
             { true }, // field relative
-            { driverController.hid.leftTriggerAxis > 0.5 || rampAnywhereButton.asBoolean }, // experimental code to face shooter while ramping "|| rampAnywhereButton.asBoolean"
+            { driverController.hid.leftTriggerAxis > 0.5 || anywhereShot.asBoolean }, // experimental code to face shooter while ramping "|| rampAnywhereButton.asBoolean"
             { driverController.hid.leftBumper }) // ferryShot.asBoolean
 
         // doesnt work???
@@ -368,7 +365,7 @@ object RobotContainer {
             )
 
         ferryShot
-            .or(podiumShot).or(subwooferShot).or(rampAnywhereButton)
+            .or(podiumShot).or(subwooferShot).or(anywhereShot)
             .whileTrue(
                 FeedToShooter()
             ).onFalse(
