@@ -310,14 +310,10 @@ object Constants {
         // Score positions in radians
         const val HOME_POSITION: Double = -2.4
         const val DANGLE_POSITION: Double = -Math.PI / 2
-        const val HAND_OFF_POSITION: Double = -2.4
-        const val AMP_SLAM_POSITION: Double = -0.20 // NOT USED ANYMORE
         const val CLIMB_IDLE_POSITION: Double = -1.1
         const val AMP_SHOOT_POSITION: Double = -0.55
-        const val TRAP_POSITION: Double = 1.37
 
         // Manual testing values
-        const val MANUAL_ARM_PIVOT_SPEED: Double = 0.1
         const val HANDOFF_SPEED: Double = -0.3
         const val SHOOT_SPEED: Double = 0.8
     }
@@ -348,7 +344,7 @@ object Constants {
         const val CANCODER_ID: Int = 22
 
         const val TOLERANCE: Double = 0.005
-        const val MANUAL_ELEVATOR_SPEED: Double = 0.5
+        const val MANUAL_ELEVATOR_SPEED: Double = 0.7 // was .5
     }
 }
 

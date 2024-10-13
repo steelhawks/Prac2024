@@ -194,7 +194,7 @@ object LEDSubsystem : SubsystemBase() {
         )
     }
 
-    fun fadeCommand(color: LEDColor, interval: Double, time: Double): Command {
+    fun fadeCommand(color: LEDColor): Command {
         return ParallelDeadlineGroup(
             Commands.run({
                 this.fade(color)

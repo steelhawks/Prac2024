@@ -9,10 +9,10 @@ import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.trajectory.TrapezoidProfile
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.*
 import frc.robot.Constants
-import java.beans.beancontext.BeanContextServiceAvailableEvent
 import kotlin.math.abs
 import kotlin.math.cos
 
@@ -113,13 +113,20 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
     }
 
     override fun useOutput(output: Double, setpoint: TrapezoidProfile.State?) {
-        setpoint?.let {
-            val feedForward = pivotFeedForward.calculate(it.position, it.velocity)
-            m_pivotMotor.setVoltage(output + feedForward)
-            SmartDashboard.putNumber("shooter/feedforward", feedForward)
-            SmartDashboard.putNumber("shooter/setpoint position", it.position)
-            SmartDashboard.putNumber("shooter/setpoint velocity", it.velocity)
-        }
+//        val feedforward = setpoint?.let { pivotFeedForward.calculate(it.position, setpoint.velocity) }
+        val feedforward = pivotFeedForward.calculate(setpoint!!.position, setpoint.velocity)
+        m_pivotMotor.setVoltage(output + feedforward)
+
+        SmartDashboard.putNumber("shooter/feedforward", feedforward)
+        SmartDashboard.putNumber("shooter/setpoint position", setpoint.velocity)
+        SmartDashboard.putNumber("shooter/setpoint velocity", setpoint.velocity)
+//        setpoint?.let {
+//            val feedForward = pivotFeedForward.calculate(it.position, it.velocity)
+//            m_pivotMotor.setVoltage(output + feedForward)
+//            SmartDashboard.putNumber("shooter/feedforward", feedForward)
+//            SmartDashboard.putNumber("shooter/setpoint position", it.position)
+//            SmartDashboard.putNumber("shooter/setpoint velocity", it.velocity)
+//        }
     }
 
     override fun getMeasurement(): Double {
@@ -140,8 +147,10 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
     }
 
     /** Shooter */
-    fun goHome() {
-        setGoal(Constants.Shooter.HOME_POSITION)
+    fun goHome() { // test dis
+        if (!(abs(measurement - Constants.Shooter.HOME_POSITION) <= Constants.Shooter.PIVOT_TOLERANCE)) {
+            setGoal(Constants.Shooter.HOME_POSITION)
+        }
     }
 
     fun stopShooter() {
@@ -206,13 +215,17 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
     // to fix maybe add a wait timer for it to actually get to this position
     // or maybe the time it takes for the shooters rpms to reach its time is enough time
     private val pivotAtSetpoint: Boolean
-        get() = if (controller.goal.position == 1.02) true else abs(measurement - controller.goal.position) <= Constants.Shooter.PIVOT_TOLERANCE * 1.5
+        get() = if (controller.goal.position == Constants.Shooter.HOME_POSITION) true else abs(measurement - controller.goal.position) <= Constants.Shooter.PIVOT_TOLERANCE * 1.5
 
     private val topShooterAtSetpoint: Boolean
         get() = abs((shooterTopRPM - topShooterPIDController.setpoint)) <= Constants.Shooter.SHOOTER_TOLERANCE * 1.5
 
     private val bottomShooterAtSetpoint: Boolean
         get() = abs((shooterBottomRPM - bottomShooterPIDController.setpoint)) <= Constants.Shooter.SHOOTER_TOLERANCE * 1.5
+
+//    fun isShooterWithinRPMPercentageSetpoint(percentage: Double): Boolean {
+//        return abs(shooterTopRPM / topShooterPIDController.setpoint) >= percentage && abs(shooterBottomRPM / bottomShooterPIDController.setpoint) >= percentage
+//    }
 
     val isReadyToShoot: Boolean
         get() = topShooterAtSetpoint && bottomShooterAtSetpoint && pivotAtSetpoint
@@ -222,6 +235,10 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
     override fun periodic() {
         if (m_enabled) {
             useOutput(m_controller.calculate(measurement), m_controller.setpoint)
+        }
+
+        if (DriverStation.isDisabled()) {
+            goHome()
         }
 
         counter = (counter + 1) % 1000 // reset to avoid overflow

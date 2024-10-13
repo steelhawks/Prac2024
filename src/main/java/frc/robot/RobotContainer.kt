@@ -47,8 +47,14 @@ object RobotContainer {
         LOCKED, UNLOCKED
     }
 
+    enum class MatchState {
+        NORMAL, END_GAME
+    }
+
     private var elevatorManual = ManualMode.LOCKED
     private var shooterManual = ManualMode.LOCKED
+    private var matchMode = MatchState.NORMAL
+    private var isNormalMode = Trigger { matchMode == MatchState.NORMAL }
     var armManual = ManualMode.LOCKED
 
     lateinit var robotState: RobotState
@@ -72,6 +78,7 @@ object RobotContainer {
     // operator controller and triggers
     private val operatorController = CommandXboxController(OperatorConstants.OPERATOR_CONTROLLER_PORT)
 
+    private val toggleNormalModeButton = operatorController.back().and(operatorController.start()) // test this
     private val reverseIntakeButton = operatorController.povDown().or(DashboardTrigger("reverseIntake"))
     private val manualIntakeButton = operatorController.povUp().or(DashboardTrigger("manualIntake"))
     private val intakeFromHumanButton = operatorController.a().or(DashboardTrigger("intakeFromHuman"))
@@ -79,11 +86,17 @@ object RobotContainer {
     private val subwooferShot = operatorController.leftBumper().or(DashboardTrigger("subwooferShot"))
     private val podiumShot = operatorController.rightBumper().or(DashboardTrigger("podiumShot"))
     private val elevatorAndArmHomeButton = operatorController.x().or(DashboardTrigger("elevatorHome"))
-    private val anywhereShot = operatorController.button(OperatorConstants.OPERATOR_LEFT_TRIGGER_ID).or(DashboardTrigger("anywhereShot"))
-    private val unlockElevatorControl = operatorController.button(OperatorConstants.OPERATOR_LEFT_STICK_BUTTON_ID)
-    private val unlockShooterControl = operatorController.button(OperatorConstants.OPERATOR_RIGHT_STICK_BUTTON_ID)
-    //    private val unlockArmControl = operatorController.button(OperatorConstants.OPERATOR_RIGHT_STICK_BUTTON_ID)
+    // FOR PS5 CONTROLLERS
+//    private val anywhereShot =
+//        operatorController.button(OperatorConstants.OPERATOR_LEFT_TRIGGER_ID).or(DashboardTrigger("anywhereShot"))
+//    private val intakeToShooter = operatorController.button(OperatorConstants.OPERATOR_RIGHT_TRIGGER_ID)
+//    private val unlockElevatorControl = operatorController.button(OperatorConstants.OPERATOR_LEFT_STICK_BUTTON_ID)
+//    private val unlockShooterControl = operatorController.button(OperatorConstants.OPERATOR_RIGHT_STICK_BUTTON_ID)
 
+    private val anywhereShot = operatorController.leftTrigger().or(DashboardTrigger("anywhereShot"))
+    private val intakeToShooter = operatorController.rightTrigger()
+    private val unlockElevatorControl = operatorController.leftStick()
+    private val unlockShooterControl = operatorController.rightStick()
 
     // this thread should run ONCE
     private val initializeDSRequiredTasks: Thread = Thread {
@@ -101,15 +114,17 @@ object RobotContainer {
             LEDIdleCommand(if (alliance == DriverStation.Alliance.Red) LEDColor.RED else LEDColor.BLUE)
 
         // keep here so we can be sure that alliance is not null
-        anywhereShot.whileTrue(
-            ParallelCommandGroup(
-                RampShooter(
-                    2000.0,
-                    2000.0,
-                    SwerveSubsystem.odometryImpl.getPivotAngle(alliance!!)
-                ),
+        anywhereShot
+            .and(isNormalMode)
+            .whileTrue(
+                ParallelCommandGroup(
+                    RampShooter(
+                        3000.0,
+                        3000.0,
+                        SwerveSubsystem.odometryImpl.getPivotAngle(alliance!!)
+                    ),
+                )
             )
-        )
     }
 
     init {
@@ -117,6 +132,7 @@ object RobotContainer {
         configureDefaultCommands()
         configureDriverBindings()
         configureOperatorBindings()
+        configureEndGameBindings()
     }
 
     /**
@@ -132,8 +148,8 @@ object RobotContainer {
         })
             .andThen(
                 ConditionalCommand(
-                    LEDSubsystem.flashCommand(LEDSubsystem.LEDColor.WHITE, 0.2, 2.0),
-                    LEDSubsystem.flashCommand(LEDSubsystem.LEDColor.CYAN, 0.2, 2.0)
+                    LEDSubsystem.flashCommand(LEDColor.WHITE, 0.2, 2.0),
+                    LEDSubsystem.flashCommand(LEDColor.CYAN, 0.2, 2.0)
                 ) { ShooterSubsystem.autoShootingEnabled }
             ))
 
@@ -151,12 +167,179 @@ object RobotContainer {
     }
 
     private fun configureOperatorBindings() {
-        unlockElevatorControl.onTrue(ConditionalCommand(
+        toggleNormalModeButton.onTrue(
+            SequentialCommandGroup(
+                Commands.runOnce({
+                    LEDSubsystem.defaultCommand.cancel()
+                    LEDSubsystem.removeDefaultCommand()
+                }),
+                ConditionalCommand(
+                    Commands.runOnce({
+                        matchMode = MatchState.END_GAME
+                        LEDSubsystem.defaultCommand = LEDSubsystem.fadeCommand(LEDColor.ORANGE)
+                    }),
+                    Commands.runOnce({
+                        matchMode = MatchState.END_GAME
+                        LEDSubsystem.defaultCommand =
+                            LEDIdleCommand(if (alliance == DriverStation.Alliance.Red) LEDColor.RED else LEDColor.BLUE)
+                    }),
+                ) { matchMode == MatchState.NORMAL }
+            )
+        )
+
+        unlockElevatorControl
+            .and(isNormalMode)
+            .onTrue(manualElevatorCommand())
+
+        unlockShooterControl
+            .and(isNormalMode)
+            .onTrue(ConditionalCommand(
+                InstantCommand({
+                    shooterManual = ManualMode.UNLOCKED
+                    ShooterSubsystem.disable()
+                    ShooterSubsystem.defaultCommand.cancel()
+                    ShooterSubsystem.defaultCommand =
+                        ManualShooterPivotCommand {
+                            if (!isNormalMode.asBoolean || abs(operatorController.getRawAxis(OperatorConstants.OPERATOR_RIGHT_STICK_AXIS)) < Constants.Deadbands.SHOOTER_DEADBAND) {
+                                null
+                            } else {
+                                operatorController.getRawAxis(OperatorConstants.OPERATOR_RIGHT_STICK_AXIS).sign > 0
+                            }
+                        }
+                }),
+                InstantCommand({
+                    shooterManual = ManualMode.LOCKED
+                    ShooterSubsystem.enable()
+                    ShooterSubsystem.defaultCommand.cancel()
+                    ShooterSubsystem.defaultCommand =
+                        ShooterHomePositionCommand()
+                })
+            ) { shooterManual == ManualMode.LOCKED })
+
+//        unlockArmControl.onTrue(InstantCommand({ // right stick BUTTON
+//            armManual = if (armManual == ManualMode.UNLOCKED) {
+//                ManualMode.LOCKED
+//            } else {
+//                ManualMode.UNLOCKED
+//            }
+//        }))
+
+        intakeToShooter // TEST THIS!!! // REMOVE THE TRIGGER THAT TURNS ON THE FEEDERS IN CONFIGURETRIGGERS
+            .and(isNormalMode)
+            .whileTrue(
+                FeedToShooter()
+            )
+            .onTrue(
+                LEDSubsystem.flashCommand(LEDColor.WHITE, 0.2, 2.0)
+            )
+
+
+        fireNoteToAmp // triangle || y // intake to arm
+            .and(isNormalMode)
+            .and { ElevatorSubsystem.atElevatorMin }
+            .onTrue(
+                IntakeToArmCommand().withTimeout(5.0)
+                    .andThen(
+                        SequentialCommandGroup(
+                            Commands.runOnce(ArmSubsystem::goToAmpFirePosition),
+                            WaitCommand(.5),
+                            ElevatorSubsystem.getAmpCommand(),
+                        ).unless { IntakeSubsystem.intakeToArmInterrupted }
+                    )
+            )
+
+        fireNoteToAmp // shoot note
+            .and(isNormalMode)
+            .and { ArmSubsystem.armInPosition(ArmSubsystem.Position.AMP_SHOOT) }
+            .and { ElevatorSubsystem.elevatorInPosition(ElevatorSubsystem.ElevatorLevel.AMP) }
+            .onTrue(
+                ParallelCommandGroup(
+                    SequentialCommandGroup(
+                        WaitCommand(.2),
+                        ArmShootInAmpCommand(),
+                    ),
+                    LEDSubsystem.flashCommand(LEDColor.ORANGE, 0.2, 2.0)
+                )
+            )
+
+        elevatorAndArmHomeButton
+            .and(isNormalMode)
+            .and { ElevatorSubsystem.elevatorInPosition(ElevatorSubsystem.ElevatorLevel.AMP) }
+            .onTrue(
+                SequentialCommandGroup(
+                    InstantCommand({ ArmSubsystem.goToDangle() }),
+                    WaitCommand(.2),
+                    ElevatorSubsystem.getHomeCommand(),
+                    ConditionalCommand(
+                        InstantCommand({ ArmSubsystem.goHome() }),
+                        InstantCommand(),
+                        ElevatorSubsystem::atElevatorMin
+                    )
+                )
+            )
+
+        subwooferShot
+            .and(isNormalMode)
+            .whileTrue( // left bumper
+                SubwooferShot()
+            )
+
+        podiumShot
+            .and(isNormalMode)
+            .whileTrue( // right bumper
+                PodiumShot()
+            )
+
+        reverseIntakeButton
+            .and(isNormalMode)
+            .whileTrue(IntakeReverseCommand())
+
+        manualIntakeButton
+            .and(isNormalMode)
+            .whileTrue(
+                Commands.runEnd(
+                    IntakeSubsystem::intake,
+                    IntakeSubsystem::stop,
+                    IntakeSubsystem
+                )
+            )
+
+        intakeFromHumanButton
+            .and(isNormalMode)
+            .whileTrue(
+                IntakeFromHuman()
+            ).onTrue(LEDSubsystem.flashCommand(LEDColor.GREEN, .2, 2.0))
+            .onFalse(Commands.runOnce({
+                IntakeSubsystem.stop()
+                ShooterSubsystem.stopFeed()
+            }))
+    }
+
+    private fun configureEndGameBindings() {
+        operatorController.y()
+            .and(isNormalMode.negate())
+            .and { elevatorManual == ManualMode.LOCKED }
+            .and { !ElevatorSubsystem.isEnabled }
+            .onTrue(
+                SequentialCommandGroup(
+                    Commands.runOnce({ ArmSubsystem.goToClimbPosition() }),
+                    WaitCommand(.5),
+                    ElevatorSubsystem.getClimbCommand()
+                )
+            )
+
+        operatorController.rightStick()
+            .and(isNormalMode.negate())
+            .onTrue(manualElevatorCommand())
+    }
+
+    private fun manualElevatorCommand(): Command {
+        return ConditionalCommand(
             InstantCommand({
                 elevatorManual = ManualMode.UNLOCKED
                 ElevatorSubsystem.defaultCommand =
                     ManualElevatorControlCommand {
-                        if (abs(operatorController.getRawAxis(OperatorConstants.OPERATOR_LEFT_STICK_AXIS)) < Constants.Deadbands.CLIMB_DEADBAND) {
+                        if (isNormalMode.asBoolean || abs(operatorController.getRawAxis(OperatorConstants.OPERATOR_LEFT_STICK_AXIS)) < Constants.Deadbands.CLIMB_DEADBAND) {
                             null
                         } else {
                             operatorController.getRawAxis(OperatorConstants.OPERATOR_LEFT_STICK_AXIS).sign > 0
@@ -178,104 +361,7 @@ object RobotContainer {
                     Commands.runOnce({ ArmSubsystem.goHome() })
                 ) { !ElevatorSubsystem.atElevatorMin }
             )
-        ) { elevatorManual == ManualMode.LOCKED })
-
-        unlockShooterControl.onTrue(ConditionalCommand(
-            InstantCommand({
-                shooterManual = ManualMode.UNLOCKED
-                ShooterSubsystem.disable()
-                ShooterSubsystem.defaultCommand.cancel()
-                ShooterSubsystem.defaultCommand =
-                    ManualShooterPivotCommand {
-                        if (abs(operatorController.getRawAxis(OperatorConstants.OPERATOR_RIGHT_STICK_AXIS)) < Constants.Deadbands.SHOOTER_DEADBAND) {
-                            null
-                        } else {
-                            operatorController.getRawAxis(OperatorConstants.OPERATOR_RIGHT_STICK_AXIS).sign > 0
-                        }
-                    }
-            }),
-            InstantCommand({
-                shooterManual = ManualMode.LOCKED
-                ShooterSubsystem.enable()
-                ShooterSubsystem.defaultCommand.cancel()
-                ShooterSubsystem.defaultCommand =
-                    ShooterHomePositionCommand()
-            })
-        ) { shooterManual == ManualMode.LOCKED })
-
-//        unlockArmControl.onTrue(InstantCommand({ // right stick BUTTON
-//            armManual = if (armManual == ManualMode.UNLOCKED) {
-//                ManualMode.LOCKED
-//            } else {
-//                ManualMode.UNLOCKED
-//            }
-//        }))
-
-        fireNoteToAmp // triangle || y // intake to arm
-            .and { ElevatorSubsystem.atElevatorMin }
-            .onTrue(
-                IntakeToArmCommand().withTimeout(5.0)
-                    .andThen(
-                        SequentialCommandGroup(
-                            Commands.runOnce(ArmSubsystem::goToAmpFirePosition),
-                            WaitCommand(.5),
-                            ElevatorSubsystem.getAmpCommand(),
-                        ).unless { IntakeSubsystem.intakeToArmInterrupted }
-                    )
-            )
-
-        fireNoteToAmp // shoot note
-            .and { ArmSubsystem.armInPosition(ArmSubsystem.Position.AMP_SHOOT) }
-            .and { ElevatorSubsystem.elevatorInPosition(ElevatorSubsystem.ElevatorLevel.AMP) }
-            .onTrue(
-                ParallelCommandGroup(
-                    SequentialCommandGroup(
-                        WaitCommand(.2),
-                        ArmShootInAmpCommand(),
-                    ),
-                    LEDSubsystem.flashCommand(LEDSubsystem.LEDColor.ORANGE, 0.2, 2.0)
-                )
-            )
-
-        elevatorAndArmHomeButton
-            .and { ElevatorSubsystem.elevatorInPosition(ElevatorSubsystem.ElevatorLevel.AMP) }
-            .onTrue(
-                SequentialCommandGroup(
-                    InstantCommand({ ArmSubsystem.goToDangle() }),
-                    WaitCommand(.2),
-                    ElevatorSubsystem.getHomeCommand(),
-                    ConditionalCommand(
-                        InstantCommand({ ArmSubsystem.goHome() }),
-                        InstantCommand(),
-                        ElevatorSubsystem::atElevatorMin
-                    )
-                )
-            )
-
-        subwooferShot.whileTrue( // left bumper
-            SubwooferShot()
-        )
-
-        podiumShot.whileTrue( // right bumper
-            PodiumShot()
-        )
-
-        reverseIntakeButton.whileTrue(IntakeReverseCommand())
-        manualIntakeButton.whileTrue(
-            Commands.runEnd(
-                IntakeSubsystem::intake,
-                IntakeSubsystem::stop,
-                IntakeSubsystem
-            )
-        )
-
-        intakeFromHumanButton.whileTrue(
-            IntakeFromHuman()
-        ).onTrue(LEDSubsystem.flashCommand(LEDSubsystem.LEDColor.GREEN, .2, 2.0))
-            .onFalse(Commands.runOnce({
-                IntakeSubsystem.stop()
-                ShooterSubsystem.stopFeed()
-            }))
+        ) { elevatorManual == ManualMode.LOCKED }
     }
 
     private fun configureDefaultCommands() {
@@ -354,25 +440,28 @@ object RobotContainer {
             IntakeSubsystem.noteStatus == NoteStatus.ARM
         }
             .whileTrue(
-                LEDNoteToArmCommand(LEDSubsystem.LEDColor.PURPLE)
+                LEDNoteToArmCommand(LEDColor.PURPLE)
             )
 
         Trigger {
             IntakeSubsystem.noteStatus == NoteStatus.IN_SHOOTER
         }
             .whileTrue(
-                LEDNoteInShooterCommand(LEDSubsystem.LEDColor.MAGENTA)
+                LEDNoteInShooterCommand(LEDColor.MAGENTA)
             )
 
-        ferryShot
-            .or(podiumShot).or(subwooferShot).or(anywhereShot)
-            .whileTrue(
-                FeedToShooter()
-            ).onFalse(
-                Commands.runOnce({
-                    ShooterSubsystem.stopFeed()
-                })
-            )
+//        Trigger { // find out a fix to this
+//            ShooterSubsystem.isShooterWithinRPMPercentageSetpoint(.75)
+//        }.and(
+//            ferryShot.or(podiumShot).or(subwooferShot).or(anywhereShot)
+//        ) //.and(intakeToShooter.negate())
+//            .whileTrue(
+//                FeedToShooter()
+//            ).onFalse(
+//                Commands.runOnce({
+//                    ShooterSubsystem.stopFeed()
+//                })
+//            )
 
         Trigger {
             ShooterSubsystem.firing
@@ -380,7 +469,11 @@ object RobotContainer {
             .and { ShooterSubsystem.autoShootingEnabled }
             .and(ferryShot.or(podiumShot).or(subwooferShot))
             .onTrue(
-                ForkCommand(IntakeSubsystem.IntakeDirection.TO_SHOOTER).withTimeout(1.0)
+                SequentialCommandGroup(
+                    WaitCommand(.25),
+                    FeedToShooter().withTimeout(1.0)
+//                    ForkCommand(IntakeSubsystem.IntakeDirection.TO_SHOOTER).withTimeout(1.0)
+                )
             )
 
         Trigger {

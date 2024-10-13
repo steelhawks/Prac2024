@@ -29,11 +29,8 @@ object ArmSubsystem : ProfiledPIDSubsystem(
     enum class Position(val rotations: Double) {
         HOME(Constants.AmpArm.HOME_POSITION),
         DANGLE(Constants.AmpArm.DANGLE_POSITION),
-        HANDOFF(Constants.AmpArm.HAND_OFF_POSITION),
-        AMP_SLAM(Constants.AmpArm.AMP_SLAM_POSITION),
         AMP_SHOOT(Constants.AmpArm.AMP_SHOOT_POSITION),
-        CLIMB_POSITION(Constants.AmpArm.CLIMB_IDLE_POSITION),
-        TRAP(Constants.AmpArm.TRAP_POSITION)
+        CLIMB_POSITION(Constants.AmpArm.CLIMB_IDLE_POSITION)
     }
 
     enum class ArmStatus {
@@ -113,6 +110,10 @@ object ArmSubsystem : ProfiledPIDSubsystem(
 
     fun goToAmpFirePosition() {
         setGoal(Position.AMP_SHOOT.rotations)
+    }
+
+    fun goToClimbPosition() {
+        setGoal(Position.CLIMB_POSITION.rotations)
     }
 
     fun stopArm() {

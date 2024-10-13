@@ -48,8 +48,7 @@ class SwerveModule(val swerveModuleNumber: Int, private val constants: SwerveMod
 
     var currentState: SwerveModuleState = SwerveModuleState()
         private set
-    var desiredState: SwerveModuleState = SwerveModuleState()
-        private set
+    private var desiredState: SwerveModuleState = SwerveModuleState()
 
     //    private val drivePIDController: PIDController = PIDController(0.1, 0.0, 0.0)
 //    private val steeringPIDController: PIDController = PIDController(0.1, 0.0, 0.0)
