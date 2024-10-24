@@ -13,8 +13,15 @@ import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.*
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController
+import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.Constants
+import frc.robot.Constants.OperatorConstants
+import frc.robot.RobotContainer
+import frc.robot.RobotContainer.ManualMode
+import frc.robot.commands.elevator.ManualElevatorControlCommand
 import kotlin.math.abs
+import kotlin.math.sign
 
 object ElevatorSubsystem : ProfiledPIDSubsystem(
     ProfiledPIDController(
@@ -98,6 +105,37 @@ object ElevatorSubsystem : ProfiledPIDSubsystem(
                     ArmSubsystem.goHome()
                 }))
         )
+    }
+
+    fun getManualElevatorCommand(isNormalMode: Trigger, operatorController: CommandXboxController): Command {
+        return ConditionalCommand(
+            InstantCommand({
+                RobotContainer.elevatorManual = ManualMode.UNLOCKED
+                ElevatorSubsystem.defaultCommand =
+                    ManualElevatorControlCommand {
+                        if (isNormalMode.asBoolean || abs(operatorController.getRawAxis(OperatorConstants.OPERATOR_LEFT_STICK_AXIS)) < Constants.Deadbands.CLIMB_DEADBAND) {
+                            null
+                        } else {
+                            operatorController.getRawAxis(OperatorConstants.OPERATOR_LEFT_STICK_AXIS).sign > 0
+                        }
+                    }
+            }),
+            SequentialCommandGroup(
+                InstantCommand({
+                    RobotContainer.elevatorManual = ManualMode.LOCKED
+                    defaultCommand.cancel()
+                    removeDefaultCommand()
+                }),
+                ConditionalCommand(
+                    getHomeCommand()
+                        .until(this::atElevatorMin)
+                        .andThen(
+                            this::stopElevator
+                        ),
+                    Commands.runOnce({ ArmSubsystem.goHome() })
+                ) { !atElevatorMin }
+            )
+        ) { RobotContainer.elevatorManual == ManualMode.LOCKED }
     }
 
     fun getAmpCommand(): Command {

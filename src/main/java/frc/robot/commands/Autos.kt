@@ -48,10 +48,7 @@ object Autos
                         WaitUntilCommand(ShooterSubsystem::isReadyToShoot),
                         ParallelDeadlineGroup(
                             WaitCommand(.3),
-                            ParallelCommandGroup(
-                                FeedToShooter(),
-                                ForkCommand(IntakeSubsystem.IntakeDirection.TO_SHOOTER)
-                            )
+                            FeedToShooter()
                         )
                     ),
                     PodiumShot()
@@ -68,10 +65,7 @@ object Autos
                 WaitUntilCommand(ShooterSubsystem::isReadyToShoot),
                 ParallelDeadlineGroup(
                     WaitCommand(.3),
-                    ParallelCommandGroup(
-                        FeedToShooter(),
-                        ForkCommand(IntakeSubsystem.IntakeDirection.TO_SHOOTER)
-                    )
+                    FeedToShooter()
                 )
             )
         )

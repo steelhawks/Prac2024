@@ -12,10 +12,12 @@ class ShooterHomePositionCommand : Command() {
         addRequirements(shooterSubsystem)
     }
 
-    override fun initialize() {}
+    override fun initialize() {
+        shooterSubsystem.goHome() // check this
+    }
 
     override fun execute() {
-        shooterSubsystem.goHome()
+//        shooterSubsystem.goHome()
     }
 
     override fun isFinished(): Boolean {

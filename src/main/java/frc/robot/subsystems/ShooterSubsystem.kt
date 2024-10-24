@@ -148,9 +148,10 @@ object ShooterSubsystem : ProfiledPIDSubsystem(
 
     /** Shooter */
     fun goHome() { // test dis
-        if (!(abs(measurement - Constants.Shooter.HOME_POSITION) <= Constants.Shooter.PIVOT_TOLERANCE)) {
-            setGoal(Constants.Shooter.HOME_POSITION)
-        }
+//        if (!(abs(measurement - Constants.Shooter.HOME_POSITION) <= Constants.Shooter.PIVOT_TOLERANCE)) {
+//            setGoal(Constants.Shooter.HOME_POSITION)
+//        }
+        setGoal(Constants.Shooter.HOME_POSITION)
     }
 
     fun stopShooter() {

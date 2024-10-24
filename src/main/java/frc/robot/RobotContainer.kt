@@ -1,5 +1,6 @@
 package frc.robot
 
+import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj2.command.*
@@ -51,10 +52,10 @@ object RobotContainer {
         NORMAL, END_GAME
     }
 
-    private var elevatorManual = ManualMode.LOCKED
+    var elevatorManual = ManualMode.LOCKED
     private var shooterManual = ManualMode.LOCKED
     private var matchMode = MatchState.NORMAL
-    private var isNormalMode = Trigger { matchMode == MatchState.NORMAL }
+    var isNormalMode = Trigger { matchMode == MatchState.NORMAL }
     var armManual = ManualMode.LOCKED
 
     lateinit var robotState: RobotState
@@ -97,6 +98,11 @@ object RobotContainer {
     private val intakeToShooter = operatorController.rightTrigger()
     private val unlockElevatorControl = operatorController.leftStick()
     private val unlockShooterControl = operatorController.rightStick()
+
+    fun getNoteDir(): String {
+        val retrievedEntry = NetworkTableInstance.getDefault().getTable("vision").getEntry("noteDirection").getString("")
+        return retrievedEntry
+    }
 
     // this thread should run ONCE
     private val initializeDSRequiredTasks: Thread = Thread {
@@ -189,7 +195,7 @@ object RobotContainer {
 
         unlockElevatorControl
             .and(isNormalMode)
-            .onTrue(manualElevatorCommand())
+            .onTrue(ElevatorSubsystem.getManualElevatorCommand(isNormalMode, operatorController))
 
         unlockShooterControl
             .and(isNormalMode)
@@ -330,39 +336,10 @@ object RobotContainer {
 
         operatorController.rightStick()
             .and(isNormalMode.negate())
-            .onTrue(manualElevatorCommand())
+            .onTrue(ElevatorSubsystem.getManualElevatorCommand(isNormalMode, operatorController))
     }
 
-    private fun manualElevatorCommand(): Command {
-        return ConditionalCommand(
-            InstantCommand({
-                elevatorManual = ManualMode.UNLOCKED
-                ElevatorSubsystem.defaultCommand =
-                    ManualElevatorControlCommand {
-                        if (isNormalMode.asBoolean || abs(operatorController.getRawAxis(OperatorConstants.OPERATOR_LEFT_STICK_AXIS)) < Constants.Deadbands.CLIMB_DEADBAND) {
-                            null
-                        } else {
-                            operatorController.getRawAxis(OperatorConstants.OPERATOR_LEFT_STICK_AXIS).sign > 0
-                        }
-                    }
-            }),
-            SequentialCommandGroup(
-                InstantCommand({
-                    elevatorManual = ManualMode.LOCKED
-                    ElevatorSubsystem.defaultCommand.cancel()
-                    ElevatorSubsystem.removeDefaultCommand()
-                }),
-                ConditionalCommand(
-                    ElevatorSubsystem.getHomeCommand()
-                        .until(ElevatorSubsystem::atElevatorMin)
-                        .andThen(
-                            ElevatorSubsystem::stopElevator
-                        ),
-                    Commands.runOnce({ ArmSubsystem.goHome() })
-                ) { !ElevatorSubsystem.atElevatorMin }
-            )
-        ) { elevatorManual == ManualMode.LOCKED }
-    }
+
 
     private fun configureDefaultCommands() {
         ShooterSubsystem.defaultCommand = ShooterHomePositionCommand()
@@ -373,22 +350,6 @@ object RobotContainer {
             { true }, // field relative
             { driverController.hid.leftTriggerAxis > 0.5 || anywhereShot.asBoolean }, // experimental code to face shooter while ramping "|| rampAnywhereButton.asBoolean"
             { driverController.hid.leftBumper }) // ferryShot.asBoolean
-
-        // doesnt work???
-//        if (ElevatorSubsystem.atElevatorMin) {
-//            println("Elevator good and can reset");
-//            ArmSubsystem.goHome()
-//        } else {
-//            DriverStation.reportWarning("ELEVATOR IS NOT RESET... Resetting to Home Now", false)
-//            Commands.runOnce(ArmSubsystem::goToDangle)
-//                .andThen(
-//                    WaitUntilCommand { ArmSubsystem.armInPosition(ArmSubsystem.Position.DANGLE) },
-//                    Commands.runOnce(ElevatorSubsystem::getHomeCommand)
-//                        .andThen(
-//                            ElevatorSubsystem::resetCANCoder
-//                        )
-//                )
-//        }
     }
 
     fun resetElevatorOnStart() { // PLEASE TEST AND BE MINDFUL OF FIRST

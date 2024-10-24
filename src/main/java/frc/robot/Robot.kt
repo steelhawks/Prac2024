@@ -106,6 +106,8 @@ object Robot : LoggedRobot()
             SmartDashboard.putString("Note Status", IntakeSubsystem.noteStatus.name)
             SmartDashboard.putNumber("Auton Selected", Autos.getAutonSelector.toDouble())
             SmartDashboard.putString("Auton Name", Autos.selectedAutonomousCommandName)
+            SmartDashboard.putBoolean("Is Normal Mode", RobotContainer.isNormalMode.asBoolean)
+            SmartDashboard.putString("Note Direction Currently", RobotContainer.getNoteDir())
         }
     }
 
