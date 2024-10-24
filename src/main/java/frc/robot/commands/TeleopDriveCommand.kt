@@ -17,7 +17,8 @@ class TeleopDriveCommand(
     private val getRightX: () -> Double,
     private val getFieldRelative: () -> Boolean,
     private val getFaceSpeaker: () -> Boolean,
-    private val getFaceAmp: () -> Boolean
+    private val getFaceAmp: () -> Boolean,
+    private val getNoteDir: () -> String
 ) : Command() {
     private val swerveSubsystem = SwerveSubsystem
 
@@ -46,6 +47,7 @@ class TeleopDriveCommand(
         val fieldRelative = getFieldRelative()
         val faceSpeaker = getFaceSpeaker()
         val faceAmp = getFaceAmp()
+        val noteDir = getNoteDir()
 
         val translationValue = MathUtil.applyDeadband(leftY, Constants.Deadbands.DRIVE_DEADBAND)
         val strafeValue = MathUtil.applyDeadband(leftX,  Constants.Deadbands.DRIVE_DEADBAND)
@@ -59,6 +61,13 @@ class TeleopDriveCommand(
             multipliedTranslation = if (swerveSubsystem.isLowGear) multipliedTranslation else multipliedTranslation.times(0.3)
         } else if (faceAmp) {
             multipliedRotation = getRotationSpeedFromPID(if (RobotContainer.alliance == DriverStation.Alliance.Blue) Constants.BlueTeamPoses.BLUE_AMP_POSE else Constants.RedTeamPoses.RED_AMP_POSE)
+        } else if (noteDir != "none") { // TEST THIS PLEASE
+            multipliedRotation = when (noteDir) {
+                "left" -> Constants.Swerve.MAX_ANGULAR_VELOCITY * -.5 // turn left
+                "right" -> Constants.Swerve.MAX_ANGULAR_VELOCITY * .5
+                "forward" -> 0.0
+                else -> multipliedRotation
+            }
         }
 
         swerveSubsystem.drive(
