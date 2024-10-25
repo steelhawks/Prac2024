@@ -2,12 +2,14 @@ package frc.robot.commands
 
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.Command
 import frc.lib.util.math.MathConstants
 import frc.robot.Constants
 import frc.robot.RobotContainer
+import frc.robot.subsystems.IntakeSubsystem
 import frc.robot.subsystems.SwerveSubsystem
 
 
@@ -17,7 +19,9 @@ class TeleopDriveCommand(
     private val getRightX: () -> Double,
     private val getFieldRelative: () -> Boolean,
     private val getFaceSpeaker: () -> Boolean,
-    private val getFaceAmp: () -> Boolean
+    private val getFaceAmp: () -> Boolean,
+    private val getNoteDir: () -> String,
+    private val getIntakeButtonPressed: () -> Boolean
 ) : Command() {
     private val swerveSubsystem = SwerveSubsystem
 
@@ -46,6 +50,8 @@ class TeleopDriveCommand(
         val fieldRelative = getFieldRelative()
         val faceSpeaker = getFaceSpeaker()
         val faceAmp = getFaceAmp()
+        val noteDir = getNoteDir()
+        val intakeButtonPressed  = getIntakeButtonPressed()
 
         val translationValue = MathUtil.applyDeadband(leftY, Constants.Deadbands.DRIVE_DEADBAND)
         val strafeValue = MathUtil.applyDeadband(leftX,  Constants.Deadbands.DRIVE_DEADBAND)
@@ -59,6 +65,26 @@ class TeleopDriveCommand(
             multipliedTranslation = if (swerveSubsystem.isLowGear) multipliedTranslation else multipliedTranslation.times(0.3)
         } else if (faceAmp) {
             multipliedRotation = getRotationSpeedFromPID(if (RobotContainer.alliance == DriverStation.Alliance.Blue) Constants.BlueTeamPoses.BLUE_AMP_POSE else Constants.RedTeamPoses.RED_AMP_POSE)
+        } else if (noteDir != "none" && intakeButtonPressed) { // TEST THIS
+
+            // without pid
+//            multipliedRotation = when (noteDir) {
+//                "left" -> Constants.Swerve.MAX_ANGULAR_VELOCITY * .5
+//                "right" -> Constants.Swerve.MAX_ANGULAR_VELOCITY * -.5
+//                "forward" -> 0.0
+//                else -> multipliedRotation
+//            }
+
+            if (noteDir == "forward" && !IntakeSubsystem.intakeBeamBroken) {
+                multipliedTranslation = Translation2d(-.2, 0.0)
+            }
+
+            multipliedRotation = when (noteDir) {
+                "left" -> getRotationSpeedFromPID(Pose2d(Translation2d(), Rotation2d.fromDegrees(SwerveSubsystem.getPose().rotation.degrees + 5)))
+                "right" -> getRotationSpeedFromPID(Pose2d(Translation2d(), Rotation2d.fromDegrees(SwerveSubsystem.getPose().rotation.degrees - 5)))
+                "forward" -> 0.0
+                else -> multipliedRotation
+            }
         }
 
         swerveSubsystem.drive(

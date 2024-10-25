@@ -100,7 +100,7 @@ object RobotContainer {
     private val unlockShooterControl = operatorController.rightStick()
 
     fun getNoteDir(): String {
-        val retrievedEntry = NetworkTableInstance.getDefault().getTable("vision").getEntry("noteDirection").getString("")
+        val retrievedEntry = NetworkTableInstance.getDefault().getTable("vision").getEntry("noteDirection").getString("none")
         return retrievedEntry
     }
 
@@ -349,7 +349,9 @@ object RobotContainer {
             { driverController.rightX },
             { true }, // field relative
             { driverController.hid.leftTriggerAxis > 0.5 || anywhereShot.asBoolean }, // experimental code to face shooter while ramping "|| rampAnywhereButton.asBoolean"
-            { driverController.hid.leftBumper }) // ferryShot.asBoolean
+            { driverController.hid.leftBumper }, // ferryShot.asBoolean
+            {  getNoteDir() }, // where note is from vision processing
+            { intakeButton.asBoolean }) // intake button pressed boolean
     }
 
     fun resetElevatorOnStart() { // PLEASE TEST AND BE MINDFUL OF FIRST

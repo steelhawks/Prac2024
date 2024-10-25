@@ -114,20 +114,6 @@ object Autos
         return PrintCommand("This selection has no auto set")
     }
 
-    private fun testAuto(): Command {
-        return SequentialCommandGroup(
-            ManualShotCommand().withTimeout(2.0),
-            TeleopDriveCommand({0.0}, {0.0}, {0.2}, { true }, getFaceSpeaker = { false }, getFaceAmp = { false }).withTimeout(5.0)
-        )
-    }
-
-    private fun testAutoShootThenMoveForward(): Command {
-        return SequentialCommandGroup(
-            ManualShotCommand().withTimeout(1.0),
-            TeleopDriveCommand({.2}, {0.0}, {0.0}, { true }, getFaceSpeaker = { false }, getFaceAmp = { false }).withTimeout(1.0)
-        )
-    }
-
     /**
      * An enumeration of the available autonomous modes.
      *
