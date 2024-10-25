@@ -3,16 +3,20 @@ package frc.robot.commands
 import com.pathplanner.lib.auto.NamedCommands
 import com.pathplanner.lib.commands.PathPlannerAuto
 import edu.wpi.first.wpilibj.DigitalInput
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.*
+import frc.robot.Constants
+import frc.robot.Robot
+import frc.robot.RobotContainer
 import frc.robot.commands.intake.IntakeCommand
 import frc.robot.commands.shooter.ManualShotCommand
 import frc.robot.commands.shooter.PodiumShot
 import frc.robot.commands.shooter.SubwooferShot
 import frc.robot.subsystems.IntakeSubsystem
 import frc.robot.subsystems.ShooterSubsystem
+import frc.robot.subsystems.SwerveSubsystem
 
-object Autos
-{
+object Autos {
     init {
         configureNamedCommands()
     }
@@ -22,27 +26,10 @@ object Autos
     private fun configureNamedCommands() {
         NamedCommands.registerCommand("intake", IntakeCommand())
 
-        NamedCommands.registerCommand("subwoofer shot",
+        NamedCommands.registerCommand(
+            "subwoofer shot",
             ParallelRaceGroup(
                 WaitCommand(2.0),
-                ParallelDeadlineGroup(
-                    SequentialCommandGroup(
-                        WaitUntilCommand(ShooterSubsystem::isReadyToShoot),
-                        ParallelDeadlineGroup(
-                            WaitCommand(.3),
-                            ParallelCommandGroup(
-                                FeedToShooter(),
-                            )
-                        )
-                    ),
-                    SubwooferShot()
-                )
-            )
-        )
-
-        NamedCommands.registerCommand("podium shoot",
-            ParallelRaceGroup(
-                WaitCommand(4.0),
                 ParallelDeadlineGroup(
                     SequentialCommandGroup(
                         WaitUntilCommand(ShooterSubsystem::isReadyToShoot),
@@ -51,21 +38,76 @@ object Autos
                             FeedToShooter()
                         )
                     ),
-                    PodiumShot()
+                    SubwooferShot()
                 )
-            ))
+            )
+        )
 
-        NamedCommands.registerCommand("ramp from anywhere",
+        NamedCommands.registerCommand(
+            "anywhere shot",
             ParallelRaceGroup(
-
-            ))
-
-        NamedCommands.registerCommand("shoot from anywhere",
-            SequentialCommandGroup(
-                WaitUntilCommand(ShooterSubsystem::isReadyToShoot),
+                WaitCommand(4.0),
                 ParallelDeadlineGroup(
-                    WaitCommand(.3),
-                    FeedToShooter()
+                    SequentialCommandGroup(
+                        WaitUntilCommand(ShooterSubsystem::isReadyToShoot),
+                        ParallelDeadlineGroup(
+                            WaitCommand(0.3),
+                            ForkCommand(IntakeSubsystem.IntakeDirection.TO_SHOOTER)
+                        )
+                    ),
+                    RotateToAngleCommand(
+                        {
+                            SwerveSubsystem.calculateTurnAngle(
+                                if (RobotContainer.alliance == DriverStation.Alliance.Red) Constants.BlueTeamPoses.BLUE_SPEAKER_POSE else Constants.RedTeamPoses.RED_SPEAKER_POSE,
+                                SwerveSubsystem.heading.degrees + 180
+                            )
+                        }
+                    ),
+                    Commands.parallel(
+                        Commands.run(
+                            {ShooterSubsystem.setGoal(SwerveSubsystem.odometryImpl.getPivotAngle(RobotContainer.alliance!!))}
+                        ),
+                        Commands.runEnd(
+                            {ShooterSubsystem.rampShooter(3000.0, 3000.0)},
+                            {ShooterSubsystem.stopShooter()}
+                        ),
+                        Commands.runEnd(
+                            {ShooterSubsystem.feedToShooter()},
+                            {ShooterSubsystem.stopFeed()}
+                        )
+                    )
+
+                )
+            )
+        )
+
+        NamedCommands.registerCommand(
+            "anywhere ramp",
+            Commands.parallel(
+                Commands.run(
+                    {ShooterSubsystem.setGoal(SwerveSubsystem.odometryImpl.getPivotAngle(RobotContainer.alliance!!))}
+                ),
+                Commands.runEnd(
+                    {ShooterSubsystem.rampShooter(1700.0, 1700.0)},
+                    {ShooterSubsystem.stopShooter()}
+                ),
+                Commands.runEnd(
+                    {ShooterSubsystem.feedToShooter()},
+                    {ShooterSubsystem.stopFeed()}
+                )
+            )
+        )
+
+        NamedCommands.registerCommand(
+            "anywhere feed",
+            ParallelRaceGroup(
+                WaitCommand(1.0),
+                SequentialCommandGroup(
+                    WaitUntilCommand(ShooterSubsystem::isReadyToShoot),
+                    ParallelDeadlineGroup(
+                        WaitCommand(0.3),
+                        ForkCommand(IntakeSubsystem.IntakeDirection.TO_SHOOTER)
+                    )
                 )
             )
         )
