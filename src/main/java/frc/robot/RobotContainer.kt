@@ -445,6 +445,8 @@ object RobotContainer {
             ferryShot
                 .or(podiumShot)
                 .or(subwooferShot)
+                .or(anywhereShot)
+                .or(ferryShot)
         )
             .onTrue(
                 RepeatCommand(
